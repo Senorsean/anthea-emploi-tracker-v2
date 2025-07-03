@@ -174,9 +174,10 @@ export const Header = () => {
           </div>
         </div>
         <div className="mt-6 text-center text-white">
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-3xl font-bold mb-1">emploi Tracker</h1>
+          <h2 className="text-2xl font-bold">
             Tableau de Bord - Recherche d'Emploi
-          </h1>
+          </h2>
           <p className="text-sm sm:text-base">
             Gérez votre recherche d'emploi de manière professionnelle avec ANTHEA RH
           </p>
