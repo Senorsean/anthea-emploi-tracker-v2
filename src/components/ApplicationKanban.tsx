@@ -39,7 +39,7 @@ interface ApplicationKanbanProps {
   preview?: boolean;
 }
 
-const SortableJobCard: React.FC<{ job: Job }> = ({ job }) => {
+const SortableJobCard: React.FC<{ job: Job; onDoubleClick?: () => void }> = ({ job, onDoubleClick }) => {
   const {
     attributes,
     listeners,
@@ -70,6 +70,7 @@ const SortableJobCard: React.FC<{ job: Job }> = ({ job }) => {
       style={style}
       {...attributes}
       {...listeners}
+      onDoubleClick={onDoubleClick}
       className="bg-white shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing"
     >
       <CardContent className="p-4">
@@ -140,6 +141,7 @@ const DroppableColumn: React.FC<{
 export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = false }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeJob, setActiveJob] = useState<Job | null>(null);
+  const [editJob, setEditJob] = useState<{ data: Job; columnId: string } | null>(null);
   const [jobs, setJobs] = useState<Record<string, Job[]>>({
     targeted: [
       {
@@ -292,11 +294,20 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
       id: Date.now().toString(),
       dateAdded: new Date().toISOString().split('T')[0]
     };
-    
+
     setJobs(prev => ({
       ...prev,
       targeted: [...prev.targeted, newJob]
     }));
+  };
+
+  const updateJob = (jobData: Job) => {
+    setJobs(prev => {
+      const newJobs = { ...prev };
+      const columnJobs = newJobs[editJob!.columnId];
+      newJobs[editJob!.columnId] = columnJobs.map(j => j.id === jobData.id ? { ...j, ...jobData } : j);
+      return newJobs;
+    });
   };
 
   if (preview) {
@@ -349,7 +360,11 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
           {columns.map(column => (
             <DroppableColumn key={column.id} column={column} jobs={jobs[column.id]}>
               {jobs[column.id].map(job => (
-                <SortableJobCard key={job.id} job={job} />
+                <SortableJobCard
+                  key={job.id}
+                  job={job}
+                  onDoubleClick={() => setEditJob({ data: job, columnId: column.id })}
+                />
               ))}
             </DroppableColumn>
           ))}
@@ -360,10 +375,20 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
         </DragOverlay>
       </div>
 
-      <AddJobModal 
+      <AddJobModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
-        onAdd={addJob}
+        onSubmit={addJob}
+      />
+
+      <AddJobModal
+        isOpen={!!editJob}
+        onClose={() => setEditJob(null)}
+        onSubmit={(data) => {
+          updateJob({ ...(editJob!.data), ...data });
+          setEditJob(null);
+        }}
+        initialData={editJob ? editJob.data : undefined}
       />
     </DndContext>
   );

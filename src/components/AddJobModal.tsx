@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,33 +7,52 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 
+interface JobData {
+  id?: string;
+  title: string;
+  company: string;
+  location: string;
+  priority: 'High' | 'Medium' | 'Low';
+  label: string;
+  url?: string;
+}
+
 interface AddJobModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (job: {
-    title: string;
-    company: string;
-    location: string;
-    priority: 'High' | 'Medium' | 'Low';
-    label: string;
-    url?: string;
-  }) => void;
+  onSubmit: (job: JobData) => void;
+  initialData?: JobData;
 }
 
-export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onAdd }) => {
-  const [formData, setFormData] = useState({
+export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
+  const [formData, setFormData] = useState<JobData>({
     title: '',
     company: '',
     location: '',
-    priority: 'Medium' as 'High' | 'Medium' | 'Low',
+    priority: 'Medium',
     label: '',
     url: '',
   });
 
+  useEffect(() => {
+    if (initialData) {
+      setFormData({ ...initialData });
+    } else {
+      setFormData({
+        title: '',
+        company: '',
+        location: '',
+        priority: 'Medium',
+        label: '',
+        url: '',
+      });
+    }
+  }, [initialData, isOpen]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.title && formData.company) {
-      onAdd(formData);
+      onSubmit(formData);
       setFormData({
         title: '',
         company: '',
@@ -50,7 +69,9 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onAdd
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Ajouter un Nouveau Poste</DialogTitle>
+          <DialogTitle>
+            {initialData ? 'Modifier le Poste' : 'Ajouter un Nouveau Poste'}
+          </DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -128,7 +149,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onAdd
               Annuler
             </Button>
             <Button type="submit" className="flex-1 bg-[#a4007c] hover:bg-[#a4007c]/90">
-              Ajouter
+              {initialData ? 'Enregistrer' : 'Ajouter'}
             </Button>
           </div>
         </form>
