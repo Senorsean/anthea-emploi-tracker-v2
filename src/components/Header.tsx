@@ -83,11 +83,6 @@ export const Header = () => {
 
   return (
     <header className="relative bg-gradient-to-r from-blue-500 to-violet-500 shadow-sm border-b border-gray-200">
-      <img
-        src="https://chatgpt.com/s/m_6866a711f8408191998211546b2fa69a"
-        alt="people shaking hands after an interview"
-        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
-      />
       <div className="relative container mx-auto px-4 py-8">
         <div className="flex items-center justify-between">
           <Link to="/settings" className="flex items-center space-x-2 cursor-pointer">
@@ -174,6 +169,11 @@ export const Header = () => {
           </div>
         </div>
         <div className="mt-6 text-center text-white">
+          <img
+            src="https://dev.anthea-rh.com/wp-content/uploads/2022/12/logtransp.png"
+            alt="Anthea"
+            className="mx-auto mb-4 w-32"
+          />
           <h1 className="text-3xl font-bold mb-1">emploi Tracker</h1>
           <h2 className="text-2xl font-bold">
             Tableau de Bord - Recherche d'Emploi
