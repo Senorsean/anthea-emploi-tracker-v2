@@ -4,8 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, Target, Users, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { initialResponses } from '@/data/responses';
+import { initialJobs } from '@/data/jobs';
 
 export const StatsOverview = () => {
+  const allJobs = Object.values(initialJobs).flat();
+  const responseRate = allJobs.length === 0
+    ? 0
+    : Math.round((initialResponses.length / allJobs.length) * 100);
+
   const stats = [
     {
       title: 'Objectif Actuel',
@@ -27,8 +34,8 @@ export const StatsOverview = () => {
     },
     {
       title: 'Taux de Réponse',
-      value: '42%',
-      progress: 42,
+      value: `${responseRate}%`,
+      progress: responseRate,
       icon: Calendar,
       color: 'text-[#b3d800]',
       bgColor: 'bg-[#b3d800]/10',
@@ -84,6 +91,13 @@ export const StatsOverview = () => {
         if (index === 1) {
           return (
             <Link key={index} to="/progression-candidatures">
+              {content}
+            </Link>
+          );
+        }
+        if (index === 2) {
+          return (
+            <Link key={index} to="/taux-reponse">
               {content}
             </Link>
           );

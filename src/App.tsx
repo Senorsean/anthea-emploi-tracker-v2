@@ -12,6 +12,7 @@ import RenforcezVotreReseauPage from "./pages/RenforcezVotreReseauPage";
 import ProgressionEntretiensPage from "./pages/ProgressionEntretiensPage";
 import ProgressionCandidaturesPage from "./pages/ProgressionCandidaturesPage";
 import ProgressionReseauPage from "./pages/ProgressionReseauPage";
+import TauxReponsePage from "./pages/TauxReponsePage";
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 
@@ -62,6 +63,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <ProgressionReseauPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/taux-reponse"
+            element={
+              <RequireAuth>
+                <TauxReponsePage />
               </RequireAuth>
             }
           />
