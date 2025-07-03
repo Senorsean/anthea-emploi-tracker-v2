@@ -66,6 +66,9 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+      <footer className="text-center py-4 text-xs text-gray-500">
+        Application créée par Samuel LUCAS© 2025 Conformité RGPD
+      </footer>
     </TooltipProvider>
   </QueryClientProvider>
 );
