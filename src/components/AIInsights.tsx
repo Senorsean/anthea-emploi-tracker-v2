@@ -29,7 +29,7 @@ export const AIInsights = () => {
       title: 'Diversifiez vos approches',
       description: 'Seulement 38% de vos candidatures passent le screening initial. Essayez d\'optimiser vos candidatures.',
       action: 'Optimiser mon CV',
-      actionUrl: '#'
+      actionUrl: 'https://cv-compass-optimizer.lovable.app/'
     },
     {
       priority: 'low',
