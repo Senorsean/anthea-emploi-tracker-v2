@@ -5,6 +5,22 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, ExternalLink, Calendar, Building } from 'lucide-react';
 import { AddJobModal } from './AddJobModal';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface Job {
   id: string;
@@ -21,8 +37,80 @@ interface ApplicationKanbanProps {
   preview?: boolean;
 }
 
+const SortableJobCard: React.FC<{ job: Job }> = ({ job }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: job.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'High': return 'bg-red-100 text-red-800';
+      case 'Medium': return 'bg-yellow-100 text-yellow-800';
+      case 'Low': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  return (
+    <Card
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className="bg-white shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing"
+    >
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between mb-2">
+          <h4 className="font-medium text-sm leading-tight">{job.title}</h4>
+          {job.url && (
+            <ExternalLink className="h-3 w-3 text-gray-400 flex-shrink-0 ml-2" />
+          )}
+        </div>
+        
+        <div className="flex items-center gap-1 mb-2">
+          <Building className="h-3 w-3 text-gray-500" />
+          <p className="text-xs text-gray-600 truncate">{job.company}</p>
+        </div>
+        
+        <p className="text-xs text-gray-500 mb-3">{job.location}</p>
+        
+        <div className="flex items-center justify-between">
+          <Badge className={`text-xs ${getPriorityColor(job.priority)}`}>
+            {job.priority}
+          </Badge>
+          <div className="flex items-center gap-1">
+            <Calendar className="h-3 w-3 text-gray-400" />
+            <span className="text-xs text-gray-500">
+              {new Date(job.dateAdded).toLocaleDateString('fr-FR', { 
+                month: 'short', 
+                day: 'numeric' 
+              })}
+            </span>
+          </div>
+        </div>
+        
+        <Badge variant="outline" className="mt-2 text-xs">
+          {job.label}
+        </Badge>
+      </CardContent>
+    </Card>
+  );
+};
+
 export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = false }) => {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [activeJob, setActiveJob] = useState<Job | null>(null);
   const [jobs, setJobs] = useState<Record<string, Job[]>>({
     targeted: [
       {
@@ -81,13 +169,63 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
     { id: 'offer', title: 'Offre', color: 'bg-green-100', count: jobs.offer.length },
   ];
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'High': return 'bg-red-100 text-red-800';
-      case 'Medium': return 'bg-yellow-100 text-yellow-800';
-      case 'Low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  );
+
+  const findJobAndColumn = (jobId: string) => {
+    for (const [columnId, columnJobs] of Object.entries(jobs)) {
+      const job = columnJobs.find(job => job.id === jobId);
+      if (job) {
+        return { job, columnId };
+      }
     }
+    return null;
+  };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const result = findJobAndColumn(active.id as string);
+    if (result) {
+      setActiveJob(result.job);
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (!over) {
+      setActiveJob(null);
+      return;
+    }
+
+    const jobId = active.id as string;
+    const targetColumnId = over.id as string;
+    
+    const result = findJobAndColumn(jobId);
+    if (!result || result.columnId === targetColumnId) {
+      setActiveJob(null);
+      return;
+    }
+
+    // Move job to new column
+    setJobs(prev => {
+      const newJobs = { ...prev };
+      
+      // Remove job from source column
+      newJobs[result.columnId] = newJobs[result.columnId].filter(job => job.id !== jobId);
+      
+      // Add job to target column
+      newJobs[targetColumnId] = [...newJobs[targetColumnId], result.job];
+      
+      return newJobs;
+    });
+
+    setActiveJob(null);
   };
 
   const addJob = (jobData: Omit<Job, 'id' | 'dateAdded'>) => {
@@ -134,67 +272,80 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Entonnoir de Candidatures</h2>
-        <Button onClick={() => setShowAddModal(true)} className="bg-[#a4007c] hover:bg-[#a4007c]/90">
-          <Plus className="h-4 w-4 mr-2" />
-          Ajouter un Poste
-        </Button>
-      </div>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-900">Entonnoir de Candidatures</h2>
+          <Button onClick={() => setShowAddModal(true)} className="bg-[#a4007c] hover:bg-[#a4007c]/90">
+            <Plus className="h-4 w-4 mr-2" />
+            Ajouter un Poste
+          </Button>
+        </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {columns.map(column => (
-          <div key={column.id} className="space-y-4">
-            <div className={`${column.color} rounded-lg p-4`}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-900">{column.title}</h3>
-                <Badge variant="secondary">{column.count}</Badge>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          {columns.map(column => (
+            <SortableContext key={column.id} items={jobs[column.id].map(job => job.id)} strategy={verticalListSortingStrategy}>
+              <div
+                className={`${column.color} rounded-lg p-4 min-h-[600px]`}
+                data-column-id={column.id}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-gray-900">{column.title}</h3>
+                  <Badge variant="secondary">{column.count}</Badge>
+                </div>
+                
+                <div
+                  className="space-y-3 min-h-[500px] relative"
+                  style={{ 
+                    minHeight: '500px',
+                    border: '2px dashed transparent',
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.currentTarget.style.border = '2px dashed #a4007c';
+                  }}
+                  onDragLeave={(e) => {
+                    e.currentTarget.style.border = '2px dashed transparent';
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.currentTarget.style.border = '2px dashed transparent';
+                  }}
+                >
+                  {jobs[column.id].map(job => (
+                    <SortableJobCard key={job.id} job={job} />
+                  ))}
+                  
+                  {/* Drop zone overlay */}
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      zIndex: -1,
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const targetColumnId = column.id;
+                      // Handle drop logic here if needed
+                    }}
+                    data-droppable-id={column.id}
+                  />
+                </div>
               </div>
-              
-              <div className="space-y-3 min-h-[500px]">
-                {jobs[column.id].map(job => (
-                  <Card key={job.id} className="bg-white shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-medium text-sm leading-tight">{job.title}</h4>
-                        {job.url && (
-                          <ExternalLink className="h-3 w-3 text-gray-400 flex-shrink-0 ml-2" />
-                        )}
-                      </div>
-                      
-                      <div className="flex items-center gap-1 mb-2">
-                        <Building className="h-3 w-3 text-gray-500" />
-                        <p className="text-xs text-gray-600 truncate">{job.company}</p>
-                      </div>
-                      
-                      <p className="text-xs text-gray-500 mb-3">{job.location}</p>
-                      
-                      <div className="flex items-center justify-between">
-                        <Badge className={`text-xs ${getPriorityColor(job.priority)}`}>
-                          {job.priority}
-                        </Badge>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3 text-gray-400" />
-                          <span className="text-xs text-gray-500">
-                            {new Date(job.dateAdded).toLocaleDateString('fr-FR', { 
-                              month: 'short', 
-                              day: 'numeric' 
-                            })}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <Badge variant="outline" className="mt-2 text-xs">
-                        {job.label}
-                      </Badge>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
+            </SortableContext>
+          ))}
+        </div>
+
+        <DragOverlay>
+          {activeJob ? <SortableJobCard job={activeJob} /> : null}
+        </DragOverlay>
       </div>
 
       <AddJobModal 
@@ -202,6 +353,6 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
         onClose={() => setShowAddModal(false)}
         onAdd={addJob}
       />
-    </div>
+    </DndContext>
   );
 };
