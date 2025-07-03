@@ -17,15 +17,6 @@ const Index = () => {
       <Header />
       
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Tableau de Bord - Recherche d'Emploi
-          </h1>
-          <p className="text-gray-600">
-            Gérez votre recherche d'emploi de manière professionnelle avec ANTHEA RH
-          </p>
-        </div>
-
         <StatsOverview />
         <ApplicationStats />
 

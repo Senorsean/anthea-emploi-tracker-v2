@@ -88,7 +88,7 @@ export const Header = () => {
         alt="decorative background"
         className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
       />
-      <div className="relative container mx-auto px-4 py-4">
+      <div className="relative container mx-auto px-4 py-8">
         <div className="flex items-center justify-between">
           <Link to="/settings" className="flex items-center space-x-2 cursor-pointer">
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#a4007c] to-[#e3007b] flex items-center justify-center">
@@ -172,6 +172,14 @@ export const Header = () => {
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
+        </div>
+        <div className="mt-6 text-center text-white">
+          <h1 className="text-2xl font-bold">
+            Tableau de Bord - Recherche d'Emploi
+          </h1>
+          <p className="text-sm sm:text-base">
+            Gérez votre recherche d'emploi de manière professionnelle avec ANTHEA RH
+          </p>
         </div>
       </div>
       <Dialog open={!!editingAlert} onOpenChange={() => setEditingAlert(null)}>
