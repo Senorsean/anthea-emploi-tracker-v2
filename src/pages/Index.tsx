@@ -44,7 +44,10 @@ const Index = () => {
                 preview={true}
                 onPreviewClick={() => setActiveTab('applications')}
               />
-              <NetworkingCRM preview={true} />
+              <NetworkingCRM
+                preview={true}
+                onPreviewClick={() => setActiveTab('network')}
+              />
             </div>
           </TabsContent>
 
