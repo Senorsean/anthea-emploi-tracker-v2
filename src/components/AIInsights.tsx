@@ -13,7 +13,7 @@ export const AIInsights = () => {
     description:
       "Votre taux de succès en entretien est 50% plus bas que recommandé. Concentrez-vous sur l'amélioration pour débloquer votre recherche d'emploi.",
     actionText: 'Améliorer mes entretiens',
-    actionUrl: '/improve-interviews',
+    actionUrl: '/ameliorer-entretiens',
   };
 
   const recommendations = [
