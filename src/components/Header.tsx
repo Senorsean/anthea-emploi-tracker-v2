@@ -56,7 +56,11 @@ const getInitials = (metadata: UserMetadata, email?: string) => {
   return 'A';
 };
 
-export const Header = () => {
+export interface HeaderProps {
+  onLogoClick?: () => void;
+}
+
+export const Header = ({ onLogoClick }: HeaderProps) => {
   const [firstName, setFirstName] = useState<string>('');
   const [initials, setInitials] = useState<string>('A');
   const { alerts, markAsRead, cancelAlert, updateAlertDate, unreadCount } = useAlerts();
@@ -170,7 +174,7 @@ export const Header = () => {
           </div>
         </div>
         <div className="mt-6 text-center text-white">
-          <Link to="/">
+          <Link to="/" onClick={onLogoClick}>
             <img
               src="https://dev.anthea-rh.com/wp-content/uploads/2022/12/logtransp.png"
               alt="Anthea"
