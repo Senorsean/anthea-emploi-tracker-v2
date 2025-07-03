@@ -21,19 +21,22 @@ export const AIInsights = () => {
       priority: 'high',
       title: 'Augmentez votre rythme de candidatures',
       description: 'Basé sur vos données, vous devriez postuler à 2 postes par semaine pour décrocher 1 entretien par semaine.',
-      action: 'Voir les opportunités'
+      action: 'Voir les opportunités',
+      actionUrl: '#'
     },
     {
-      priority: 'medium', 
+      priority: 'medium',
       title: 'Diversifiez vos approches',
       description: 'Seulement 38% de vos candidatures passent le screening initial. Essayez d\'optimiser vos candidatures.',
-      action: 'Optimiser mon CV'
+      action: 'Optimiser mon CV',
+      actionUrl: '#'
     },
     {
       priority: 'low',
       title: 'Renforcez votre réseau',
       description: '67% de vos entretiens aboutissent à des entretiens finaux. Votre réseau peut vous aider à décrocher plus d\'opportunités.',
-      action: 'Développer mon réseau'
+      action: 'Développer mon réseau',
+      actionUrl: '/renforcez-votre-reseau'
     }
   ];
 
@@ -95,12 +98,13 @@ export const AIInsights = () => {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-gray-600 mb-4">{rec.description}</p>
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
                 className="w-full border-[#a4007c] text-[#a4007c] hover:bg-[#a4007c] hover:text-white"
               >
-                {rec.action}
+                <Link to={rec.actionUrl}>{rec.action}</Link>
               </Button>
             </CardContent>
           </Card>

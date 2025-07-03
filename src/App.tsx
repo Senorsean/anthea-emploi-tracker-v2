@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import AmeliorerEntretiensPage from "./pages/AmeliorerEntretiensPage";
 import MethodeStarPage from "./pages/MethodeStarPage";
+import RenforcezVotreReseauPage from "./pages/RenforcezVotreReseauPage";
 import RequireAuth from "./components/RequireAuth";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <MethodeStarPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/renforcez-votre-reseau"
+            element={
+              <RequireAuth>
+                <RenforcezVotreReseauPage />
               </RequireAuth>
             }
           />
