@@ -15,6 +15,7 @@ import {
   useSensors,
   closestCenter,
   DragOverEvent,
+  useDroppable,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -109,22 +110,25 @@ const SortableJobCard: React.FC<{ job: Job }> = ({ job }) => {
   );
 };
 
-const DroppableColumn: React.FC<{ 
+const DroppableColumn: React.FC<{
   column: { id: string; title: string; color: string; count: number };
   jobs: Job[];
   children: React.ReactNode;
 }> = ({ column, jobs, children }) => {
+  const { setNodeRef, isOver } = useDroppable({ id: column.id });
+
   return (
     <SortableContext items={jobs.map(job => job.id)} strategy={verticalListSortingStrategy}>
       <div
-        className={`${column.color} rounded-lg p-4 min-h-[600px]`}
+        ref={setNodeRef}
+        className={`${column.color} rounded-lg p-4 min-h-[600px] ${isOver ? 'ring-2 ring-[#a4007c]' : ''}`}
         data-column-id={column.id}
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-gray-900">{column.title}</h3>
           <Badge variant="secondary">{column.count}</Badge>
         </div>
-        
+
         <div className="space-y-3 min-h-[500px]">
           {children}
         </div>
