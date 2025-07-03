@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
-import ImproveInterviews from "./pages/ImproveInterviews";
+import AmeliorerEntretiensPage from "./pages/AmeliorerEntretiensPage";
 import RequireAuth from "./components/RequireAuth";
 
 const queryClient = new QueryClient();
@@ -28,10 +28,10 @@ const App = () => (
             }
           />
           <Route
-            path="/improve-interviews"
+            path="/ameliorer-entretiens"
             element={
               <RequireAuth>
-                <ImproveInterviews />
+                <AmeliorerEntretiensPage />
               </RequireAuth>
             }
           />
