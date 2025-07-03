@@ -82,7 +82,8 @@ export const Header = () => {
   const currentDate = new Date().toLocaleDateString('fr-FR');
 
   return (
-    <header className="relative bg-gradient-to-r from-blue-500 to-violet-500 shadow-sm border-b border-gray-200">
+    <>
+      <header className="relative bg-gradient-to-r from-blue-500 to-violet-500 shadow-sm border-b border-gray-200">
       <div className="relative container mx-auto px-4 py-8">
         <div className="flex items-center justify-between">
           <Link to="/settings" className="flex items-center space-x-2 cursor-pointer">
@@ -175,9 +176,7 @@ export const Header = () => {
             className="mx-auto mb-4 w-32"
           />
           <h1 className="text-2xl font-bold mb-1">emploi Tracker</h1>
-          <h2 className="text-2xl font-bold">
-            Tableau de Bord - Recherche d'Emploi
-          </h2>
+          {/* Heading moved below the banner */}
           <p className="text-sm sm:text-base">
             Gérez votre recherche d'emploi de manière professionnelle avec ANTHEA RH
           </p>
@@ -216,6 +215,10 @@ export const Header = () => {
         </DialogContent>
       </Dialog>
     </header>
+    <h2 className="mt-4 text-center text-2xl font-bold text-[#a4007c]">
+      Tableau de Bord - Recherche d'Emploi
+    </h2>
+  </>
   );
 };
 
