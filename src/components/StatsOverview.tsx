@@ -1,10 +1,50 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { TrendingUp, Target, Users, Calendar } from 'lucide-react';
+import { initialJobs } from '@/data/jobs';
 
 export const StatsOverview = () => {
+  const [open, setOpen] = useState(false);
+
+  const goal = 30;
+  const now = new Date('2025-01-03');
+  const diffDays = (dateStr: string) =>
+    (now.getTime() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24);
+
+  const applications = Object.entries(initialJobs)
+    .filter(([key]) => key !== 'targeted')
+    .flatMap(([, jobs]) => jobs);
+
+  const timeframes = [
+    { label: 'Jour', days: 1 },
+    { label: 'Semaine', days: 7 },
+    { label: 'Mois', days: 30 },
+    { label: '3 mois', days: 90 },
+    { label: '6 mois', days: 180 },
+  ];
+
+  const progressData = timeframes.map((tf) => {
+    const count = applications.filter((job) => diffDays(job.dateAdded) <= tf.days).length;
+    const percent = Math.round((count / goal) * 100);
+    return { ...tf, count, percent };
+  });
+
   const stats = [
     {
       title: 'Objectif Actuel',
@@ -48,8 +88,11 @@ export const StatsOverview = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat, index) => {
         const Icon = stat.icon;
-        return (
-          <Card key={index} className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+        const card = (
+          <Card
+            key={index}
+            className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">
                 {stat.title}
@@ -73,6 +116,43 @@ export const StatsOverview = () => {
             </CardContent>
           </Card>
         );
+
+        if (stat.title === 'Candidatures Envoyées') {
+          return (
+            <Dialog key={index} open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>{card}</DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Progression des Candidatures</DialogTitle>
+                </DialogHeader>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Période</TableHead>
+                      <TableHead>Candidatures</TableHead>
+                      <TableHead className="text-right">Progression</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {progressData.map((data) => (
+                      <TableRow key={data.label}>
+                        <TableCell>{data.label}</TableCell>
+                        <TableCell>
+                          {data.count}/{goal}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {data.percent}%
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </DialogContent>
+            </Dialog>
+          );
+        }
+
+        return card;
       })}
     </div>
   );
