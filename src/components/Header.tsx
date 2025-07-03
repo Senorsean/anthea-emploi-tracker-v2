@@ -81,10 +81,12 @@ export const Header = () => {
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#a4007c] to-[#e3007b] flex items-center justify-center">
               <span className="text-white font-bold text-sm">{initials}</span>
             </div>
-            {firstName && (
-              <p className="font-medium text-gray-800">Bienvenue, {firstName}</p>
-            )}
-            <p className="hidden sm:block text-xs text-gray-500">{currentDate}</p>
+            <div className="flex flex-col leading-tight">
+              {firstName && (
+                <p className="font-medium text-gray-800">Bienvenue, {firstName}</p>
+              )}
+              <p className="hidden sm:block text-xs text-gray-500">{currentDate}</p>
+            </div>
           </div>
 
           <div className="flex items-center space-x-4">
