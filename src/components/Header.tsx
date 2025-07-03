@@ -3,9 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell, Check, Settings, LogOut } from 'lucide-react';
+import { Bell, Check, Settings, LogOut, Pencil, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Link } from 'react-router-dom';
 import { useAlerts } from '@/hooks/useAlerts';
+import type { Alert } from '@/data/alerts';
 
 interface UserMetadata {
   first_name?: string;
@@ -57,7 +59,9 @@ const getInitials = (metadata: UserMetadata, email?: string) => {
 export const Header = () => {
   const [firstName, setFirstName] = useState<string>('');
   const [initials, setInitials] = useState<string>('A');
-  const { alerts, markAsRead, unreadCount } = useAlerts();
+  const { alerts, markAsRead, cancelAlert, updateAlertDate, unreadCount } = useAlerts();
+
+  const [editingAlert, setEditingAlert] = useState<Alert | null>(null);
   
   useEffect(() => {
     supabase.auth
@@ -114,14 +118,35 @@ export const Header = () => {
                     {alerts.map(alert => (
                       !alert.read && (
                         <li key={alert.id} className="flex justify-between items-start text-sm">
-                          <span>{alert.message}</span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => markAsRead(alert.id)}
-                          >
-                            <Check className="h-4 w-4" />
-                          </Button>
+                          <div>
+                            <p>{alert.message}</p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(alert.date).toLocaleDateString('fr-FR')}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setEditingAlert(alert)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => cancelAlert(alert.id)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => markAsRead(alert.id)}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </li>
                       )
                     ))}
@@ -144,6 +169,38 @@ export const Header = () => {
           </div>
         </div>
       </div>
+      <Dialog open={!!editingAlert} onOpenChange={() => setEditingAlert(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Modifier la date</DialogTitle>
+          </DialogHeader>
+          <input
+            type="date"
+            value={editingAlert?.date || ''}
+            onChange={e =>
+              setEditingAlert(prev => (prev ? { ...prev, date: e.target.value } : null))
+            }
+            className="w-full border rounded p-2"
+          />
+          <div className="flex gap-3 pt-4">
+            <Button type="button" variant="outline" onClick={() => setEditingAlert(null)} className="flex-1">
+              Annuler
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                if (editingAlert) {
+                  updateAlertDate(editingAlert.id, editingAlert.date);
+                  setEditingAlert(null);
+                }
+              }}
+              className="flex-1 bg-[#a4007c] hover:bg-[#a4007c]/90"
+            >
+              Enregistrer
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 };
