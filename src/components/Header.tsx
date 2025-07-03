@@ -1,10 +1,47 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell, Settings, User, LogOut } from 'lucide-react';
+import { Bell, Settings, LogOut } from 'lucide-react';
+
+interface UserMetadata {
+  first_name?: string;
+  firstName?: string;
+  name?: string;
+  full_name?: string;
+  fullName?: string;
+}
+
+const getFirstName = (metadata: UserMetadata, email?: string) => {
+  const name =
+    metadata.first_name ||
+    metadata.firstName ||
+    metadata.name ||
+    metadata.full_name ||
+    metadata.fullName;
+  if (name) return name.split(' ')[0];
+  if (email) return email.split('@')[0];
+  return 'Utilisateur';
+};
 
 export const Header = () => {
+  const [firstName, setFirstName] = useState<string>('');
+
+  useEffect(() => {
+    supabase.auth
+      .getUser()
+      .then(({ data: { user } }) => {
+        if (user) {
+          setFirstName(getFirstName(user.user_metadata as UserMetadata, user.email));
+        }
+      })
+      .catch(() => {
+        setFirstName('');
+      });
+  }, []);
+
+  const currentDate = new Date().toLocaleDateString('fr-FR');
+
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
       <div className="container mx-auto px-4 py-4">
@@ -18,6 +55,12 @@ export const Header = () => {
                 <h1 className="text-xl font-bold text-gray-900">ANTHEA RH</h1>
                 <p className="text-xs text-gray-500">Suivi de Recherche d'Emploi</p>
               </div>
+            </div>
+            <div className="hidden sm:block text-sm">
+              {firstName && (
+                <p className="font-medium text-gray-800">Bienvenue {firstName}</p>
+              )}
+              <p className="text-xs text-gray-500">{currentDate}</p>
             </div>
           </div>
 
