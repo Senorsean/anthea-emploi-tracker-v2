@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, ExternalLink, Calendar, Building } from 'lucide-react';
 import { AddJobModal } from './AddJobModal';
+import { Job, initialJobs } from '@/data/jobs';
 import {
   DndContext,
   DragEndEvent,
@@ -24,16 +25,6 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-interface Job {
-  id: string;
-  title: string;
-  company: string;
-  location: string;
-  priority: 'High' | 'Medium' | 'Low';
-  label: string;
-  url?: string;
-  dateAdded: string;
-}
 
 interface ApplicationKanbanProps {
   preview?: boolean;
@@ -142,54 +133,7 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeJob, setActiveJob] = useState<Job | null>(null);
   const [editJob, setEditJob] = useState<{ data: Job; columnId: string } | null>(null);
-  const [jobs, setJobs] = useState<Record<string, Job[]>>({
-    targeted: [
-      {
-        id: '1',
-        title: 'Product Manager',
-        company: 'Google',
-        location: 'Paris, FR',
-        priority: 'High',
-        label: 'Tech',
-        dateAdded: '2025-01-02'
-      },
-      {
-        id: '2',
-        title: 'Marketing Manager',
-        company: 'Microsoft',
-        location: 'Lyon, FR',
-        priority: 'Medium',
-        label: 'Marketing',
-        dateAdded: '2025-01-01'
-      }
-    ],
-    applied: [
-      {
-        id: '3',
-        title: 'Senior Product Manager',
-        company: 'Amazon',
-        location: 'Remote',
-        priority: 'High',
-        label: 'Tech',
-        url: 'https://example.com',
-        dateAdded: '2024-12-28'
-      }
-    ],
-    screening: [
-      {
-        id: '4',
-        title: 'Product Marketing Manager',
-        company: 'Salesforce',
-        location: 'Paris, FR',
-        priority: 'High',
-        label: 'Marketing',
-        dateAdded: '2024-12-25'
-      }
-    ],
-    interview: [],
-    final: [],
-    offer: []
-  });
+  const [jobs, setJobs] = useState<Record<string, Job[]>>(initialJobs);
 
   const columns = [
     { id: 'targeted', title: 'Ciblés', color: 'bg-gray-100', count: jobs.targeted.length },

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Header } from '@/components/Header';
 import { StatsOverview } from '@/components/StatsOverview';
+import { ApplicationStats } from '@/components/ApplicationStats';
 import { ApplicationKanban } from '@/components/ApplicationKanban';
 import { NetworkingCRM } from '@/components/NetworkingCRM';
 import { AIInsights } from '@/components/AIInsights';
@@ -26,6 +27,7 @@ const Index = () => {
         </div>
 
         <StatsOverview />
+        <ApplicationStats />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
           <TabsList className="grid grid-cols-4 lg:w-1/2 mx-auto mb-8">
