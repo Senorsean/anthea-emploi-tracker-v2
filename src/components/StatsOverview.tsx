@@ -8,11 +8,12 @@ export const StatsOverview = () => {
   const stats = [
     {
       title: 'Objectif Actuel',
-      value: 'Décrocher plus d\'entretiens',
+      value: "Décrocher plus d'entretiens",
       progress: 75,
       icon: Target,
       color: 'text-[#a4007c]',
       bgColor: 'bg-[#a4007c]/10',
+      progressColor: 'bg-[#a4007c]',
     },
     {
       title: 'Candidatures Envoyées',
@@ -21,6 +22,7 @@ export const StatsOverview = () => {
       icon: TrendingUp,
       color: 'text-[#e3007b]',
       bgColor: 'bg-[#e3007b]/10',
+      progressColor: 'bg-[#e3007b]',
     },
     {
       title: 'Taux de Réponse',
@@ -29,6 +31,7 @@ export const StatsOverview = () => {
       icon: Calendar,
       color: 'text-[#b3d800]',
       bgColor: 'bg-[#b3d800]/10',
+      progressColor: 'bg-[#b3d800]',
     },
     {
       title: 'Contacts Réseau',
@@ -37,6 +40,7 @@ export const StatsOverview = () => {
       icon: Users,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
+      progressColor: 'bg-blue-600',
     },
   ];
 
@@ -58,7 +62,11 @@ export const StatsOverview = () => {
               <div className="text-2xl font-bold text-gray-900 mb-2">
                 {stat.value}
               </div>
-              <Progress value={stat.progress} className="w-full h-2" />
+              <Progress
+                value={stat.progress}
+                indicatorClassName={stat.progressColor}
+                className="w-full h-2"
+              />
               <p className="text-xs text-gray-500 mt-2">
                 {stat.progress}% de progression
               </p>
