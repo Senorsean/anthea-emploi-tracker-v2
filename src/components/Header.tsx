@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
 import { Bell, Check, Settings, LogOut } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAlerts } from '@/hooks/useAlerts';
 
 interface UserMetadata {
@@ -58,6 +58,7 @@ export const Header = () => {
   const [firstName, setFirstName] = useState<string>('');
   const [initials, setInitials] = useState<string>('A');
   const { alerts, markAsRead, unreadCount } = useAlerts();
+  const navigate = useNavigate();
   
   useEffect(() => {
     supabase.auth
@@ -81,7 +82,10 @@ export const Header = () => {
     <header className="bg-white shadow-sm border-b border-gray-200">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/settings" className="flex items-center space-x-2 cursor-pointer">
+          <div
+            onClick={() => navigate('/settings')}
+            className="flex items-center space-x-2 cursor-pointer"
+          >
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#a4007c] to-[#e3007b] flex items-center justify-center">
               <span className="text-white font-bold text-sm">{initials}</span>
             </div>
@@ -91,7 +95,7 @@ export const Header = () => {
               )}
               <p className="hidden sm:block text-xs text-gray-500">{currentDate}</p>
             </div>
-          </Link>
+          </div>
 
           <div className="flex items-center space-x-4">
             <Popover>
@@ -129,10 +133,12 @@ export const Header = () => {
                 )}
               </PopoverContent>
             </Popover>
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/settings">
-                <Settings className="h-4 w-4" />
-              </Link>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/settings')}
+            >
+              <Settings className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
