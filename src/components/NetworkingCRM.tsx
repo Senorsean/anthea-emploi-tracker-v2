@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, ExternalLink, Mail, Search, Filter } from 'lucide-react';
+import { Plus, ExternalLink, Mail, Search, Filter, Pencil } from 'lucide-react';
 import { initialContacts, Contact } from '@/data/contacts';
 import { AddContactModal } from './AddContactModal';
+import EditContactModal from './EditContactModal';
 
 interface NetworkingCRMProps {
   preview?: boolean;
@@ -19,6 +20,7 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
+  const [editContact, setEditContact] = useState<Contact | null>(null);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -54,8 +56,12 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
       id: Date.now().toString(),
       dateAdded: new Date().toISOString().split('T')[0]
     };
-    
+
     setContacts(prev => [newContact, ...prev]);
+  };
+
+  const updateContact = (updated: Contact) => {
+    setContacts(prev => prev.map(c => (c.id === updated.id ? updated : c)));
   };
 
   if (preview) {
@@ -168,6 +174,13 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
                   <p className="text-xs text-gray-500">
                     Ajouté le {new Date(contact.dateAdded).toLocaleDateString('fr-FR')}
                   </p>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setEditContact(contact)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -175,11 +188,23 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
         ))}
       </div>
 
-      <AddContactModal 
+      <AddContactModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onAdd={addContact}
       />
+
+      {editContact && (
+        <EditContactModal
+          isOpen={!!editContact}
+          onClose={() => setEditContact(null)}
+          contact={editContact}
+          onUpdate={(data) => {
+            updateContact(data);
+            setEditContact(null);
+          }}
+        />
+      )}
     </div>
   );
 };
