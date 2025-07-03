@@ -84,7 +84,7 @@ export const Header = () => {
   return (
     <header className="relative bg-gradient-to-r from-blue-500 to-violet-500 shadow-sm border-b border-gray-200">
       <img
-        src="/lovable-uploads/43afacb4-6c67-4c54-9cc1-2dbd9397e967.png"
+        src="https://chatgpt.com/s/m_6866a711f8408191998211546b2fa69a"
         alt="people shaking hands after an interview"
         className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
       />
