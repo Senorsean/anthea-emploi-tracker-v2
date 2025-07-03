@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import AmeliorerEntretiensPage from "./pages/AmeliorerEntretiensPage";
+import MethodeStarPage from "./pages/MethodeStarPage";
 import RequireAuth from "./components/RequireAuth";
 
 const queryClient = new QueryClient();
@@ -32,6 +33,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <AmeliorerEntretiensPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/methode-star"
+            element={
+              <RequireAuth>
+                <MethodeStarPage />
               </RequireAuth>
             }
           />

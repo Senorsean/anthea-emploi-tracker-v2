@@ -13,7 +13,13 @@ export default function AmeliorerEntretiensPage() {
           <ul className="list-disc list-inside mt-2 space-y-2">
             <li>Analysez l'offre d'emploi pour identifier les attentes du poste.</li>
             <li>Renseignez-vous sur l’entreprise (valeurs, secteur, culture).</li>
-            <li>Préparez des exemples concrets de vos expériences passées (méthode STAR).</li>
+            <li>
+              Préparez des exemples concrets de vos expériences passées (
+              <Link to="/methode-star" className="text-blue-600 hover:underline">
+                méthode STAR
+              </Link>
+              ).
+            </li>
             <li>Entraînez-vous à répondre aux questions classiques (forces, faiblesses, motivations…).</li>
             <li>Préparez votre tenue, votre itinéraire ou le lien de visio.</li>
           </ul>
