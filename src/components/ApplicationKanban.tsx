@@ -28,6 +28,7 @@ import { CSS } from '@dnd-kit/utilities';
 
 interface ApplicationKanbanProps {
   preview?: boolean;
+  onPreviewClick?: () => void;
 }
 
 const SortableJobCard: React.FC<{ job: Job; onDoubleClick?: () => void }> = ({ job, onDoubleClick }) => {
@@ -129,7 +130,7 @@ const DroppableColumn: React.FC<{
   );
 };
 
-export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = false }) => {
+export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = false, onPreviewClick }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeJob, setActiveJob] = useState<Job | null>(null);
   const [editJob, setEditJob] = useState<{ data: Job; columnId: string } | null>(null);
@@ -256,7 +257,7 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
 
   if (preview) {
     return (
-      <Card className="h-96">
+      <Card role="button" className="h-96 cursor-pointer" onClick={onPreviewClick}>
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center justify-between">
             <span>Entonnoir de Candidatures</span>

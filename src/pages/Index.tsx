@@ -40,7 +40,10 @@ const Index = () => {
           <TabsContent value="overview" className="space-y-8">
             <AIInsights />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <ApplicationKanban preview={true} />
+              <ApplicationKanban
+                preview={true}
+                onPreviewClick={() => setActiveTab('applications')}
+              />
               <NetworkingCRM preview={true} />
             </div>
           </TabsContent>
