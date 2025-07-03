@@ -5,7 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Target, TrendingUp, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
+import { Target, TrendingUp, Calendar, CheckCircle, AlertCircle, Pencil, Plus, Trash } from 'lucide-react';
+import type { WeeklyAction } from '@/data/weeklyActions';
+import { initialWeeklyActions, actionTemplates } from '@/data/weeklyActions';
+import AddWeeklyActionModal from './AddWeeklyActionModal';
 
 export const GoalsModule = () => {
   const [currentGoal, setCurrentGoal] = useState('interviews');
@@ -53,33 +56,26 @@ export const GoalsModule = () => {
   };
 
   const selectedGoal = goals[currentGoal];
-  
-  const weeklyActions = [
-    {
-      action: 'Postuler à 6 nouveaux postes',
-      completed: 3,
-      target: 6,
-      status: 'in-progress'
-    },
-    {
-      action: 'Contacter 3 personnes de mon réseau',
-      completed: 1,
-      target: 3,
-      status: 'in-progress'
-    },
-    {
-      action: 'Mettre à jour mon profil LinkedIn',
-      completed: 1,
-      target: 1,
-      status: 'completed'
-    },
-    {
-      action: 'Préparer les entretiens de la semaine',
-      completed: 0,
-      target: 2,
-      status: 'pending'
-    }
-  ];
+
+  const [weeklyActions, setWeeklyActions] = useState<WeeklyAction[]>(initialWeeklyActions);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editAction, setEditAction] = useState<WeeklyAction | null>(null);
+
+  const addAction = (data: Omit<WeeklyAction, 'id'>) => {
+    const newAction: WeeklyAction = {
+      ...data,
+      id: Date.now().toString()
+    };
+    setWeeklyActions(prev => [...prev, newAction]);
+  };
+
+  const updateAction = (data: WeeklyAction) => {
+    setWeeklyActions(prev => prev.map(a => a.id === data.id ? data : a));
+  };
+
+  const deleteAction = (id: string) => {
+    setWeeklyActions(prev => prev.filter(a => a.id !== id));
+  };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -164,16 +160,19 @@ export const GoalsModule = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Weekly Actions */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-[#b3d800]" />
               Actions de la Semaine
             </CardTitle>
+            <Button size="icon" variant="outline" onClick={() => setShowAddModal(true)}>
+              <Plus className="h-4 w-4" />
+            </Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {weeklyActions.map((action, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              {weeklyActions.map(action => (
+                <div key={action.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-3 flex-1">
                     {getStatusIcon(action.status)}
                     <div className="flex-1">
@@ -183,10 +182,18 @@ export const GoalsModule = () => {
                       </p>
                     </div>
                   </div>
-                  <Badge className={getStatusColor(action.status)}>
-                    {action.status === 'completed' ? 'Terminé' :
-                     action.status === 'in-progress' ? 'En cours' : 'À faire'}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge className={getStatusColor(action.status)}>
+                      {action.status === 'completed' ? 'Terminé' :
+                       action.status === 'in-progress' ? 'En cours' : 'À faire'}
+                    </Badge>
+                    <Button variant="ghost" size="icon" onClick={() => setEditAction(action)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => deleteAction(action.id)}>
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -219,6 +226,26 @@ export const GoalsModule = () => {
           </CardContent>
         </Card>
       </div>
+
+      <AddWeeklyActionModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSubmit={(data) => addAction({ ...data })}
+        templates={actionTemplates}
+      />
+
+      {editAction && (
+        <AddWeeklyActionModal
+          isOpen={!!editAction}
+          onClose={() => setEditAction(null)}
+          onSubmit={(data) => {
+            updateAction({ ...editAction, ...data });
+            setEditAction(null);
+          }}
+          initialData={editAction}
+          templates={actionTemplates}
+        />
+      )}
     </div>
   );
 };
