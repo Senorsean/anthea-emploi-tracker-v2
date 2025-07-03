@@ -22,9 +22,10 @@ interface Contact {
 
 interface NetworkingCRMProps {
   preview?: boolean;
+  onPreviewClick?: () => void;
 }
 
-export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false }) => {
+export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, onPreviewClick }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -112,7 +113,7 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false })
 
   if (preview) {
     return (
-      <Card className="h-96">
+      <Card role="button" className="h-96 cursor-pointer" onClick={onPreviewClick}>
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center justify-between">
             <span>CRM de Réseautage</span>
