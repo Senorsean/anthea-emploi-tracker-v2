@@ -82,7 +82,7 @@ export const Header = () => {
               <span className="text-white font-bold text-sm">{initials}</span>
             </div>
             {firstName && (
-              <p className="font-medium text-gray-800">Bienvenue {firstName}</p>
+              <p className="font-medium text-gray-800">Bienvenue, {firstName}</p>
             )}
             <p className="hidden sm:block text-xs text-gray-500">{currentDate}</p>
           </div>
