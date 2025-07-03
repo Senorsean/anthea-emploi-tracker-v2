@@ -174,7 +174,7 @@ export const Header = () => {
             alt="Anthea"
             className="mx-auto mb-4 w-32"
           />
-          <h1 className="text-3xl font-bold mb-1">emploi Tracker</h1>
+          <h1 className="text-2xl font-bold mb-1">emploi Tracker</h1>
           <h2 className="text-2xl font-bold">
             Tableau de Bord - Recherche d'Emploi
           </h2>
