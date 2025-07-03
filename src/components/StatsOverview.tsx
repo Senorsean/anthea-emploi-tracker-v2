@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, Target, Users, Calendar } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const StatsOverview = () => {
   const stats = [
@@ -48,7 +49,7 @@ export const StatsOverview = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat, index) => {
         const Icon = stat.icon;
-        return (
+        const content = (
           <Card key={index} className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">
@@ -72,6 +73,11 @@ export const StatsOverview = () => {
               </p>
             </CardContent>
           </Card>
+        );
+        return index === 0 ? (
+          <Link key={index} to="/progression-entretiens">{content}</Link>
+        ) : (
+          content
         );
       })}
     </div>
