@@ -21,10 +21,10 @@ export const GoalsModule = () => {
       currentWeek: 1,
       progress: 50,
       recommendations: [
-        'Postulez à 6-8 postes par semaine minimum',
-        'Optimisez votre CV pour chaque candidature',
-        'Utilisez votre réseau pour des recommandations',
-        'Suivez vos candidatures après 1 semaine'
+        "Postulez à au moins 5 postes par jour pour multiplier vos chances",
+        "Contactez chaque jour un recruteur ou RH via LinkedIn",
+        "Préparez un pitch de présentation clair de 30 secondes",
+        "Relancez systématiquement vos candidatures après une semaine"
       ]
     },
     offers: {
@@ -34,10 +34,10 @@ export const GoalsModule = () => {
       currentWeek: 0,
       progress: 0,
       recommendations: [
-        'Préparez-vous intensivement aux entretiens',
-        'Recherchez l\'entreprise en profondeur',
-        'Préparez des questions pertinentes',
-        'Négociez professionnellement'
+        "Entraînez-vous à des simulations d'entretiens chaque semaine",
+        "Ciblez trois entreprises clés et adaptez votre candidature",
+        "Demandez à deux contacts de vous recommander",
+        "Suivez vos démarches dans un tableau pour relancer efficacement"
       ]
     },
     responses: {
@@ -47,10 +47,10 @@ export const GoalsModule = () => {
       currentWeek: 2,
       progress: 67,
       recommendations: [
-        'Personnalisez chaque lettre de motivation',
-        'Postulez dans les 48h après publication',
-        'Utilisez des mots-clés de l\'offre',
-        'Optimisez votre profil LinkedIn'
+        "Personnalisez chaque email ou lettre de motivation",
+        "Postulez dans les 24h suivant la publication de l'offre",
+        "Mettez à jour votre profil sur les job boards et LinkedIn",
+        "Demandez un retour en cas de silence après dix jours"
       ]
     }
   };
