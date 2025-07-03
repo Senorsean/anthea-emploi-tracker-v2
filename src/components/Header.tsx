@@ -96,7 +96,7 @@ export const Header = () => {
             </div>
             <div className="flex flex-col leading-tight">
               {firstName && (
-                <p className="font-medium text-gray-800">Bienvenue, {firstName}</p>
+                <p className="font-medium text-white">Bienvenue, {firstName}</p>
               )}
               <p className="hidden sm:block text-xs text-gray-500">{currentDate}</p>
             </div>
@@ -106,7 +106,7 @@ export const Header = () => {
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="sm" className="relative">
-                  <Bell className="h-4 w-4" />
+                  <Bell className="h-4 w-4 text-white" />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 h-4 w-4 bg-[#e3007b] text-white rounded-full text-[10px] flex items-center justify-center">
                       {unreadCount}
@@ -161,7 +161,7 @@ export const Header = () => {
             </Popover>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/settings">
-                <Settings className="h-4 w-4" />
+                <Settings className="h-4 w-4 text-white" />
               </Link>
             </Button>
             <Button
@@ -169,7 +169,7 @@ export const Header = () => {
               size="sm"
               onClick={() => supabase.auth.signOut()}
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-4 w-4 text-white" />
             </Button>
           </div>
         </div>
