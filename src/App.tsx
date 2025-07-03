@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import AmeliorerEntretiensPage from "./pages/AmeliorerEntretiensPage";
 import MethodeStarPage from "./pages/MethodeStarPage";
 import RenforcezVotreReseauPage from "./pages/RenforcezVotreReseauPage";
+import TauxDeReponsePage from "./pages/TauxDeReponsePage";
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 
@@ -51,6 +52,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <RenforcezVotreReseauPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/taux-de-reponse"
+            element={
+              <RequireAuth>
+                <TauxDeReponsePage />
               </RequireAuth>
             }
           />
