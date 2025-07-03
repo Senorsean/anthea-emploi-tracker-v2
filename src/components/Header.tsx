@@ -98,7 +98,7 @@ export const Header = () => {
               {firstName && (
                 <p className="font-medium text-white">Bienvenue, {firstName}</p>
               )}
-              <p className="hidden sm:block text-xs text-gray-500">{currentDate}</p>
+              <p className="hidden sm:block text-xs text-white">{currentDate}</p>
             </div>
           </Link>
 
