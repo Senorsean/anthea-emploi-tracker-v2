@@ -34,16 +34,20 @@ const Login = () => {
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 relative overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-50"
+          className="absolute inset-0 bg-cover bg-center opacity-30"
           style={{
-            backgroundImage: `url(${'/lovable-uploads/43afacb4-6c67-4c54-9cc1-2dbd9397e967.png'})`,
+            backgroundImage: `url('https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3')`,
           }}
         ></div>
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/60 via-purple-700/60 to-purple-800/60"></div>
         
         <div className="relative z-10 flex flex-col justify-center px-12 text-white">
           <div className="mb-8">
-            <h1 className="text-5xl font-light mb-4">anthéa</h1>
+            <img 
+              src="/lovable-uploads/58744305-1ea3-4b87-a9cc-302ae6c7fdd0.png" 
+              alt="anthéa logo" 
+              className="h-16 mb-6"
+            />
             <p className="text-lg font-light leading-relaxed">
               Votre partenaire de confiance pour l'emploi et le reclassement professionnel
             </p>
