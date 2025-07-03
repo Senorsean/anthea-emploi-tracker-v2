@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import AmeliorerEntretiensPage from "./pages/AmeliorerEntretiensPage";
 import MethodeStarPage from "./pages/MethodeStarPage";
 import RenforcezVotreReseauPage from "./pages/RenforcezVotreReseauPage";
+import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <RenforcezVotreReseauPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <RequireAuth>
+                <Settings />
               </RequireAuth>
             }
           />
