@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, ExternalLink, Mail, Search, Filter, Pencil } from 'lucide-react';
+import { Plus, ExternalLink, Mail, Search, Filter, Pencil, LayoutGrid, List } from 'lucide-react';
 import { initialContacts, Contact } from '@/data/contacts';
 import { AddContactModal } from './AddContactModal';
 import EditContactModal from './EditContactModal';
@@ -21,6 +21,7 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
   const [statusFilter, setStatusFilter] = useState('all');
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
   const [editContact, setEditContact] = useState<Contact | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -96,10 +97,26 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">CRM de Réseautage</h2>
-        <Button onClick={() => setShowAddModal(true)} className="bg-[#e3007b] hover:bg-[#e3007b]/90">
-          <Plus className="h-4 w-4 mr-2" />
-          Ajouter un Contact
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={viewMode === 'list' ? 'secondary' : 'outline'}
+            size="icon"
+            onClick={() => setViewMode('list')}
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === 'grid' ? 'secondary' : 'outline'}
+            size="icon"
+            onClick={() => setViewMode('grid')}
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </Button>
+          <Button onClick={() => setShowAddModal(true)} className="bg-[#e3007b] hover:bg-[#e3007b]/90">
+            <Plus className="h-4 w-4 mr-2" />
+            Ajouter un Contact
+          </Button>
+        </div>
       </div>
 
       <div className="flex gap-4 mb-6">
@@ -127,7 +144,7 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
         </Select>
       </div>
 
-      <div className="grid gap-4">
+      <div className={viewMode === 'grid' ? 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3' : 'space-y-4'}>
         {filteredContacts.map(contact => (
           <Card key={contact.id} className="hover:shadow-md transition-shadow">
             <CardContent className="p-6">
