@@ -88,6 +88,13 @@ export const StatsOverview = () => {
             </Link>
           );
         }
+        if (index === 3) {
+          return (
+            <Link key={index} to="/progression-reseau">
+              {content}
+            </Link>
+          );
+        }
         return content;
       })}
     </div>

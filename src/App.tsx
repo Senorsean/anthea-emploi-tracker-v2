@@ -11,6 +11,7 @@ import MethodeStarPage from "./pages/MethodeStarPage";
 import RenforcezVotreReseauPage from "./pages/RenforcezVotreReseauPage";
 import ProgressionEntretiensPage from "./pages/ProgressionEntretiensPage";
 import ProgressionCandidaturesPage from "./pages/ProgressionCandidaturesPage";
+import ProgressionReseauPage from "./pages/ProgressionReseauPage";
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 
@@ -53,6 +54,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <ProgressionCandidaturesPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/progression-reseau"
+            element={
+              <RequireAuth>
+                <ProgressionReseauPage />
               </RequireAuth>
             }
           />
