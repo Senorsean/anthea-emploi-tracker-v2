@@ -5,13 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Brain, TrendingUp, AlertTriangle, Target, Lightbulb, ExternalLink } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const AIInsights = () => {
   const bottleneck = {
     type: 'Interview Success Rate',
-    description: 'Votre taux de succès en entretien est 50% plus bas que recommandé. Concentrez-vous sur l\'amélioration pour débloquer votre recherche d\'emploi.',
+    description:
+      "Votre taux de succès en entretien est 50% plus bas que recommandé. Concentrez-vous sur l'amélioration pour débloquer votre recherche d'emploi.",
     actionText: 'Améliorer mes entretiens',
-    actionUrl: '#'
+    actionUrl: '/improve-interviews',
   };
 
   const recommendations = [
@@ -60,12 +62,15 @@ export const AIInsights = () => {
             <div className="flex-1">
               <p className="font-semibold mb-1">🚨 Goulot d'étranglement détecté: {bottleneck.type}</p>
               <p className="text-sm mb-3">{bottleneck.description}</p>
-              <Button 
-                size="sm" 
+              <Button
+                asChild
+                size="sm"
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
-                {bottleneck.actionText}
-                <ExternalLink className="h-3 w-3 ml-1" />
+                <Link to={bottleneck.actionUrl}>
+                  {bottleneck.actionText}
+                  <ExternalLink className="h-3 w-3 ml-1" />
+                </Link>
               </Button>
             </div>
           </div>
