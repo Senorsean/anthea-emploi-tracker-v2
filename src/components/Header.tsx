@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { Bell, Settings, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface UserMetadata {
   first_name?: string;
@@ -94,8 +95,10 @@ export const Header = () => {
               <Bell className="h-4 w-4" />
               <span className="absolute -top-1 -right-1 h-3 w-3 bg-[#e3007b] rounded-full text-xs"></span>
             </Button>
-            <Button variant="ghost" size="sm">
-              <Settings className="h-4 w-4" />
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/settings">
+                <Settings className="h-4 w-4" />
+              </Link>
             </Button>
             <Button
               variant="ghost"
