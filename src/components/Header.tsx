@@ -82,8 +82,13 @@ export const Header = () => {
   const currentDate = new Date().toLocaleDateString('fr-FR');
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
-      <div className="container mx-auto px-4 py-4">
+    <header className="relative bg-gradient-to-r from-blue-500 to-violet-500 shadow-sm border-b border-gray-200">
+      <img
+        src="/lovable-uploads/43afacb4-6c67-4c54-9cc1-2dbd9397e967.png"
+        alt="decorative background"
+        className="absolute inset-0 w-full h-full object-cover opacity-20 pointer-events-none"
+      />
+      <div className="relative container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <Link to="/settings" className="flex items-center space-x-2 cursor-pointer">
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#a4007c] to-[#e3007b] flex items-center justify-center">
