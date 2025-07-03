@@ -1,9 +1,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell, Settings, LogOut } from 'lucide-react';
+import { Bell, Check, Settings, LogOut } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAlerts } from '@/hooks/useAlerts';
 
 interface UserMetadata {
   first_name?: string;
@@ -55,7 +57,8 @@ const getInitials = (metadata: UserMetadata, email?: string) => {
 export const Header = () => {
   const [firstName, setFirstName] = useState<string>('');
   const [initials, setInitials] = useState<string>('A');
-
+  const { alerts, markAsRead, unreadCount } = useAlerts();
+  
   useEffect(() => {
     supabase.auth
       .getUser()
@@ -91,10 +94,41 @@ export const Header = () => {
           </div>
 
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="relative">
-              <Bell className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 h-3 w-3 bg-[#e3007b] rounded-full text-xs"></span>
-            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="ghost" size="sm" className="relative">
+                  <Bell className="h-4 w-4" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 h-4 w-4 bg-[#e3007b] text-white rounded-full text-[10px] flex items-center justify-center">
+                      {unreadCount}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
+                <h4 className="font-medium mb-2">Alertes de Relance</h4>
+                {alerts.filter(a => !a.read).length === 0 ? (
+                  <p className="text-sm text-gray-500">Aucune alerte</p>
+                ) : (
+                  <ul className="space-y-2">
+                    {alerts.map(alert => (
+                      !alert.read && (
+                        <li key={alert.id} className="flex justify-between items-start text-sm">
+                          <span>{alert.message}</span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => markAsRead(alert.id)}
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                        </li>
+                      )
+                    ))}
+                  </ul>
+                )}
+              </PopoverContent>
+            </Popover>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/settings">
                 <Settings className="h-4 w-4" />
@@ -113,3 +147,4 @@ export const Header = () => {
     </header>
   );
 };
+
