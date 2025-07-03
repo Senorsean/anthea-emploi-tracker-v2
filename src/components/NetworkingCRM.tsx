@@ -6,19 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, ExternalLink, Mail, Search, Filter } from 'lucide-react';
+import { initialContacts, Contact } from '@/data/contacts';
 import { AddContactModal } from './AddContactModal';
-
-interface Contact {
-  id: string;
-  name: string;
-  company: string;
-  position: string;
-  email: string;
-  linkedin?: string;
-  status: 'pending' | 'contacted' | 'replied' | 'referred';
-  dateAdded: string;
-  notes?: string;
-}
 
 interface NetworkingCRMProps {
   preview?: boolean;
@@ -29,49 +18,7 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [contacts, setContacts] = useState<Contact[]>([
-    {
-      id: '1',
-      name: 'Olivia Bennett',
-      company: 'Cultivated Culture',
-      position: 'Product Manager',
-      email: 'olivia@cultivatedculture.com',
-      linkedin: 'in/obennett',
-      status: 'replied',
-      dateAdded: '2025-01-02',
-      notes: 'Très intéressée par mon profil'
-    },
-    {
-      id: '2',
-      name: 'James Whitaker', 
-      company: 'Cultivated Culture',
-      position: 'Senior Product Manager',
-      email: 'james@cultivatedculture.com',
-      linkedin: 'in/james-whitaker',
-      status: 'contacted',
-      dateAdded: '2025-01-01'
-    },
-    {
-      id: '3',
-      name: 'Sofia Ramirez',
-      company: 'Cultivated Culture', 
-      position: 'Product Marketing Manager',
-      email: 'sofia@cultivatedculture.com',
-      linkedin: 'in/sofia-r',
-      status: 'replied',
-      dateAdded: '2024-12-30'
-    },
-    {
-      id: '4',
-      name: 'Marcus Chen',
-      company: 'Amazon',
-      position: 'Product Manager',
-      email: 'mchen@amazon.com',
-      linkedin: 'in/mchen',
-      status: 'pending',
-      dateAdded: '2024-12-28'
-    }
-  ]);
+  const [contacts, setContacts] = useState<Contact[]>(initialContacts);
 
   const getStatusColor = (status: string) => {
     switch (status) {
