@@ -68,7 +68,11 @@ const ProgressionEntretiensPage = () => {
                     </td>
                     <td className="py-2">
                       <div className="flex items-center gap-2">
-                        <Progress value={getProgress(tf.key)} className="h-2 flex-1" />
+                        <Progress
+                          value={getProgress(tf.key)}
+                          indicatorClassName="bg-[#a4007c]"
+                          className="h-2 flex-1"
+                        />
                         <span>{getProgress(tf.key)}%</span>
                       </div>
                     </td>

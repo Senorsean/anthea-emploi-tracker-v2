@@ -152,7 +152,11 @@ export const GoalsModule = () => {
               <span className="text-sm font-medium text-gray-700">Progression hebdomadaire</span>
               <span className="text-sm text-gray-500">{selectedGoal.progress}%</span>
             </div>
-            <Progress value={selectedGoal.progress} className="h-3" />
+            <Progress
+              value={selectedGoal.progress}
+              indicatorClassName="bg-[#a4007c]"
+              className="h-3"
+            />
           </div>
         </CardContent>
       </Card>
