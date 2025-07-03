@@ -74,11 +74,21 @@ export const StatsOverview = () => {
             </CardContent>
           </Card>
         );
-        return index === 0 ? (
-          <Link key={index} to="/progression-entretiens">{content}</Link>
-        ) : (
-          content
-        );
+        if (index === 0) {
+          return (
+            <Link key={index} to="/progression-entretiens">
+              {content}
+            </Link>
+          );
+        }
+        if (index === 1) {
+          return (
+            <Link key={index} to="/progression-candidatures">
+              {content}
+            </Link>
+          );
+        }
+        return content;
       })}
     </div>
   );
