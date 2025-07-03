@@ -59,7 +59,7 @@ const Login = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center bg-white px-8">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-light text-[#b3d800] mb-2">Emploi TRACKER</h2>
+            <h2 className="text-2xl font-light text-[#b3d800] mb-2">Emploi TRACKER</h2>
             <p className="text-gray-600 text-sm">
               Connectez-vous pour accéder à votre espace
             </p>
