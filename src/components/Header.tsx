@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Bell, Settings, User } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Bell, Settings, User, LogOut } from 'lucide-react';
 
 export const Header = () => {
   return (
@@ -28,8 +29,12 @@ export const Header = () => {
             <Button variant="ghost" size="sm">
               <Settings className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm">
-              <User className="h-4 w-4" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => supabase.auth.signOut()}
+            >
+              <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
