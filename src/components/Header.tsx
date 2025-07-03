@@ -81,7 +81,7 @@ export const Header = () => {
     <header className="bg-white shadow-sm border-b border-gray-200">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+          <Link to="/settings" className="flex items-center space-x-2 cursor-pointer">
             <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#a4007c] to-[#e3007b] flex items-center justify-center">
               <span className="text-white font-bold text-sm">{initials}</span>
             </div>
@@ -91,7 +91,7 @@ export const Header = () => {
               )}
               <p className="hidden sm:block text-xs text-gray-500">{currentDate}</p>
             </div>
-          </div>
+          </Link>
 
           <div className="flex items-center space-x-4">
             <Popover>
