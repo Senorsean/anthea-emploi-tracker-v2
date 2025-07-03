@@ -10,6 +10,7 @@ import AmeliorerEntretiensPage from "./pages/AmeliorerEntretiensPage";
 import MethodeStarPage from "./pages/MethodeStarPage";
 import RenforcezVotreReseauPage from "./pages/RenforcezVotreReseauPage";
 import ProgressionEntretiensPage from "./pages/ProgressionEntretiensPage";
+import ProgressionCandidaturesPage from "./pages/ProgressionCandidaturesPage";
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 
@@ -44,6 +45,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <ProgressionEntretiensPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/progression-candidatures"
+            element={
+              <RequireAuth>
+                <ProgressionCandidaturesPage />
               </RequireAuth>
             }
           />
