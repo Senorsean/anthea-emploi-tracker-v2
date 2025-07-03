@@ -170,11 +170,13 @@ export const Header = () => {
           </div>
         </div>
         <div className="mt-6 text-center text-white">
-          <img
-            src="https://dev.anthea-rh.com/wp-content/uploads/2022/12/logtransp.png"
-            alt="Anthea"
-            className="mx-auto mb-4 w-32"
-          />
+          <Link to="/">
+            <img
+              src="https://dev.anthea-rh.com/wp-content/uploads/2022/12/logtransp.png"
+              alt="Anthea"
+              className="mx-auto mb-4 w-32"
+            />
+          </Link>
           <h1 className="text-2xl font-bold mb-1">emploi Tracker</h1>
           {/* Heading moved below the banner */}
           <p className="text-sm sm:text-base">
