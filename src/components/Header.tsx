@@ -56,11 +56,7 @@ const getInitials = (metadata: UserMetadata, email?: string) => {
   return 'A';
 };
 
-export interface HeaderProps {
-  onLogoClick?: () => void;
-}
-
-export const Header = ({ onLogoClick }: HeaderProps) => {
+export const Header = () => {
   const [firstName, setFirstName] = useState<string>('');
   const [initials, setInitials] = useState<string>('A');
   const { alerts, markAsRead, cancelAlert, updateAlertDate, unreadCount } = useAlerts();
@@ -174,13 +170,11 @@ export const Header = ({ onLogoClick }: HeaderProps) => {
           </div>
         </div>
         <div className="mt-6 text-center text-white">
-          <Link to="/" onClick={onLogoClick}>
-            <img
-              src="https://dev.anthea-rh.com/wp-content/uploads/2022/12/logtransp.png"
-              alt="Anthea"
-              className="mx-auto mb-4 w-32"
-            />
-          </Link>
+          <img
+            src="https://dev.anthea-rh.com/wp-content/uploads/2022/12/logtransp.png"
+            alt="Anthea"
+            className="mx-auto mb-4 w-32"
+          />
           <h1 className="text-2xl font-bold mb-1">emploi Tracker</h1>
           {/* Heading moved below the banner */}
           <p className="text-sm sm:text-base">

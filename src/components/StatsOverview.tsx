@@ -3,16 +3,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, Target, Users, Calendar } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { initialResponses } from '@/data/responses';
-import { initialJobs } from '@/data/jobs';
 
 export const StatsOverview = () => {
-  const allJobs = Object.values(initialJobs).flat();
-  const responseRate = allJobs.length === 0
-    ? 0
-    : Math.round((initialResponses.length / allJobs.length) * 100);
-
   const stats = [
     {
       title: 'Objectif Actuel',
@@ -34,8 +26,8 @@ export const StatsOverview = () => {
     },
     {
       title: 'Taux de Réponse',
-      value: `${responseRate}%`,
-      progress: responseRate,
+      value: '42%',
+      progress: 42,
       icon: Calendar,
       color: 'text-[#b3d800]',
       bgColor: 'bg-[#b3d800]/10',
@@ -56,7 +48,7 @@ export const StatsOverview = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat, index) => {
         const Icon = stat.icon;
-        const content = (
+        return (
           <Card key={index} className="transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-gray-600">
@@ -81,35 +73,6 @@ export const StatsOverview = () => {
             </CardContent>
           </Card>
         );
-        if (index === 0) {
-          return (
-            <Link key={index} to="/progression-entretiens">
-              {content}
-            </Link>
-          );
-        }
-        if (index === 1) {
-          return (
-            <Link key={index} to="/progression-candidatures">
-              {content}
-            </Link>
-          );
-        }
-        if (index === 2) {
-          return (
-            <Link key={index} to="/taux-reponse">
-              {content}
-            </Link>
-          );
-        }
-        if (index === 3) {
-          return (
-            <Link key={index} to="/progression-reseau">
-              {content}
-            </Link>
-          );
-        }
-        return content;
       })}
     </div>
   );

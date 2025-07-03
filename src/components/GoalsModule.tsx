@@ -5,10 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Target, TrendingUp, Calendar, CheckCircle, AlertCircle, Pencil, Plus, Trash } from 'lucide-react';
-import type { WeeklyAction } from '@/data/weeklyActions';
-import { initialWeeklyActions, actionTemplates } from '@/data/weeklyActions';
-import AddWeeklyActionModal from './AddWeeklyActionModal';
+import { Target, TrendingUp, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
 
 export const GoalsModule = () => {
   const [currentGoal, setCurrentGoal] = useState('interviews');
@@ -21,10 +18,10 @@ export const GoalsModule = () => {
       currentWeek: 1,
       progress: 50,
       recommendations: [
-        "Postulez à au moins 5 postes par jour pour multiplier vos chances",
-        "Contactez chaque jour un recruteur ou RH via LinkedIn",
-        "Préparez un pitch de présentation clair de 30 secondes",
-        "Relancez systématiquement vos candidatures après une semaine"
+        'Postulez à 6-8 postes par semaine minimum',
+        'Optimisez votre CV pour chaque candidature',
+        'Utilisez votre réseau pour des recommandations',
+        'Suivez vos candidatures après 1 semaine'
       ]
     },
     offers: {
@@ -34,10 +31,10 @@ export const GoalsModule = () => {
       currentWeek: 0,
       progress: 0,
       recommendations: [
-        "Entraînez-vous à des simulations d'entretiens chaque semaine",
-        "Ciblez trois entreprises clés et adaptez votre candidature",
-        "Demandez à deux contacts de vous recommander",
-        "Suivez vos démarches dans un tableau pour relancer efficacement"
+        'Préparez-vous intensivement aux entretiens',
+        'Recherchez l\'entreprise en profondeur',
+        'Préparez des questions pertinentes',
+        'Négociez professionnellement'
       ]
     },
     responses: {
@@ -47,35 +44,42 @@ export const GoalsModule = () => {
       currentWeek: 2,
       progress: 67,
       recommendations: [
-        "Personnalisez chaque email ou lettre de motivation",
-        "Postulez dans les 24h suivant la publication de l'offre",
-        "Mettez à jour votre profil sur les job boards et LinkedIn",
-        "Demandez un retour en cas de silence après dix jours"
+        'Personnalisez chaque lettre de motivation',
+        'Postulez dans les 48h après publication',
+        'Utilisez des mots-clés de l\'offre',
+        'Optimisez votre profil LinkedIn'
       ]
     }
   };
 
   const selectedGoal = goals[currentGoal];
-
-  const [weeklyActions, setWeeklyActions] = useState<WeeklyAction[]>(initialWeeklyActions);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editAction, setEditAction] = useState<WeeklyAction | null>(null);
-
-  const addAction = (data: Omit<WeeklyAction, 'id'>) => {
-    const newAction: WeeklyAction = {
-      ...data,
-      id: Date.now().toString()
-    };
-    setWeeklyActions(prev => [...prev, newAction]);
-  };
-
-  const updateAction = (data: WeeklyAction) => {
-    setWeeklyActions(prev => prev.map(a => a.id === data.id ? data : a));
-  };
-
-  const deleteAction = (id: string) => {
-    setWeeklyActions(prev => prev.filter(a => a.id !== id));
-  };
+  
+  const weeklyActions = [
+    {
+      action: 'Postuler à 6 nouveaux postes',
+      completed: 3,
+      target: 6,
+      status: 'in-progress'
+    },
+    {
+      action: 'Contacter 3 personnes de mon réseau',
+      completed: 1,
+      target: 3,
+      status: 'in-progress'
+    },
+    {
+      action: 'Mettre à jour mon profil LinkedIn',
+      completed: 1,
+      target: 1,
+      status: 'completed'
+    },
+    {
+      action: 'Préparer les entretiens de la semaine',
+      completed: 0,
+      target: 2,
+      status: 'pending'
+    }
+  ];
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -148,11 +152,7 @@ export const GoalsModule = () => {
               <span className="text-sm font-medium text-gray-700">Progression hebdomadaire</span>
               <span className="text-sm text-gray-500">{selectedGoal.progress}%</span>
             </div>
-            <Progress
-              value={selectedGoal.progress}
-              indicatorClassName="bg-[#a4007c]"
-              className="h-3"
-            />
+            <Progress value={selectedGoal.progress} className="h-3" />
           </div>
         </CardContent>
       </Card>
@@ -160,19 +160,16 @@ export const GoalsModule = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Weekly Actions */}
         <Card>
-          <CardHeader className="flex items-center justify-between">
+          <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-[#b3d800]" />
               Actions de la Semaine
             </CardTitle>
-            <Button size="icon" variant="outline" onClick={() => setShowAddModal(true)}>
-              <Plus className="h-4 w-4" />
-            </Button>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {weeklyActions.map(action => (
-                <div key={action.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              {weeklyActions.map((action, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-3 flex-1">
                     {getStatusIcon(action.status)}
                     <div className="flex-1">
@@ -182,18 +179,10 @@ export const GoalsModule = () => {
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className={getStatusColor(action.status)}>
-                      {action.status === 'completed' ? 'Terminé' :
-                       action.status === 'in-progress' ? 'En cours' : 'À faire'}
-                    </Badge>
-                    <Button variant="ghost" size="icon" onClick={() => setEditAction(action)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => deleteAction(action.id)}>
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <Badge className={getStatusColor(action.status)}>
+                    {action.status === 'completed' ? 'Terminé' :
+                     action.status === 'in-progress' ? 'En cours' : 'À faire'}
+                  </Badge>
                 </div>
               ))}
             </div>
@@ -226,26 +215,6 @@ export const GoalsModule = () => {
           </CardContent>
         </Card>
       </div>
-
-      <AddWeeklyActionModal
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onSubmit={(data) => addAction({ ...data })}
-        templates={actionTemplates}
-      />
-
-      {editAction && (
-        <AddWeeklyActionModal
-          isOpen={!!editAction}
-          onClose={() => setEditAction(null)}
-          onSubmit={(data) => {
-            updateAction({ ...editAction, ...data });
-            setEditAction(null);
-          }}
-          initialData={editAction}
-          templates={actionTemplates}
-        />
-      )}
     </div>
   );
 };
