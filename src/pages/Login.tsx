@@ -33,13 +33,13 @@ const Login = () => {
       {/* Left side - Brand and tagline */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 relative overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-50"
           style={{
             backgroundImage: `url(${'/lovable-uploads/43afacb4-6c67-4c54-9cc1-2dbd9397e967.png'})`,
           }}
         ></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/80 via-purple-700/80 to-purple-800/80"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/60 via-purple-700/60 to-purple-800/60"></div>
         
         <div className="relative z-10 flex flex-col justify-center px-12 text-white">
           <div className="mb-8">
