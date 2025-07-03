@@ -14,6 +14,7 @@ import {
   useSensor,
   useSensors,
   closestCenter,
+  DragOverEvent,
 } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -108,6 +109,30 @@ const SortableJobCard: React.FC<{ job: Job }> = ({ job }) => {
   );
 };
 
+const DroppableColumn: React.FC<{ 
+  column: { id: string; title: string; color: string; count: number };
+  jobs: Job[];
+  children: React.ReactNode;
+}> = ({ column, jobs, children }) => {
+  return (
+    <SortableContext items={jobs.map(job => job.id)} strategy={verticalListSortingStrategy}>
+      <div
+        className={`${column.color} rounded-lg p-4 min-h-[600px]`}
+        data-column-id={column.id}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-gray-900">{column.title}</h3>
+          <Badge variant="secondary">{column.count}</Badge>
+        </div>
+        
+        <div className="space-y-3 min-h-[500px]">
+          {children}
+        </div>
+      </div>
+    </SortableContext>
+  );
+};
+
 export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = false }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeJob, setActiveJob] = useState<Job | null>(null);
@@ -169,6 +194,8 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
     { id: 'offer', title: 'Offre', color: 'bg-green-100', count: jobs.offer.length },
   ];
 
+  const validColumnIds = columns.map(col => col.id);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -204,22 +231,49 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
     }
 
     const jobId = active.id as string;
-    const targetColumnId = over.id as string;
+    let targetColumnId = over.id as string;
     
+    // Si on drop sur une carte, on trouve la colonne parente
     const result = findJobAndColumn(jobId);
-    if (!result || result.columnId === targetColumnId) {
+    if (!result) {
       setActiveJob(null);
       return;
     }
 
-    // Move job to new column
+    // Vérifier si on drop sur une colonne valide
+    if (!validColumnIds.includes(targetColumnId)) {
+      // Si on drop sur une carte, trouver la colonne qui contient cette carte
+      const overResult = findJobAndColumn(targetColumnId);
+      if (overResult) {
+        targetColumnId = overResult.columnId;
+      } else {
+        setActiveJob(null);
+        return;
+      }
+    }
+
+    // Si c'est la même colonne, ne rien faire
+    if (result.columnId === targetColumnId) {
+      setActiveJob(null);
+      return;
+    }
+
+    console.log(`Moving job ${jobId} from ${result.columnId} to ${targetColumnId}`);
+
+    // Déplacer le job vers la nouvelle colonne
     setJobs(prev => {
       const newJobs = { ...prev };
       
-      // Remove job from source column
+      // Vérifier que les colonnes existent
+      if (!newJobs[result.columnId] || !newJobs[targetColumnId]) {
+        console.error('Invalid column:', result.columnId, targetColumnId);
+        return prev;
+      }
+      
+      // Retirer le job de la colonne source
       newJobs[result.columnId] = newJobs[result.columnId].filter(job => job.id !== jobId);
       
-      // Add job to target column
+      // Ajouter le job à la colonne de destination
       newJobs[targetColumnId] = [...newJobs[targetColumnId], result.job];
       
       return newJobs;
@@ -289,57 +343,11 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           {columns.map(column => (
-            <SortableContext key={column.id} items={jobs[column.id].map(job => job.id)} strategy={verticalListSortingStrategy}>
-              <div
-                className={`${column.color} rounded-lg p-4 min-h-[600px]`}
-                data-column-id={column.id}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-gray-900">{column.title}</h3>
-                  <Badge variant="secondary">{column.count}</Badge>
-                </div>
-                
-                <div
-                  className="space-y-3 min-h-[500px] relative"
-                  style={{ 
-                    minHeight: '500px',
-                    border: '2px dashed transparent',
-                  }}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    e.currentTarget.style.border = '2px dashed #a4007c';
-                  }}
-                  onDragLeave={(e) => {
-                    e.currentTarget.style.border = '2px dashed transparent';
-                  }}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    e.currentTarget.style.border = '2px dashed transparent';
-                  }}
-                >
-                  {jobs[column.id].map(job => (
-                    <SortableJobCard key={job.id} job={job} />
-                  ))}
-                  
-                  {/* Drop zone overlay */}
-                  <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      zIndex: -1,
-                    }}
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                    }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      const targetColumnId = column.id;
-                      // Handle drop logic here if needed
-                    }}
-                    data-droppable-id={column.id}
-                  />
-                </div>
-              </div>
-            </SortableContext>
+            <DroppableColumn key={column.id} column={column} jobs={jobs[column.id]}>
+              {jobs[column.id].map(job => (
+                <SortableJobCard key={job.id} job={job} />
+              ))}
+            </DroppableColumn>
           ))}
         </div>
 
