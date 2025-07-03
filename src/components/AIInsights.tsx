@@ -22,7 +22,7 @@ export const AIInsights = () => {
       title: 'Augmentez votre rythme de candidatures',
       description: 'Basé sur vos données, vous devriez postuler à 2 postes par semaine pour décrocher 1 entretien par semaine.',
       action: 'Voir les opportunités',
-      actionUrl: '#'
+      actionUrl: 'https://match.anthea-rh.com/'
     },
     {
       priority: 'medium',
@@ -104,7 +104,13 @@ export const AIInsights = () => {
                 size="sm"
                 className="w-full border-[#a4007c] text-[#a4007c] hover:bg-[#a4007c] hover:text-white"
               >
-                <Link to={rec.actionUrl}>{rec.action}</Link>
+                {rec.actionUrl.startsWith('http') ? (
+                  <a href={rec.actionUrl} target="_blank" rel="noopener noreferrer">
+                    {rec.action}
+                  </a>
+                ) : (
+                  <Link to={rec.actionUrl}>{rec.action}</Link>
+                )}
               </Button>
             </CardContent>
           </Card>
