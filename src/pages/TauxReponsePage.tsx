@@ -3,12 +3,13 @@ import { Header } from '@/components/Header';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { initialResponses } from '@/data/responses';
 import { useJobs } from '@/hooks/useJobs';
+import { useResponses } from '@/hooks/useResponses';
 
 const TauxReponsePage = () => {
   const { jobs } = useJobs();
-  const now = new Date('2025-01-03');
+  const { responses } = useResponses();
+  const now = new Date();
   const allJobs = Object.values(jobs).flat();
 
   const diffDays = (dateStr: string) => {
@@ -17,23 +18,23 @@ const TauxReponsePage = () => {
 
   const counts = {
     day: {
-      responses: initialResponses.filter(r => diffDays(r.date) <= 1).length,
+      responses: responses.filter(r => diffDays(r.date) <= 1).length,
       sent: allJobs.filter(j => diffDays(j.dateAdded) <= 1).length,
     },
     week: {
-      responses: initialResponses.filter(r => diffDays(r.date) <= 7).length,
+      responses: responses.filter(r => diffDays(r.date) <= 7).length,
       sent: allJobs.filter(j => diffDays(j.dateAdded) <= 7).length,
     },
     month: {
-      responses: initialResponses.filter(r => diffDays(r.date) <= 30).length,
+      responses: responses.filter(r => diffDays(r.date) <= 30).length,
       sent: allJobs.filter(j => diffDays(j.dateAdded) <= 30).length,
     },
     threeMonths: {
-      responses: initialResponses.filter(r => diffDays(r.date) <= 90).length,
+      responses: responses.filter(r => diffDays(r.date) <= 90).length,
       sent: allJobs.filter(j => diffDays(j.dateAdded) <= 90).length,
     },
     sixMonths: {
-      responses: initialResponses.filter(r => diffDays(r.date) <= 180).length,
+      responses: responses.filter(r => diffDays(r.date) <= 180).length,
       sent: allJobs.filter(j => diffDays(j.dateAdded) <= 180).length,
     },
   } as const;
