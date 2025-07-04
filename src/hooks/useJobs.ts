@@ -1,9 +1,22 @@
-import { useState, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import { Job, initialJobs } from '@/data/jobs';
 import { uploadJson, downloadJson } from '@/integrations/supabase/storage';
 import { supabase } from '@/integrations/supabase/client';
 
-export function useJobs() {
+interface JobsContextValue {
+  jobs: Record<string, Job[]>;
+  setJobs: React.Dispatch<React.SetStateAction<Record<string, Job[]>>>;
+}
+
+const JobsContext = createContext<JobsContextValue | null>(null);
+
+function useJobsState(): JobsContextValue {
   const [jobs, setJobs] = useState<Record<string, Job[]>>(initialJobs);
 
   useEffect(() => {
@@ -36,4 +49,17 @@ export function useJobs() {
   }, [jobs]);
 
   return { jobs, setJobs };
+}
+
+export const JobsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const value = useJobsState();
+  return <JobsContext.Provider value={value}>{children}</JobsContext.Provider>;
+};
+
+export function useJobs(): JobsContextValue {
+  const context = useContext(JobsContext);
+  if (!context) {
+    throw new Error('useJobs must be used within a JobsProvider');
+  }
+  return context;
 }

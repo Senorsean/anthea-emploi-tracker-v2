@@ -15,15 +15,17 @@ import ProgressionReseauPage from "./pages/ProgressionReseauPage";
 import TauxReponsePage from "./pages/TauxReponsePage";
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
+import { JobsProvider } from "@/hooks/useJobs";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
+    <JobsProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route
@@ -106,6 +108,7 @@ const App = () => (
         Application créée par Samuel LUCAS© 2025 Conformité RGPD
       </footer>
     </TooltipProvider>
+    </JobsProvider>
   </QueryClientProvider>
 );
 
