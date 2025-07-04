@@ -3,9 +3,10 @@ import { Header } from '@/components/Header';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { initialInterviews } from '@/data/interviews';
+import { useInterviews } from '@/hooks/useInterviews';
 
 const ProgressionEntretiensPage = () => {
+  const { interviews } = useInterviews();
   const now = new Date('2025-01-03');
 
   const diffDays = (dateStr: string) => {
@@ -13,11 +14,11 @@ const ProgressionEntretiensPage = () => {
   };
 
   const counts = {
-    day: initialInterviews.filter(i => diffDays(i.date) <= 1).length,
-    week: initialInterviews.filter(i => diffDays(i.date) <= 7).length,
-    month: initialInterviews.filter(i => diffDays(i.date) <= 30).length,
-    threeMonths: initialInterviews.filter(i => diffDays(i.date) <= 90).length,
-    sixMonths: initialInterviews.filter(i => diffDays(i.date) <= 180).length,
+    day: interviews.filter(i => diffDays(i.date) <= 1).length,
+    week: interviews.filter(i => diffDays(i.date) <= 7).length,
+    month: interviews.filter(i => diffDays(i.date) <= 30).length,
+    threeMonths: interviews.filter(i => diffDays(i.date) <= 90).length,
+    sixMonths: interviews.filter(i => diffDays(i.date) <= 180).length,
   };
 
   const targets = {

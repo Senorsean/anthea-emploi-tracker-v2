@@ -10,6 +10,7 @@ import { AddJobModal } from './AddJobModal';
 import { Job, initialJobs } from '@/data/jobs';
 import { uploadJson, downloadJson } from '@/integrations/supabase/storage';
 import { supabase } from '@/integrations/supabase/client';
+import { useInterviews } from '@/hooks/useInterviews';
 import {
   DndContext,
   DragEndEvent,
@@ -139,6 +140,7 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
   const [activeJob, setActiveJob] = useState<Job | null>(null);
   const [editJob, setEditJob] = useState<{ data: Job; columnId: string } | null>(null);
   const [jobs, setJobs] = useState<Record<string, Job[]>>(initialJobs);
+  const { setInterviews } = useInterviews();
 
   useEffect(() => {
     const saved = localStorage.getItem('jobs');
@@ -261,6 +263,13 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
       
       // Ajouter le job à la colonne de destination
       newJobs[targetColumnId] = [...newJobs[targetColumnId], result.job];
+
+      if (targetColumnId === 'interview' && result.columnId !== 'interview') {
+        setInterviews(prev => [
+          ...prev,
+          { id: Date.now().toString(), date: new Date().toISOString().split('T')[0] }
+        ]);
+      }
       
       return newJobs;
     });

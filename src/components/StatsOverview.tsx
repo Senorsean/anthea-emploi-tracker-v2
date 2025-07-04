@@ -5,19 +5,41 @@ import { Progress } from '@/components/ui/progress';
 import { TrendingUp, Target, Users, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { initialResponses } from '@/data/responses';
-import { initialJobs } from '@/data/jobs';
+import { useJobs } from '@/hooks/useJobs';
+import { useContacts } from '@/hooks/useContacts';
+import { useInterviews } from '@/hooks/useInterviews';
 
 export const StatsOverview = () => {
-  const allJobs = Object.values(initialJobs).flat();
+  const { jobs } = useJobs();
+  const { contacts } = useContacts();
+  const { interviews } = useInterviews();
+
+  const allJobs = Object.values(jobs).flat();
   const responseRate = allJobs.length === 0
     ? 0
     : Math.round((initialResponses.length / allJobs.length) * 100);
+
+  const now = new Date('2025-01-03');
+  const diffDays = (dateStr: string) =>
+    (now.getTime() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24);
+  const monthInterviews = interviews.filter(i => diffDays(i.date) <= 30).length;
+  const interviewProgress = Math.min(100, Math.round((monthInterviews / 8) * 100));
+  const applicationsTarget = 30;
+  const applicationsProgress = Math.min(
+    100,
+    Math.round((allJobs.length / applicationsTarget) * 100)
+  );
+  const activeContacts = contacts.filter(c => c.status !== 'pending').length;
+  const contactsProgress = Math.min(
+    100,
+    Math.round((activeContacts / 25) * 100)
+  );
 
   const stats = [
     {
       title: 'Objectif Actuel',
       value: "Décrocher plus d'entretiens",
-      progress: 75,
+      progress: interviewProgress,
       icon: Target,
       color: 'text-[#a4007c]',
       bgColor: 'bg-[#a4007c]/10',
@@ -25,8 +47,8 @@ export const StatsOverview = () => {
     },
     {
       title: 'Candidatures Envoyées',
-      value: '23/30',
-      progress: 77,
+      value: `${allJobs.length}/${applicationsTarget}`,
+      progress: applicationsProgress,
       icon: TrendingUp,
       color: 'text-[#e3007b]',
       bgColor: 'bg-[#e3007b]/10',
@@ -43,8 +65,8 @@ export const StatsOverview = () => {
     },
     {
       title: 'Contacts Réseau',
-      value: '15 actifs',
-      progress: 60,
+      value: `${activeContacts} actifs`,
+      progress: contactsProgress,
       icon: Users,
       color: 'text-blue-600',
       bgColor: 'bg-blue-50',
