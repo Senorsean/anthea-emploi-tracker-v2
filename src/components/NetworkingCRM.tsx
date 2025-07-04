@@ -5,20 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, ExternalLink, Mail, Search, Filter } from 'lucide-react';
+import { Plus, ExternalLink, Mail, Search, Filter, Pencil, LayoutGrid, List } from 'lucide-react';
+import { initialContacts, Contact } from '@/data/contacts';
 import { AddContactModal } from './AddContactModal';
-
-interface Contact {
-  id: string;
-  name: string;
-  company: string;
-  position: string;
-  email: string;
-  linkedin?: string;
-  status: 'pending' | 'contacted' | 'replied' | 'referred';
-  dateAdded: string;
-  notes?: string;
-}
+import EditContactModal from './EditContactModal';
 
 interface NetworkingCRMProps {
   preview?: boolean;
@@ -29,49 +19,9 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [contacts, setContacts] = useState<Contact[]>([
-    {
-      id: '1',
-      name: 'Olivia Bennett',
-      company: 'Cultivated Culture',
-      position: 'Product Manager',
-      email: 'olivia@cultivatedculture.com',
-      linkedin: 'in/obennett',
-      status: 'replied',
-      dateAdded: '2025-01-02',
-      notes: 'Très intéressée par mon profil'
-    },
-    {
-      id: '2',
-      name: 'James Whitaker', 
-      company: 'Cultivated Culture',
-      position: 'Senior Product Manager',
-      email: 'james@cultivatedculture.com',
-      linkedin: 'in/james-whitaker',
-      status: 'contacted',
-      dateAdded: '2025-01-01'
-    },
-    {
-      id: '3',
-      name: 'Sofia Ramirez',
-      company: 'Cultivated Culture', 
-      position: 'Product Marketing Manager',
-      email: 'sofia@cultivatedculture.com',
-      linkedin: 'in/sofia-r',
-      status: 'replied',
-      dateAdded: '2024-12-30'
-    },
-    {
-      id: '4',
-      name: 'Marcus Chen',
-      company: 'Amazon',
-      position: 'Product Manager',
-      email: 'mchen@amazon.com',
-      linkedin: 'in/mchen',
-      status: 'pending',
-      dateAdded: '2024-12-28'
-    }
-  ]);
+  const [contacts, setContacts] = useState<Contact[]>(initialContacts);
+  const [editContact, setEditContact] = useState<Contact | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -107,8 +57,12 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
       id: Date.now().toString(),
       dateAdded: new Date().toISOString().split('T')[0]
     };
-    
+
     setContacts(prev => [newContact, ...prev]);
+  };
+
+  const updateContact = (updated: Contact) => {
+    setContacts(prev => prev.map(c => (c.id === updated.id ? updated : c)));
   };
 
   if (preview) {
@@ -143,10 +97,26 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-900">CRM de Réseautage</h2>
-        <Button onClick={() => setShowAddModal(true)} className="bg-[#e3007b] hover:bg-[#e3007b]/90">
-          <Plus className="h-4 w-4 mr-2" />
-          Ajouter un Contact
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant={viewMode === 'list' ? 'secondary' : 'outline'}
+            size="icon"
+            onClick={() => setViewMode('list')}
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={viewMode === 'grid' ? 'secondary' : 'outline'}
+            size="icon"
+            onClick={() => setViewMode('grid')}
+          >
+            <LayoutGrid className="h-4 w-4" />
+          </Button>
+          <Button onClick={() => setShowAddModal(true)} className="bg-[#e3007b] hover:bg-[#e3007b]/90">
+            <Plus className="h-4 w-4 mr-2" />
+            Ajouter un Contact
+          </Button>
+        </div>
       </div>
 
       <div className="flex gap-4 mb-6">
@@ -174,7 +144,7 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
         </Select>
       </div>
 
-      <div className="grid gap-4">
+      <div className={viewMode === 'grid' ? 'grid gap-4 sm:grid-cols-2 lg:grid-cols-3' : 'space-y-4'}>
         {filteredContacts.map(contact => (
           <Card key={contact.id} className="hover:shadow-md transition-shadow">
             <CardContent className="p-6">
@@ -221,6 +191,13 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
                   <p className="text-xs text-gray-500">
                     Ajouté le {new Date(contact.dateAdded).toLocaleDateString('fr-FR')}
                   </p>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setEditContact(contact)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -228,11 +205,23 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
         ))}
       </div>
 
-      <AddContactModal 
+      <AddContactModal
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onAdd={addContact}
       />
+
+      {editContact && (
+        <EditContactModal
+          isOpen={!!editContact}
+          onClose={() => setEditContact(null)}
+          contact={editContact}
+          onUpdate={(data) => {
+            updateContact(data);
+            setEditContact(null);
+          }}
+        />
+      )}
     </div>
   );
 };

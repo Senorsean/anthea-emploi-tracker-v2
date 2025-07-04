@@ -9,6 +9,10 @@ import NotFound from "./pages/NotFound";
 import AmeliorerEntretiensPage from "./pages/AmeliorerEntretiensPage";
 import MethodeStarPage from "./pages/MethodeStarPage";
 import RenforcezVotreReseauPage from "./pages/RenforcezVotreReseauPage";
+import ProgressionEntretiensPage from "./pages/ProgressionEntretiensPage";
+import ProgressionCandidaturesPage from "./pages/ProgressionCandidaturesPage";
+import ProgressionReseauPage from "./pages/ProgressionReseauPage";
+import TauxReponsePage from "./pages/TauxReponsePage";
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 
@@ -35,6 +39,38 @@ const App = () => (
             element={
               <RequireAuth>
                 <AmeliorerEntretiensPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/progression-entretiens"
+            element={
+              <RequireAuth>
+                <ProgressionEntretiensPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/progression-candidatures"
+            element={
+              <RequireAuth>
+                <ProgressionCandidaturesPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/progression-reseau"
+            element={
+              <RequireAuth>
+                <ProgressionReseauPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/taux-reponse"
+            element={
+              <RequireAuth>
+                <TauxReponsePage />
               </RequireAuth>
             }
           />

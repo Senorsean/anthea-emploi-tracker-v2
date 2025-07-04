@@ -7,8 +7,6 @@ import { ApplicationKanban } from '@/components/ApplicationKanban';
 import { NetworkingCRM } from '@/components/NetworkingCRM';
 import { AIInsights } from '@/components/AIInsights';
 import { GoalsModule } from '@/components/GoalsModule';
-import { JobFollowUp } from '@/components/JobFollowUp';
-import { JobInsights } from '@/components/JobInsights';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Index = () => {
@@ -16,19 +14,17 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <Header />
+      <Header onLogoClick={() => setActiveTab('overview')} />
       
       <main className="container mx-auto px-4 py-8">
         <StatsOverview />
         <ApplicationStats />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
-          <TabsList className="grid grid-cols-6 lg:w-2/3 mx-auto mb-8">
+          <TabsList className="grid grid-cols-4 lg:w-1/2 mx-auto mb-8">
             <TabsTrigger value="overview" className="text-sm">Vue d'ensemble</TabsTrigger>
             <TabsTrigger value="applications" className="text-sm">Candidatures</TabsTrigger>
             <TabsTrigger value="network" className="text-sm">Réseau</TabsTrigger>
-            <TabsTrigger value="followup" className="text-sm">Suivi</TabsTrigger>
-            <TabsTrigger value="insights" className="text-sm">Analyses</TabsTrigger>
             <TabsTrigger value="goals" className="text-sm">Objectifs</TabsTrigger>
           </TabsList>
 
@@ -52,14 +48,6 @@ const Index = () => {
 
           <TabsContent value="network">
             <NetworkingCRM />
-          </TabsContent>
-
-          <TabsContent value="followup">
-            <JobFollowUp />
-          </TabsContent>
-
-          <TabsContent value="insights">
-            <JobInsights />
           </TabsContent>
 
           <TabsContent value="goals">
