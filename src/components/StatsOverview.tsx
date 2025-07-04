@@ -1,82 +1,125 @@
 
 import React from 'react';
+import jsPDF from 'jspdf';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, Users, Target, CheckCircle } from 'lucide-react';
 import { useStats } from '@/hooks/useStats';
 import { Button } from '@/components/ui/button';
 
+function generateInsights(stats: ReturnType<typeof useStats>) {
+  const insights: string[] = [];
+  const { conversionRates, jobs, timeframes } = stats;
+
+  if (conversionRates.appliedToScreening < 0.2 && jobs.applied > 5) {
+    insights.push(
+      `Taux de screening faible : seulement ${Math.round(
+        conversionRates.appliedToScreening * 100,
+      )}% de vos candidatures passent au screening.`,
+    );
+  }
+
+  if (conversionRates.screeningToInterview > 0.5) {
+    insights.push(
+      `Excellent taux d'entretien : ${Math.round(
+        conversionRates.screeningToInterview * 100,
+      )}% de vos screenings se transforment en entretiens.`,
+    );
+  }
+
+  if (timeframes.week.applications < 3) {
+    insights.push(
+      `Augmentez votre rythme : seulement ${timeframes.week.applications} candidatures cette semaine.`,
+    );
+  }
+
+  if (jobs.interview > 0 && conversionRates.interviewToFinal < 0.3) {
+    insights.push(
+      `Améliorez vos entretiens : ${Math.round(
+        conversionRates.interviewToFinal * 100,
+      )}% de vos entretiens passent en finale.`,
+    );
+  }
+
+  if (insights.length === 0) {
+    insights.push(
+      "Continuez vos efforts : votre recherche d'emploi progresse bien.",
+    );
+  }
+
+  return insights;
+}
+
 export const StatsOverview = () => {
   const stats = useStats();
 
   const handleExport = () => {
-    const cardHtml = cards
-      .map((card) => {
-        const badge =
-          card.title === 'Entretiens ce Mois'
-            ? `<div class="badge ${
-                stats.goals?.interviewsProgress >= 100
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-gray-100 text-gray-800'
-              }">${
-                stats.goals?.interviewsProgress || 0
-              }% de l'objectif</div>`
-            : '';
-        return `<div class="card">
-            <div class="card-header">
-              <span class="card-title">${card.title}</span>
-              <span class="icon ${card.bgColor} ${card.color}">●</span>
-            </div>
-            <div class="value">${card.value}</div>
-            ${badge}
-          </div>`;
-      })
-      .join('');
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text('Rapport de Statistiques', 105, 15, { align: 'center' });
 
-    const html = `<!DOCTYPE html>
-      <html lang="fr">
-        <head>
-          <meta charset="UTF-8" />
-          <title>Rapport de Statistiques</title>
-          <style>
-            body { font-family: Arial, sans-serif; background: #f9fafb; color: #111827; padding: 24px; }
-            h1 { text-align: center; color: #a4007c; margin-bottom: 24px; }
-            .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-            .card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-            .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-            .card-title { font-size: 14px; color: #4b5563; }
-            .icon { border-radius: 8px; padding: 4px; color: #fff; font-size: 12px; }
-            .value { font-size: 24px; font-weight: 700; color: #111827; }
-            .badge { display: inline-block; border-radius: 9999px; padding: 2px 6px; font-size: 12px; }
-            .bg-blue-50 { background-color: #eff6ff; }
-            .text-blue-600 { color: #2563eb; }
-            .bg-green-50 { background-color: #ecfdf5; }
-            .text-green-600 { color: #16a34a; }
-            .bg-purple-50 { background-color: #f5f3ff; }
-            .text-purple-600 { color: #7e22ce; }
-            .bg-orange-50 { background-color: #fff7ed; }
-            .text-orange-600 { color: #ea580c; }
-            .bg-green-100 { background-color: #d1fae5; }
-            .text-green-800 { color: #166534; }
-            .bg-gray-100 { background-color: #f3f4f6; }
-            .text-gray-800 { color: #1f2937; }
-          </style>
-        </head>
-        <body>
-          <h1>Rapport de Statistiques</h1>
-          <div class="grid">${cardHtml}</div>
-        </body>
-      </html>`;
+    const insights = generateInsights(stats);
+    doc.setFontSize(12);
+    let y = 25;
+    insights.forEach((line) => {
+      doc.text(`- ${line}`, 10, y);
+      y += 6;
+    });
 
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'rapport.html';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    y += 4;
+    doc.text('Statistiques générales', 10, y);
+    y += 6;
+    cards.forEach((card) => {
+      const progress =
+        card.title === 'Entretiens ce Mois'
+          ? ` (${stats.goals?.interviewsProgress || 0}% de l\'objectif)`
+          : '';
+      doc.text(`${card.title}: ${card.value}${progress}`, 10, y);
+      y += 6;
+    });
+
+    y += 10;
+    doc.text('Répartition des candidatures', 10, y);
+    y += 2;
+    const stages = [
+      'Ciblées',
+      'Envoyées',
+      'Screening',
+      'Entretien',
+      'Finale',
+      'Offre',
+    ];
+    const values = [
+      stats.jobs.targeted,
+      stats.jobs.applied,
+      stats.jobs.screening,
+      stats.jobs.interview,
+      stats.jobs.final,
+      stats.jobs.offer,
+    ];
+    const max = Math.max(...values, 1);
+    const chartHeight = 40;
+    const barWidth = 20;
+    const gap = 4;
+    const startX = 10;
+    const startY = y + chartHeight;
+
+    values.forEach((val, i) => {
+      const barHeight = (val / max) * chartHeight;
+      const x = startX + i * (barWidth + gap);
+      doc.setFillColor('#a4007c');
+      doc.rect(x, startY - barHeight, barWidth, barHeight, 'F');
+      doc.text(String(val), x + barWidth / 2, startY - barHeight - 2, {
+        align: 'center',
+      });
+      const pct = stats.jobs.total
+        ? Math.round((val / stats.jobs.total) * 100)
+        : 0;
+      doc.text(`${pct}%`, x + barWidth / 2, startY + 6, { align: 'center' });
+      doc.text(stages[i], x + barWidth / 2, startY + 12, { align: 'center' });
+    });
+
+    doc.save('rapport.pdf');
   };
 
   const cards = [
