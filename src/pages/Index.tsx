@@ -7,6 +7,7 @@ import { ApplicationKanban } from '@/components/ApplicationKanban';
 import { NetworkingCRM } from '@/components/NetworkingCRM';
 import { AIInsights } from '@/components/AIInsights';
 import { GoalsModule } from '@/components/GoalsModule';
+import WebzinesAnthea from '@/components/WebzinesAnthea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Index = () => {
@@ -40,6 +41,7 @@ const Index = () => {
                 onPreviewClick={() => setActiveTab('network')}
               />
             </div>
+            <WebzinesAnthea />
           </TabsContent>
 
           <TabsContent value="applications">
