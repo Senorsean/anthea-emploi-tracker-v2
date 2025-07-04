@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,8 +7,9 @@ import { Plus, ExternalLink, Calendar, Building, Upload, Info, Lightbulb } from 
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Link } from 'react-router-dom';
 import { AddJobModal } from './AddJobModal';
-import { Job, initialJobs } from '@/data/jobs';
-import { uploadJson, downloadJson } from '@/integrations/supabase/storage';
+import { Job } from '@/data/jobs';
+import { useJobs } from '@/hooks/useJobs';
+import { uploadJson } from '@/integrations/supabase/storage';
 import { supabase } from '@/integrations/supabase/client';
 import { useInterviews } from '@/hooks/useInterviews';
 import {
@@ -139,39 +140,9 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeJob, setActiveJob] = useState<Job | null>(null);
   const [editJob, setEditJob] = useState<{ data: Job; columnId: string } | null>(null);
-  const [jobs, setJobs] = useState<Record<string, Job[]>>(initialJobs);
+  const { jobs, setJobs } = useJobs();
   const { setInterviews } = useInterviews();
 
-  useEffect(() => {
-    const saved = localStorage.getItem('jobs');
-    if (saved) {
-      try {
-        setJobs(JSON.parse(saved));
-        return; // Skip remote fetch when local data exists
-      } catch (err) {
-        console.error('Failed to parse saved jobs', err);
-      }
-    }
-    const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await downloadJson<Record<string, Job[]>>("data-emploi-tracker", `${user.id}/jobs.json`);
-      if (data) {
-        setJobs(data);
-      }
-    };
-    load();
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('jobs', JSON.stringify(jobs));
-    const save = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      await uploadJson('data-emploi-tracker', `${user.id}/jobs.json`, jobs);
-    };
-    save();
-  }, [jobs]);
 
   const columns = [
     { id: 'targeted', title: 'Ciblés', color: 'bg-gray-100', count: jobs.targeted.length },
