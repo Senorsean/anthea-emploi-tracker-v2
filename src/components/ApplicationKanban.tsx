@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, ExternalLink, Calendar, Building } from 'lucide-react';
+import { Plus, ExternalLink, Calendar, Building, Info } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { AddJobModal } from './AddJobModal';
 import { Job, initialJobs } from '@/data/jobs';
 import {
@@ -309,7 +310,16 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
     >
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900">Entonnoir de Candidatures</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-gray-900">Entonnoir de Candidatures</h2>
+            <Link
+              to="/entonnoir-candidatures"
+              className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+            >
+              <Info className="h-4 w-4" />
+              Pourquoi ce modèle ?
+            </Link>
+          </div>
           <Button onClick={() => setShowAddModal(true)} className="bg-[#a4007c] hover:bg-[#a4007c]/90">
             <Plus className="h-4 w-4 mr-2" />
             Ajouter un Poste
