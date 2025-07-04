@@ -6,6 +6,7 @@ import { ApplicationStats } from '@/components/ApplicationStats';
 import { ApplicationKanban } from '@/components/ApplicationKanban';
 import { NetworkingCRM } from '@/components/NetworkingCRM';
 import { AIInsights } from '@/components/AIInsights';
+import { OverviewFocusAreas } from '@/components/OverviewFocusAreas';
 import { GoalsModule } from '@/components/GoalsModule';
 import WebzinesAnthea from '@/components/WebzinesAnthea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -31,6 +32,7 @@ const Index = () => {
 
           <TabsContent value="overview" className="space-y-8">
             <AIInsights />
+            <OverviewFocusAreas />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               <ApplicationKanban
                 preview={true}
