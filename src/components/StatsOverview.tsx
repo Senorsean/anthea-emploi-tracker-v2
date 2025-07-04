@@ -24,18 +24,18 @@ export const StatsOverview = () => {
       bgColor: 'bg-green-50',
     },
     {
-      title: 'Réponses Reçues',
-      value: stats.timeframes?.month?.responses || 0,
-      icon: <TrendingUp className="h-4 w-4" />,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-50',
-    },
-    {
       title: 'Offres Obtenues',
       value: stats.jobs?.offer || 0,
       icon: <CheckCircle className="h-4 w-4" />,
       color: 'text-purple-600',
       bgColor: 'bg-purple-50',
+    },
+    {
+      title: 'Réponses Reçues',
+      value: stats.timeframes?.month?.responses || 0,
+      icon: <TrendingUp className="h-4 w-4" />,
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-50',
     },
   ];
 
