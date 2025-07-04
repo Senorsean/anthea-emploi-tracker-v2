@@ -206,8 +206,8 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
     { id: 'applied', title: 'Postulé', color: 'bg-blue-100', count: jobs.applied?.length || 0 },
     { id: 'screening', title: 'Screening', color: 'bg-yellow-100', count: jobs.screening?.length || 0 },
     { id: 'interview', title: 'Entretien', color: 'bg-orange-100', count: jobs.interview?.length || 0 },
-    { id: 'final', title: 'Finale', color: 'bg-purple-100', count: jobs.final?.length || 0 },
     { id: 'offer', title: 'Offre', color: 'bg-green-100', count: jobs.offer?.length || 0 },
+    { id: 'final', title: 'Finale', color: 'bg-purple-100', count: jobs.final?.length || 0 },
   ];
 
   const validColumnIds = columns.map(col => col.id);
