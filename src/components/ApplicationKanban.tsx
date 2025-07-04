@@ -200,14 +200,14 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
   const { jobs, setJobs } = useJobs();
   const { setInterviews } = useInterviews();
 
-
+  // Recalculate columns with current job counts
   const columns = [
-    { id: 'targeted', title: 'Ciblés', color: 'bg-gray-100', count: jobs.targeted.length },
-    { id: 'applied', title: 'Postulé', color: 'bg-blue-100', count: jobs.applied.length },
-    { id: 'screening', title: 'Screening', color: 'bg-yellow-100', count: jobs.screening.length },
-    { id: 'interview', title: 'Entretien', color: 'bg-orange-100', count: jobs.interview.length },
-    { id: 'final', title: 'Finale', color: 'bg-purple-100', count: jobs.final.length },
-    { id: 'offer', title: 'Offre', color: 'bg-green-100', count: jobs.offer.length },
+    { id: 'targeted', title: 'Ciblés', color: 'bg-gray-100', count: jobs.targeted?.length || 0 },
+    { id: 'applied', title: 'Postulé', color: 'bg-blue-100', count: jobs.applied?.length || 0 },
+    { id: 'screening', title: 'Screening', color: 'bg-yellow-100', count: jobs.screening?.length || 0 },
+    { id: 'interview', title: 'Entretien', color: 'bg-orange-100', count: jobs.interview?.length || 0 },
+    { id: 'final', title: 'Finale', color: 'bg-purple-100', count: jobs.final?.length || 0 },
+    { id: 'offer', title: 'Offre', color: 'bg-green-100', count: jobs.offer?.length || 0 },
   ];
 
   const validColumnIds = columns.map(col => col.id);
@@ -353,30 +353,36 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
     await uploadJson('data-emploi-tracker', `${user.id}/jobs.json`, jobs);
   };
 
+  // Calculate total jobs for preview
+  const totalJobs = Object.values(jobs).flat().length;
+
   if (preview) {
     return (
       <Card role="button" className="h-96 cursor-pointer" onClick={onPreviewClick}>
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center justify-between">
             <span>Entonnoir de Candidatures</span>
-            <Badge variant="secondary">{Object.values(jobs).flat().length} postes</Badge>
+            <Badge variant="secondary">{totalJobs} postes</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 md:grid-cols-6 gap-4 h-full">
-            {columns.map(column => (
-              <div key={column.id} className={`${column.color} rounded-lg p-3`}>
-                <h4 className="font-medium text-sm mb-2">{column.title}</h4>
-                <div className="space-y-2">
-                  {jobs[column.id].slice(0, 2).map(job => (
-                    <div key={job.id} className="bg-white p-2 rounded shadow-sm">
-                      <p className="font-medium text-xs truncate">{job.title}</p>
-                      <p className="text-xs text-gray-600 truncate">{job.company}</p>
-                    </div>
-                  ))}
+            {columns.map(column => {
+              const columnJobs = jobs[column.id] || [];
+              return (
+                <div key={column.id} className={`${column.color} rounded-lg p-3`}>
+                  <h4 className="font-medium text-sm mb-2">{column.title}</h4>
+                  <div className="space-y-2">
+                    {columnJobs.slice(0, 2).map(job => (
+                      <div key={job.id} className="bg-white p-2 rounded shadow-sm">
+                        <p className="font-medium text-xs truncate">{job.title}</p>
+                        <p className="text-xs text-gray-600 truncate">{job.company}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </CardContent>
       </Card>
@@ -448,20 +454,23 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-          {columns.map(column => (
-            <DroppableColumn key={column.id} column={column} jobs={jobs[column.id]}>
-              {jobs[column.id].map(job => (
-                <SortableJobCard
-                  key={job.id}
-                  job={job}
-                  selected={selectedJobIds.includes(job.id)}
-                  onSelectChange={(checked) => handleSelect(job.id, checked)}
-                  onDelete={() => deleteJobs([job.id])}
-                  onDoubleClick={() => setEditJob({ data: job, columnId: column.id })}
-                />
-              ))}
-            </DroppableColumn>
-          ))}
+          {columns.map(column => {
+            const columnJobs = jobs[column.id] || [];
+            return (
+              <DroppableColumn key={column.id} column={column} jobs={columnJobs}>
+                {columnJobs.map(job => (
+                  <SortableJobCard
+                    key={job.id}
+                    job={job}
+                    selected={selectedJobIds.includes(job.id)}
+                    onSelectChange={(checked) => handleSelect(job.id, checked)}
+                    onDelete={() => deleteJobs([job.id])}
+                    onDoubleClick={() => setEditJob({ data: job, columnId: column.id })}
+                  />
+                ))}
+              </DroppableColumn>
+            );
+          })}
         </div>
 
         <DragOverlay>
