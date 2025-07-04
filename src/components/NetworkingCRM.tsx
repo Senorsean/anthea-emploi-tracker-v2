@@ -5,7 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, ExternalLink, Mail, Search, Filter, Pencil, LayoutGrid, List, Upload } from 'lucide-react';
+import { Plus, ExternalLink, Mail, Search, Filter, Pencil, LayoutGrid, List, Upload, Trash } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 import { Contact } from '@/data/contacts';
 import { uploadJson } from '@/integrations/supabase/storage';
 import { supabase } from '@/integrations/supabase/client';
@@ -66,6 +77,10 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
 
   const updateContact = (updated: Contact) => {
     setContacts(prev => prev.map(c => (c.id === updated.id ? updated : c)));
+  };
+
+  const deleteContact = (id: string) => {
+    setContacts(prev => prev.filter(c => c.id !== id));
   };
 
   const exportContacts = async () => {
@@ -204,13 +219,36 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
                   <p className="text-xs text-gray-500">
                     Ajouté le {new Date(contact.dateAdded).toLocaleDateString('fr-FR')}
                   </p>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setEditContact(contact)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setEditContact(contact)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Supprimer ce contact&nbsp;?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Cette action est irreversible.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Annuler</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteContact(contact.id)}>
+                            Supprimer
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
               </div>
             </CardContent>
