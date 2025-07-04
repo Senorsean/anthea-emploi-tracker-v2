@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -135,6 +135,21 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
   const [activeJob, setActiveJob] = useState<Job | null>(null);
   const [editJob, setEditJob] = useState<{ data: Job; columnId: string } | null>(null);
   const [jobs, setJobs] = useState<Record<string, Job[]>>(initialJobs);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('jobs');
+    if (saved) {
+      try {
+        setJobs(JSON.parse(saved));
+      } catch (err) {
+        console.error('Failed to parse saved jobs', err);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('jobs', JSON.stringify(jobs));
+  }, [jobs]);
 
   const columns = [
     { id: 'targeted', title: 'Ciblés', color: 'bg-gray-100', count: jobs.targeted.length },
