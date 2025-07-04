@@ -47,7 +47,14 @@ export const JobFollowUp = () => {
   ]);
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newFollowUp, setNewFollowUp] = useState({
+  const [newFollowUp, setNewFollowUp] = useState<{
+    jobTitle: string;
+    company: string;
+    type: 'email' | 'phone' | 'linkedin' | 'visit';
+    scheduledDate: string;
+    notes: string;
+    priority: 'low' | 'medium' | 'high';
+  }>({
     jobTitle: '',
     company: '',
     type: 'email',
@@ -88,7 +95,12 @@ export const JobFollowUp = () => {
     const followUp: FollowUp = {
       id: Date.now().toString(),
       jobId: Date.now().toString(),
-      ...newFollowUp,
+      jobTitle: newFollowUp.jobTitle,
+      company: newFollowUp.company,
+      type: newFollowUp.type,
+      scheduledDate: newFollowUp.scheduledDate,
+      notes: newFollowUp.notes,
+      priority: newFollowUp.priority,
       status: 'pending'
     };
     
@@ -146,7 +158,7 @@ export const JobFollowUp = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Select 
                 value={newFollowUp.type} 
-                onValueChange={(value) => setNewFollowUp({...newFollowUp, type: value})}
+                onValueChange={(value: 'email' | 'phone' | 'linkedin' | 'visit') => setNewFollowUp({...newFollowUp, type: value})}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -167,7 +179,7 @@ export const JobFollowUp = () => {
               
               <Select 
                 value={newFollowUp.priority} 
-                onValueChange={(value) => setNewFollowUp({...newFollowUp, priority: value})}
+                onValueChange={(value: 'low' | 'medium' | 'high') => setNewFollowUp({...newFollowUp, priority: value})}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -267,4 +279,32 @@ export const JobFollowUp = () => {
       </div>
     </div>
   );
+
+  function getStatusColor(status: string) {
+    switch (status) {
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'overdue': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  function getPriorityColor(priority: string) {
+    switch (priority) {
+      case 'high': return 'bg-red-100 text-red-800';
+      case 'medium': return 'bg-yellow-100 text-yellow-800';
+      case 'low': return 'bg-green-100 text-green-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  }
+
+  function getTypeIcon(type: string) {
+    switch (type) {
+      case 'email': return '📧';
+      case 'phone': return '📞';
+      case 'linkedin': return '💼';
+      case 'visit': return '🏢';
+      default: return '📋';
+    }
+  }
 };
