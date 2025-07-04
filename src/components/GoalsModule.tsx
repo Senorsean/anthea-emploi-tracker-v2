@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Target, TrendingUp, Calendar, CheckCircle, AlertCircle, Pencil, Plus, Trash } from 'lucide-react';
+import { Target, TrendingUp, Calendar, CheckCircle, AlertCircle, Pencil, Plus, Trash, Upload } from 'lucide-react';
 import type { WeeklyAction } from '@/data/weeklyActions';
 import { initialWeeklyActions, actionTemplates } from '@/data/weeklyActions';
+import { uploadJson } from '@/integrations/supabase/storage';
 import AddWeeklyActionModal from './AddWeeklyActionModal';
 
 export const GoalsModule = () => {
@@ -75,6 +76,10 @@ export const GoalsModule = () => {
 
   const deleteAction = (id: string) => {
     setWeeklyActions(prev => prev.filter(a => a.id !== id));
+  };
+
+  const exportWeeklyActions = async () => {
+    await uploadJson('data-emploi-tracker', 'weekly-actions.json', weeklyActions);
   };
 
   const getStatusIcon = (status: string) => {
@@ -220,9 +225,15 @@ export const GoalsModule = () => {
               ))}
             </div>
             
-            <Button className="w-full mt-4 bg-[#a4007c] hover:bg-[#a4007c]/90">
-              Mettre à jour mon plan d'action
-            </Button>
+            <div className="flex gap-2 mt-4">
+              <Button className="flex-1 bg-[#a4007c] hover:bg-[#a4007c]/90">
+                Mettre à jour mon plan d'action
+              </Button>
+              <Button variant="outline" onClick={exportWeeklyActions} className="flex items-center gap-1">
+                <Upload className="h-4 w-4" />
+                Sauvegarder
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
