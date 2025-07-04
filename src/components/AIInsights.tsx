@@ -4,40 +4,73 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Brain, TrendingUp, AlertTriangle, Target, Lightbulb, ExternalLink } from 'lucide-react';
+import { Brain, TrendingUp, AlertTriangle, Lightbulb, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { initialJobs } from '@/data/jobs';
+import { calculateConversionRates, detectBottleneck, computeRecommendedApplications, countRecentApplications, ConversionRates } from '@/lib/analysis';
 
 export const AIInsights = () => {
-  const bottleneck = {
-    type: 'Interview Success Rate',
-    description:
-      "Votre taux de succès en entretien est 50% plus bas que recommandé. Concentrez-vous sur l'amélioration pour débloquer votre recherche d'emploi.",
-    actionText: 'Améliorer mes entretiens',
-    actionUrl: '/ameliorer-entretiens',
+  const now = new Date('2025-01-03');
+  const counts = {
+    targeted: initialJobs.targeted.length,
+    applied: initialJobs.applied.length,
+    screening: initialJobs.screening.length,
+    interview: initialJobs.interview.length,
+    final: initialJobs.final.length,
+    offer: initialJobs.offer.length,
   };
+
+  const rates = calculateConversionRates(counts);
+  const bottleneckInfo = detectBottleneck(rates);
+
+  const stageLabels: Record<keyof ConversionRates, string> = {
+    targetedToApplied: 'Ciblés → Postulé',
+    appliedToScreening: 'Postulé → Screening',
+    screeningToInterview: 'Screening → Entretien',
+    interviewToFinal: 'Entretien → Finale',
+    finalToOffer: 'Finale → Offre',
+  };
+
+  const allJobDates = Object.values(initialJobs).flat().map(j => j.dateAdded);
+  const weeklyApps = countRecentApplications(allJobDates, 7, now);
+  const additionalApps = computeRecommendedApplications(weeklyApps, rates.screeningToInterview || 0.2);
+
+  const bottleneck = bottleneckInfo
+    ? {
+        type: stageLabels[bottleneckInfo.stage],
+        description: `Votre taux de conversion est de ${(bottleneckInfo.rate * 100).toFixed(0)}%, ce qui est inférieur au seuil recommandé.`,
+        actionText: 'Voir nos conseils',
+        actionUrl: '/ameliorer-entretiens',
+      }
+    : {
+        type: 'Aucun goulot détecté',
+        description: 'Continuez sur cette lancée pour atteindre vos objectifs.',
+        actionText: 'Découvrir nos astuces',
+        actionUrl: '/ameliorer-entretiens',
+      };
 
   const recommendations = [
     {
       priority: 'high',
       title: 'Augmentez votre rythme de candidatures',
-      description: 'Basé sur vos données, vous devriez postuler à 2 postes par semaine pour décrocher 1 entretien par semaine.',
+      description: `Avec un taux de conversion de ${(rates.screeningToInterview * 100).toFixed(0)}%, ajoutez ${additionalApps} candidatures/semaine pour décrocher un entretien.`,
       action: 'Voir les opportunités',
-      actionUrl: 'https://match.anthea-rh.com/'
+      actionUrl: 'https://match.anthea-rh.com/',
     },
     {
       priority: 'medium',
       title: 'Diversifiez vos approches',
-      description: 'Seulement 38% de vos candidatures passent le screening initial. Essayez d\'optimiser vos candidatures.',
+      description: 'Analysez vos candidatures et testez de nouvelles méthodes pour augmenter vos réponses.',
       action: 'Optimiser mon CV',
-      actionUrl: 'https://cv-compass-optimizer.lovable.app/'
+      actionUrl: 'https://cv-compass-optimizer.lovable.app/',
     },
     {
       priority: 'low',
       title: 'Renforcez votre réseau',
-      description: '67% de vos entretiens aboutissent à des entretiens finaux. Votre réseau peut vous aider à décrocher plus d\'opportunités.',
+      description: 'Votre réseau peut vous aider à décrocher plus d\'opportunités.',
       action: 'Développer mon réseau',
-      actionUrl: '/renforcez-votre-reseau'
-    }
+      actionUrl: '/renforcez-votre-reseau',
+    },
   ];
 
   const getPriorityColor = (priority: string) => {
@@ -128,24 +161,30 @@ export const AIInsights = () => {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-[#a4007c] mb-1">13%</div>
+              <div className="text-2xl font-bold text-[#a4007c] mb-1">{Math.round(rates.targetedToApplied * 100)}%</div>
               <div className="text-sm text-gray-600">Taux de candidature</div>
               <div className="text-xs text-gray-500 mt-1">vs 80% ciblé</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-[#e3007b] mb-1">80%</div>
-              <div className="text-sm text-gray-600">Apps → Phone screens</div>
-              <div className="text-xs text-green-600 mt-1">Excellent!</div>
+              <div className="text-2xl font-bold text-[#e3007b] mb-1">{Math.round(rates.appliedToScreening * 100)}%</div>
+              <div className="text-sm text-gray-600">Apps → Screening</div>
+              <div className={`text-xs ${rates.appliedToScreening > 0.7 ? 'text-green-600' : 'text-orange-600'} mt-1`}>
+                {rates.appliedToScreening > 0.7 ? 'Excellent!' : 'À améliorer'}
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-[#b3d800] mb-1">50%</div>
-              <div className="text-sm text-gray-600">Phone → Entretiens</div>
-              <div className="text-xs text-orange-600 mt-1">À améliorer</div>
+              <div className="text-2xl font-bold text-[#b3d800] mb-1">{Math.round(rates.screeningToInterview * 100)}%</div>
+              <div className="text-sm text-gray-600">Screening → Entretiens</div>
+              <div className={`text-xs ${rates.screeningToInterview > 0.5 ? 'text-green-600' : 'text-orange-600'} mt-1`}>
+                {rates.screeningToInterview > 0.5 ? 'Excellent!' : 'À améliorer'}
+              </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600 mb-1">0%</div>
-              <div className="text-sm text-gray-600">Entretiens → Offres</div>
-              <div className="text-xs text-gray-500 mt-1">En cours...</div>
+              <div className="text-2xl font-bold text-gray-600 mb-1">{Math.round(rates.interviewToFinal * 100)}%</div>
+              <div className="text-sm text-gray-600">Entretiens → Offre</div>
+              <div className={`text-xs ${rates.interviewToFinal > 0.5 ? 'text-green-600' : 'text-gray-500'} mt-1`}>
+                {rates.interviewToFinal > 0.5 ? 'Excellent!' : 'En cours...'}
+              </div>
             </div>
           </div>
         </CardContent>
