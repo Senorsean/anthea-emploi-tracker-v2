@@ -23,6 +23,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { AddContactModal } from './AddContactModal';
 import EditContactModal from './EditContactModal';
 import { useContacts } from '@/hooks/useContacts';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface NetworkingCRMProps {
   preview?: boolean;
@@ -36,6 +37,7 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
   const { contacts, setContacts } = useContacts();
   const [editContact, setEditContact] = useState<Contact | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [selectedContactIds, setSelectedContactIds] = useState<string[]>([]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -79,8 +81,22 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
     setContacts(prev => prev.map(c => (c.id === updated.id ? updated : c)));
   };
 
+  const handleSelect = (id: string, checked: boolean) => {
+    setSelectedContactIds(prev => {
+      if (checked) {
+        return prev.includes(id) ? prev : [...prev, id];
+      }
+      return prev.filter(c => c !== id);
+    });
+  };
+
+  const deleteContacts = (ids: string[]) => {
+    setContacts(prev => prev.filter(c => !ids.includes(c.id)));
+    setSelectedContactIds(prev => prev.filter(id => !ids.includes(id)));
+  };
+
   const deleteContact = (id: string) => {
-    setContacts(prev => prev.filter(c => c.id !== id));
+    deleteContacts([id]);
   };
 
   const exportContacts = async () => {
@@ -140,6 +156,30 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
             <Plus className="h-4 w-4 mr-2" />
             Ajouter un Contact
           </Button>
+          {selectedContactIds.length > 0 && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" className="flex items-center gap-1">
+                  <Trash className="h-4 w-4" />
+                  Supprimer ({selectedContactIds.length})
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Supprimer les contacts sélectionnés&nbsp;?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Cette action est irreversible.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => deleteContacts(selectedContactIds)}>
+                    Supprimer
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
           <Button variant="outline" onClick={exportContacts} className="flex items-center gap-1">
             <Upload className="h-4 w-4" />
             Sauvegarder
@@ -179,6 +219,11 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
+                    <Checkbox
+                      checked={selectedContactIds.includes(contact.id)}
+                      onCheckedChange={(checked) => handleSelect(contact.id, !!checked)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
                     <h3 className="font-semibold text-lg text-gray-900">{contact.name}</h3>
                     <Badge className={`${getStatusColor(contact.status)}`}>
                       {getStatusLabel(contact.status)}
