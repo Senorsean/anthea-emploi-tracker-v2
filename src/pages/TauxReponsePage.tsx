@@ -4,11 +4,12 @@ import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { initialResponses } from '@/data/responses';
-import { initialJobs } from '@/data/jobs';
+import { useJobs } from '@/hooks/useJobs';
 
 const TauxReponsePage = () => {
+  const { jobs } = useJobs();
   const now = new Date('2025-01-03');
-  const allJobs = Object.values(initialJobs).flat();
+  const allJobs = Object.values(jobs).flat();
 
   const diffDays = (dateStr: string) => {
     return (now.getTime() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24);

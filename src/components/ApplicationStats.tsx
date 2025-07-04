@@ -1,10 +1,11 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { initialJobs } from '@/data/jobs';
+import { useJobs } from '@/hooks/useJobs';
 
 export const ApplicationStats = () => {
+  const { jobs } = useJobs();
   const now = new Date('2025-01-03');
-  const allJobs = Object.values(initialJobs).flat();
+  const allJobs = Object.values(jobs).flat();
 
   const diffDays = (dateStr: string) => {
     return (now.getTime() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24);
