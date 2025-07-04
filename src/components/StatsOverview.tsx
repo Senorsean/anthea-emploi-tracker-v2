@@ -4,19 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, Target, Users, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { initialResponses } from '@/data/responses';
+import { useResponses } from '@/hooks/useResponses';
 import { useJobs } from '@/hooks/useJobs';
 import { useContacts } from '@/hooks/useContacts';
 
 export const StatsOverview = () => {
   const { jobs } = useJobs();
   const { contacts } = useContacts();
+  const { responses } = useResponses();
 
   const appliedJobs = jobs.applied;
   const allJobs = Object.values(jobs).flat();
   const responseRate = allJobs.length === 0
     ? 0
-    : Math.round((initialResponses.length / allJobs.length) * 100);
+    : Math.round((responses.length / allJobs.length) * 100);
 
   const monthInterviews = jobs.interview.length;
   const interviewProgress = Math.min(100, Math.round((monthInterviews / 8) * 100));
