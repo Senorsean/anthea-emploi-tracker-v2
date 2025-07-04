@@ -54,7 +54,7 @@ function useJobsState(): JobsContextValue {
 
 export const JobsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const value = useJobsState();
-  return <JobsContext.Provider value={value}>{children}</JobsContext.Provider>;
+  return React.createElement(JobsContext.Provider, { value }, children);
 };
 
 export function useJobs(): JobsContextValue {
