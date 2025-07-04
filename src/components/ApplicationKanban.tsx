@@ -306,8 +306,8 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-4 h-full">
-            {columns.slice(0, 3).map(column => (
+          <div className="grid grid-cols-3 md:grid-cols-6 gap-4 h-full">
+            {columns.map(column => (
               <div key={column.id} className={`${column.color} rounded-lg p-3`}>
                 <h4 className="font-medium text-sm mb-2">{column.title}</h4>
                 <div className="space-y-2">
