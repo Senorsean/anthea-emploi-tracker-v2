@@ -6,39 +6,63 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Brain, TrendingUp, AlertTriangle, Lightbulb, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { initialJobs } from '@/data/jobs';
-import { calculateConversionRates, detectBottleneck, computeRecommendedApplications, countRecentApplications, ConversionRates } from '@/lib/analysis';
+import { useStats } from '@/hooks/useStats';
 
 export const AIInsights = () => {
-  const now = new Date('2025-01-03');
-  const counts = {
-    targeted: initialJobs.targeted.length,
-    applied: initialJobs.applied.length,
-    screening: initialJobs.screening.length,
-    interview: initialJobs.interview.length,
-    final: initialJobs.final.length,
-    offer: initialJobs.offer.length,
+  const stats = useStats();
+
+  const detectBottleneck = () => {
+    const thresholds = {
+      targetedToApplied: 0.4,
+      appliedToScreening: 0.5,
+      screeningToInterview: 0.4,
+      interviewToFinal: 0.5,
+      finalToOffer: 0.5,
+    };
+
+    const rates = stats.conversionRates;
+    let worst: { stage: string; rate: number; label: string } | null = null;
+
+    const stageLabels = {
+      targetedToApplied: 'Ciblés → Postulé',
+      appliedToScreening: 'Postulé → Screening',
+      screeningToInterview: 'Screening → Entretien',
+      interviewToFinal: 'Entretien → Finale',
+      finalToOffer: 'Finale → Offre',
+    };
+
+    Object.entries(rates).forEach(([stage, rate]) => {
+      const threshold = thresholds[stage as keyof typeof thresholds];
+      if (rate < threshold && (!worst || rate < worst.rate)) {
+        worst = { 
+          stage, 
+          rate, 
+          label: stageLabels[stage as keyof typeof stageLabels] 
+        };
+      }
+    });
+
+    return worst;
   };
 
-  const rates = calculateConversionRates(counts);
-  const bottleneckInfo = detectBottleneck(rates);
+  const bottleneck = detectBottleneck();
 
-  const stageLabels: Record<keyof ConversionRates, string> = {
-    targetedToApplied: 'Ciblés → Postulé',
-    appliedToScreening: 'Postulé → Screening',
-    screeningToInterview: 'Screening → Entretien',
-    interviewToFinal: 'Entretien → Finale',
-    finalToOffer: 'Finale → Offre',
+  const computeRecommendedApplications = () => {
+    const successRate = stats.conversionRates?.screeningToInterview || 0.2;
+    const weeklyApps = stats.timeframes?.week?.applications || 0;
+    const goalInterviews = 1;
+    
+    if (successRate <= 0) return goalInterviews * 5;
+    const needed = goalInterviews / successRate;
+    return Math.max(0, Math.ceil(needed - weeklyApps));
   };
 
-  const allJobDates = Object.values(initialJobs).flat().map(j => j.dateAdded);
-  const weeklyApps = countRecentApplications(allJobDates, 7, now);
-  const additionalApps = computeRecommendedApplications(weeklyApps, rates.screeningToInterview || 0.2);
+  const additionalApps = computeRecommendedApplications();
 
-  const bottleneck = bottleneckInfo
+  const bottleneckInfo = bottleneck
     ? {
-        type: stageLabels[bottleneckInfo.stage],
-        description: `Votre taux de conversion est de ${(bottleneckInfo.rate * 100).toFixed(0)}%, ce qui est inférieur au seuil recommandé.`,
+        type: bottleneck.label,
+        description: `Votre taux de conversion est de ${(bottleneck.rate * 100).toFixed(0)}%, ce qui est inférieur au seuil recommandé.`,
         actionText: 'Voir nos conseils',
         actionUrl: '/ameliorer-entretiens',
       }
@@ -53,7 +77,7 @@ export const AIInsights = () => {
     {
       priority: 'high',
       title: 'Augmentez votre rythme de candidatures',
-      description: `Avec un taux de conversion de ${(rates.screeningToInterview * 100).toFixed(0)}%, ajoutez ${additionalApps} candidatures/semaine pour décrocher un entretien.`,
+      description: `Avec un taux de conversion de ${((stats.conversionRates?.screeningToInterview || 0) * 100).toFixed(0)}%, ajoutez ${additionalApps} candidatures/semaine pour décrocher un entretien.`,
       action: 'Voir les opportunités',
       actionUrl: 'https://match.anthea-rh.com/',
     },
@@ -96,15 +120,15 @@ export const AIInsights = () => {
         <AlertDescription className="text-red-800">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <p className="font-semibold mb-1">🚨 Goulot d'étranglement détecté: {bottleneck.type}</p>
-              <p className="text-sm mb-3">{bottleneck.description}</p>
+              <p className="font-semibold mb-1">🚨 Goulot d'étranglement détecté: {bottleneckInfo.type}</p>
+              <p className="text-sm mb-3">{bottleneckInfo.description}</p>
               <Button
                 asChild
                 size="sm"
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
-                <Link to={bottleneck.actionUrl}>
-                  {bottleneck.actionText}
+                <Link to={bottleneckInfo.actionUrl}>
+                  {bottleneckInfo.actionText}
                   <ExternalLink className="h-3 w-3 ml-1" />
                 </Link>
               </Button>
@@ -161,29 +185,37 @@ export const AIInsights = () => {
         <CardContent>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-[#a4007c] mb-1">{Math.round(rates.targetedToApplied * 100)}%</div>
+              <div className="text-2xl font-bold text-[#a4007c] mb-1">
+                {Math.round((stats.conversionRates?.targetedToApplied || 0) * 100)}%
+              </div>
               <div className="text-sm text-gray-600">Taux de candidature</div>
               <div className="text-xs text-gray-500 mt-1">vs 80% ciblé</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-[#e3007b] mb-1">{Math.round(rates.appliedToScreening * 100)}%</div>
+              <div className="text-2xl font-bold text-[#e3007b] mb-1">
+                {Math.round((stats.conversionRates?.appliedToScreening || 0) * 100)}%
+              </div>
               <div className="text-sm text-gray-600">Apps → Screening</div>
-              <div className={`text-xs ${rates.appliedToScreening > 0.7 ? 'text-green-600' : 'text-orange-600'} mt-1`}>
-                {rates.appliedToScreening > 0.7 ? 'Excellent!' : 'À améliorer'}
+              <div className={`text-xs ${(stats.conversionRates?.appliedToScreening || 0) > 0.7 ? 'text-green-600' : 'text-orange-600'} mt-1`}>
+                {(stats.conversionRates?.appliedToScreening || 0) > 0.7 ? 'Excellent!' : 'À améliorer'}
               </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-[#b3d800] mb-1">{Math.round(rates.screeningToInterview * 100)}%</div>
+              <div className="text-2xl font-bold text-[#b3d800] mb-1">
+                {Math.round((stats.conversionRates?.screeningToInterview || 0) * 100)}%
+              </div>
               <div className="text-sm text-gray-600">Screening → Entretiens</div>
-              <div className={`text-xs ${rates.screeningToInterview > 0.5 ? 'text-green-600' : 'text-orange-600'} mt-1`}>
-                {rates.screeningToInterview > 0.5 ? 'Excellent!' : 'À améliorer'}
+              <div className={`text-xs ${(stats.conversionRates?.screeningToInterview || 0) > 0.5 ? 'text-green-600' : 'text-orange-600'} mt-1`}>
+                {(stats.conversionRates?.screeningToInterview || 0) > 0.5 ? 'Excellent!' : 'À améliorer'}
               </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-600 mb-1">{Math.round(rates.interviewToFinal * 100)}%</div>
+              <div className="text-2xl font-bold text-gray-600 mb-1">
+                {Math.round((stats.conversionRates?.interviewToFinal || 0) * 100)}%
+              </div>
               <div className="text-sm text-gray-600">Entretiens → Offre</div>
-              <div className={`text-xs ${rates.interviewToFinal > 0.5 ? 'text-green-600' : 'text-gray-500'} mt-1`}>
-                {rates.interviewToFinal > 0.5 ? 'Excellent!' : 'En cours...'}
+              <div className={`text-xs ${(stats.conversionRates?.interviewToFinal || 0) > 0.5 ? 'text-green-600' : 'text-gray-500'} mt-1`}>
+                {(stats.conversionRates?.interviewToFinal || 0) > 0.5 ? 'Excellent!' : 'En cours...'}
               </div>
             </div>
           </div>
