@@ -4,17 +4,17 @@ import { useJobs } from '@/hooks/useJobs';
 
 export const ApplicationStats = () => {
   const { jobs } = useJobs();
-  const now = new Date('2025-01-03');
-  const allJobs = Object.values(jobs).flat();
+  const now = new Date();
+  const appliedJobs = jobs.applied;
 
   const diffDays = (dateStr: string) => {
     return (now.getTime() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24);
   };
 
-  const week = allJobs.filter(job => diffDays(job.dateAdded) <= 7).length;
-  const month = allJobs.filter(job => diffDays(job.dateAdded) <= 30).length;
-  const threeMonths = allJobs.filter(job => diffDays(job.dateAdded) <= 90).length;
-  const sixMonths = allJobs.filter(job => diffDays(job.dateAdded) <= 180).length;
+  const week = appliedJobs.filter(job => diffDays(job.dateAdded) <= 7).length;
+  const month = appliedJobs.filter(job => diffDays(job.dateAdded) <= 30).length;
+  const threeMonths = appliedJobs.filter(job => diffDays(job.dateAdded) <= 90).length;
+  const sixMonths = appliedJobs.filter(job => diffDays(job.dateAdded) <= 180).length;
 
   const stats = [
     { label: 'Cette semaine', value: week },
