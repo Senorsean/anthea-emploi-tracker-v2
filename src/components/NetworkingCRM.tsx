@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, ExternalLink, Mail, Search, Filter, Pencil, LayoutGrid, List, Upload } from 'lucide-react';
 import { initialContacts, Contact } from '@/data/contacts';
-import { uploadJson } from '@/integrations/supabase/storage';
+import { uploadJson, downloadJson } from '@/integrations/supabase/storage';
+import { supabase } from '@/integrations/supabase/client';
 import { AddContactModal } from './AddContactModal';
 import EditContactModal from './EditContactModal';
 
@@ -23,6 +24,25 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
   const [editContact, setEditContact] = useState<Contact | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+
+  useEffect(() => {
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await downloadJson<Contact[]>('data-emploi-tracker', `${user.id}/contacts.json`);
+      if (data) setContacts(data);
+    };
+    load();
+  }, []);
+
+  useEffect(() => {
+    const save = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await uploadJson('data-emploi-tracker', `${user.id}/contacts.json`, contacts);
+    };
+    save();
+  }, [contacts]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -67,7 +87,9 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
   };
 
   const exportContacts = async () => {
-    await uploadJson('data-emploi-tracker', 'contacts.json', contacts);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await uploadJson('data-emploi-tracker', `${user.id}/contacts.json`, contacts);
   };
 
   if (preview) {

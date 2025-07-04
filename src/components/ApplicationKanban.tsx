@@ -7,7 +7,8 @@ import { Plus, ExternalLink, Calendar, Building, Upload, Info } from 'lucide-rea
 import { Link } from 'react-router-dom';
 import { AddJobModal } from './AddJobModal';
 import { Job, initialJobs } from '@/data/jobs';
-import { uploadJson } from '@/integrations/supabase/storage';
+import { uploadJson, downloadJson } from '@/integrations/supabase/storage';
+import { supabase } from '@/integrations/supabase/client';
 import {
   DndContext,
   DragEndEvent,
@@ -147,10 +148,25 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
         console.error('Failed to parse saved jobs', err);
       }
     }
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await downloadJson<Record<string, Job[]>>("data-emploi-tracker", `${user.id}/jobs.json`);
+      if (data) {
+        setJobs(data);
+      }
+    };
+    load();
   }, []);
 
   useEffect(() => {
     localStorage.setItem('jobs', JSON.stringify(jobs));
+    const save = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      await uploadJson('data-emploi-tracker', `${user.id}/jobs.json`, jobs);
+    };
+    save();
   }, [jobs]);
 
   const columns = [
@@ -273,7 +289,9 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
   };
 
   const exportJobs = async () => {
-    await uploadJson('data-emploi-tracker', 'jobs.json', jobs);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await uploadJson('data-emploi-tracker', `${user.id}/jobs.json`, jobs);
   };
 
   if (preview) {
