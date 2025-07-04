@@ -4,9 +4,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, Users, Target, CheckCircle } from 'lucide-react';
 import { useStats } from '@/hooks/useStats';
+import { Button } from '@/components/ui/button';
 
 export const StatsOverview = () => {
   const stats = useStats();
+
+  const handleExport = () => {
+    const dataStr = JSON.stringify(stats, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'rapport.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   const cards = [
     {
@@ -40,32 +54,39 @@ export const StatsOverview = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {cards.map((card, index) => (
-        <Card key={index} className="hover:shadow-lg transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">
-              {card.title}
-            </CardTitle>
-            <div className={`${card.bgColor} ${card.color} p-2 rounded-lg`}>
-              {card.icon}
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{card.value}</div>
-            {card.title === 'Entretiens ce Mois' && (
-              <div className="mt-2">
-                <Badge 
-                  variant={stats.goals?.interviewsProgress >= 100 ? 'default' : 'secondary'}
-                  className={stats.goals?.interviewsProgress >= 100 ? 'bg-green-100 text-green-800' : ''}
-                >
-                  {stats.goals?.interviewsProgress || 0}% de l'objectif
-                </Badge>
+    <div>
+      <div className="flex justify-end mb-4">
+        <Button onClick={handleExport} className="bg-[#a4007c] hover:bg-[#a4007c]/90">
+          Exporter
+        </Button>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {cards.map((card, index) => (
+          <Card key={index} className="hover:shadow-lg transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-600">
+                {card.title}
+              </CardTitle>
+              <div className={`${card.bgColor} ${card.color} p-2 rounded-lg`}>
+                {card.icon}
               </div>
-            )}
-          </CardContent>
-        </Card>
-      ))}
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gray-900">{card.value}</div>
+              {card.title === 'Entretiens ce Mois' && (
+                <div className="mt-2">
+                  <Badge
+                    variant={stats.goals?.interviewsProgress >= 100 ? 'default' : 'secondary'}
+                    className={stats.goals?.interviewsProgress >= 100 ? 'bg-green-100 text-green-800' : ''}
+                  >
+                    {stats.goals?.interviewsProgress || 0}% de l'objectif
+                  </Badge>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };
