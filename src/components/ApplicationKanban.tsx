@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, ExternalLink, Calendar, Building, Upload, Info } from 'lucide-react';
+import { Plus, ExternalLink, Calendar, Building, Upload, Info, Lightbulb } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Link } from 'react-router-dom';
 import { AddJobModal } from './AddJobModal';
 import { Job, initialJobs } from '@/data/jobs';
@@ -346,6 +347,21 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
             <Link to="/methode-star" className="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm hover:bg-accent">
               <Info className="h-4 w-4" />
             </Link>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Lightbulb className="h-4 w-4 text-[#b3d800]" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 text-sm">
+                <p className="mb-2">
+                  Utilisez les données pour plus de contrôle et de prévisibilité. La plupart des chercheurs d'emploi suivent leur recherche d'une manière ou d'une autre. Ils n'utilisent pas ces données pour comprendre ce qui fonctionne et ce qui ne fonctionne pas.
+                </p>
+                <p>
+                  Emploi Tracker se distingue des autres outils de suivi des candidatures car il utilise les données de votre recherche pour identifier les points faibles et déterminer les actions à entreprendre pour obtenir les résultats escomptés !
+                </p>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
