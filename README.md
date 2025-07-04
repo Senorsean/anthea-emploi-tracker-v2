@@ -71,3 +71,8 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+
+## Exporter un rapport
+
+Dans la section **Statistiques**, cliquez sur **Exporter** pour télécharger un fichier `rapport.html`. Ce rapport reprend les codes couleurs et le design de l’application pour une lecture rapide et ergonomique.
+

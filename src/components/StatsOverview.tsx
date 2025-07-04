@@ -10,12 +10,69 @@ export const StatsOverview = () => {
   const stats = useStats();
 
   const handleExport = () => {
-    const dataStr = JSON.stringify(stats, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
+    const cardHtml = cards
+      .map((card) => {
+        const badge =
+          card.title === 'Entretiens ce Mois'
+            ? `<div class="badge ${
+                stats.goals?.interviewsProgress >= 100
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-gray-100 text-gray-800'
+              }">${
+                stats.goals?.interviewsProgress || 0
+              }% de l'objectif</div>`
+            : '';
+        return `<div class="card">
+            <div class="card-header">
+              <span class="card-title">${card.title}</span>
+              <span class="icon ${card.bgColor} ${card.color}">●</span>
+            </div>
+            <div class="value">${card.value}</div>
+            ${badge}
+          </div>`;
+      })
+      .join('');
+
+    const html = `<!DOCTYPE html>
+      <html lang="fr">
+        <head>
+          <meta charset="UTF-8" />
+          <title>Rapport de Statistiques</title>
+          <style>
+            body { font-family: Arial, sans-serif; background: #f9fafb; color: #111827; padding: 24px; }
+            h1 { text-align: center; color: #a4007c; margin-bottom: 24px; }
+            .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+            .card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+            .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+            .card-title { font-size: 14px; color: #4b5563; }
+            .icon { border-radius: 8px; padding: 4px; color: #fff; font-size: 12px; }
+            .value { font-size: 24px; font-weight: 700; color: #111827; }
+            .badge { display: inline-block; border-radius: 9999px; padding: 2px 6px; font-size: 12px; }
+            .bg-blue-50 { background-color: #eff6ff; }
+            .text-blue-600 { color: #2563eb; }
+            .bg-green-50 { background-color: #ecfdf5; }
+            .text-green-600 { color: #16a34a; }
+            .bg-purple-50 { background-color: #f5f3ff; }
+            .text-purple-600 { color: #7e22ce; }
+            .bg-orange-50 { background-color: #fff7ed; }
+            .text-orange-600 { color: #ea580c; }
+            .bg-green-100 { background-color: #d1fae5; }
+            .text-green-800 { color: #166534; }
+            .bg-gray-100 { background-color: #f3f4f6; }
+            .text-gray-800 { color: #1f2937; }
+          </style>
+        </head>
+        <body>
+          <h1>Rapport de Statistiques</h1>
+          <div class="grid">${cardHtml}</div>
+        </body>
+      </html>`;
+
+    const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'rapport.json';
+    link.download = 'rapport.html';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
