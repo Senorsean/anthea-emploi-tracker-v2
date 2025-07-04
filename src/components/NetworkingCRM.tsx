@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, ExternalLink, Mail, Search, Filter, Pencil, LayoutGrid, List } from 'lucide-react';
+import { Plus, ExternalLink, Mail, Search, Filter, Pencil, LayoutGrid, List, Upload } from 'lucide-react';
 import { initialContacts, Contact } from '@/data/contacts';
+import { uploadJson } from '@/integrations/supabase/storage';
 import { AddContactModal } from './AddContactModal';
 import EditContactModal from './EditContactModal';
 
@@ -65,6 +66,10 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
     setContacts(prev => prev.map(c => (c.id === updated.id ? updated : c)));
   };
 
+  const exportContacts = async () => {
+    await uploadJson('data-emploi-tracker', 'contacts.json', contacts);
+  };
+
   if (preview) {
     return (
       <Card role="button" className="h-96 cursor-pointer" onClick={onPreviewClick}>
@@ -115,6 +120,10 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
           <Button onClick={() => setShowAddModal(true)} className="bg-[#e3007b] hover:bg-[#e3007b]/90">
             <Plus className="h-4 w-4 mr-2" />
             Ajouter un Contact
+          </Button>
+          <Button variant="outline" onClick={exportContacts} className="flex items-center gap-1">
+            <Upload className="h-4 w-4" />
+            Sauvegarder
           </Button>
         </div>
       </div>

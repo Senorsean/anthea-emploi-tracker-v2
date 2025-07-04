@@ -3,9 +3,10 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, ExternalLink, Calendar, Building } from 'lucide-react';
+import { Plus, ExternalLink, Calendar, Building, Upload } from 'lucide-react';
 import { AddJobModal } from './AddJobModal';
 import { Job, initialJobs } from '@/data/jobs';
+import { uploadJson } from '@/integrations/supabase/storage';
 import {
   DndContext,
   DragEndEvent,
@@ -270,6 +271,10 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
     });
   };
 
+  const exportJobs = async () => {
+    await uploadJson('data-emploi-tracker', 'jobs.json', jobs);
+  };
+
   if (preview) {
     return (
       <Card role="button" className="h-96 cursor-pointer" onClick={onPreviewClick}>
@@ -310,10 +315,16 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">Entonnoir de Candidatures</h2>
-          <Button onClick={() => setShowAddModal(true)} className="bg-[#a4007c] hover:bg-[#a4007c]/90">
-            <Plus className="h-4 w-4 mr-2" />
-            Ajouter un Poste
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setShowAddModal(true)} className="bg-[#a4007c] hover:bg-[#a4007c]/90">
+              <Plus className="h-4 w-4 mr-2" />
+              Ajouter un Poste
+            </Button>
+            <Button variant="outline" onClick={exportJobs} className="flex items-center gap-1">
+              <Upload className="h-4 w-4" />
+              Sauvegarder
+            </Button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
