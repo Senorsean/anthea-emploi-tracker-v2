@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, ExternalLink, Calendar, Building, Upload } from 'lucide-react';
+import { Plus, ExternalLink, Calendar, Building, Upload, Info } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { AddJobModal } from './AddJobModal';
 import { Job, initialJobs } from '@/data/jobs';
 import { uploadJson } from '@/integrations/supabase/storage';
@@ -324,6 +325,9 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
               <Upload className="h-4 w-4" />
               Sauvegarder
             </Button>
+            <Link to="/methode-star" className="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm hover:bg-accent">
+              <Info className="h-4 w-4" />
+            </Link>
           </div>
         </div>
 
