@@ -7,22 +7,17 @@ import { Link } from 'react-router-dom';
 import { initialResponses } from '@/data/responses';
 import { useJobs } from '@/hooks/useJobs';
 import { useContacts } from '@/hooks/useContacts';
-import { useInterviews } from '@/hooks/useInterviews';
 
 export const StatsOverview = () => {
   const { jobs } = useJobs();
   const { contacts } = useContacts();
-  const { interviews } = useInterviews();
 
   const allJobs = Object.values(jobs).flat();
   const responseRate = allJobs.length === 0
     ? 0
     : Math.round((initialResponses.length / allJobs.length) * 100);
 
-  const now = new Date('2025-01-03');
-  const diffDays = (dateStr: string) =>
-    (now.getTime() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24);
-  const monthInterviews = interviews.filter(i => diffDays(i.date) <= 30).length;
+  const monthInterviews = jobs.interview.length;
   const interviewProgress = Math.min(100, Math.round((monthInterviews / 8) * 100));
   const applicationsTarget = 30;
   const applicationsProgress = Math.min(
