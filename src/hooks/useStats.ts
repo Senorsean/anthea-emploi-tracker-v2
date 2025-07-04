@@ -62,7 +62,40 @@ export function useStats(): CentralizedStats {
   const { jobs } = useJobs();
   const { interviews } = useInterviews();
   const { responses } = useResponses();
-  const [stats, setStats] = useState<CentralizedStats>({} as CentralizedStats);
+  
+  const [stats, setStats] = useState<CentralizedStats>({
+    jobs: {
+      targeted: 0,
+      applied: 0,
+      screening: 0,
+      interview: 0,
+      final: 0,
+      offer: 0,
+      total: 0,
+    },
+    timeframes: {
+      today: { applications: 0, interviews: 0, responses: 0 },
+      week: { applications: 0, interviews: 0, responses: 0 },
+      month: { applications: 0, interviews: 0, responses: 0 },
+      threeMonths: { applications: 0, interviews: 0, responses: 0 },
+      sixMonths: { applications: 0, interviews: 0, responses: 0 },
+    },
+    conversionRates: {
+      targetedToApplied: 0,
+      appliedToScreening: 0,
+      screeningToInterview: 0,
+      interviewToFinal: 0,
+      finalToOffer: 0,
+    },
+    goals: {
+      interviewsThisWeek: 0,
+      interviewsTarget: 2,
+      interviewsProgress: 0,
+      responsesThisWeek: 0,
+      responsesTarget: 3,
+      responsesProgress: 0,
+    },
+  });
 
   useEffect(() => {
     const now = new Date();
@@ -74,41 +107,41 @@ export function useStats(): CentralizedStats {
 
     // Job counts by stage
     const jobCounts = {
-      targeted: jobs.targeted.length,
-      applied: jobs.applied.length,
-      screening: jobs.screening.length,
-      interview: jobs.interview.length,
-      final: jobs.final.length,
-      offer: jobs.offer.length,
+      targeted: jobs.targeted?.length || 0,
+      applied: jobs.applied?.length || 0,
+      screening: jobs.screening?.length || 0,
+      interview: jobs.interview?.length || 0,
+      final: jobs.final?.length || 0,
+      offer: jobs.offer?.length || 0,
       total: allJobs.length,
     };
 
     // Time-based statistics
     const timeframes = {
       today: {
-        applications: jobs.applied.filter(job => diffDays(job.dateAdded) <= 1).length,
-        interviews: interviews.filter(interview => diffDays(interview.date) <= 1).length,
-        responses: responses.filter(response => diffDays(response.date) <= 1).length,
+        applications: jobs.applied?.filter(job => diffDays(job.dateAdded) <= 1).length || 0,
+        interviews: interviews?.filter(interview => diffDays(interview.date) <= 1).length || 0,
+        responses: responses?.filter(response => diffDays(response.date) <= 1).length || 0,
       },
       week: {
-        applications: jobs.applied.filter(job => diffDays(job.dateAdded) <= 7).length,
-        interviews: interviews.filter(interview => diffDays(interview.date) <= 7).length,
-        responses: responses.filter(response => diffDays(response.date) <= 7).length,
+        applications: jobs.applied?.filter(job => diffDays(job.dateAdded) <= 7).length || 0,
+        interviews: interviews?.filter(interview => diffDays(interview.date) <= 7).length || 0,
+        responses: responses?.filter(response => diffDays(response.date) <= 7).length || 0,
       },
       month: {
-        applications: jobs.applied.filter(job => diffDays(job.dateAdded) <= 30).length,
-        interviews: interviews.filter(interview => diffDays(interview.date) <= 30).length,
-        responses: responses.filter(response => diffDays(response.date) <= 30).length,
+        applications: jobs.applied?.filter(job => diffDays(job.dateAdded) <= 30).length || 0,
+        interviews: interviews?.filter(interview => diffDays(interview.date) <= 30).length || 0,
+        responses: responses?.filter(response => diffDays(response.date) <= 30).length || 0,
       },
       threeMonths: {
-        applications: jobs.applied.filter(job => diffDays(job.dateAdded) <= 90).length,
-        interviews: interviews.filter(interview => diffDays(interview.date) <= 90).length,
-        responses: responses.filter(response => diffDays(response.date) <= 90).length,
+        applications: jobs.applied?.filter(job => diffDays(job.dateAdded) <= 90).length || 0,
+        interviews: interviews?.filter(interview => diffDays(interview.date) <= 90).length || 0,
+        responses: responses?.filter(response => diffDays(response.date) <= 90).length || 0,
       },
       sixMonths: {
-        applications: jobs.applied.filter(job => diffDays(job.dateAdded) <= 180).length,
-        interviews: interviews.filter(interview => diffDays(interview.date) <= 180).length,
-        responses: responses.filter(response => diffDays(response.date) <= 180).length,
+        applications: jobs.applied?.filter(job => diffDays(job.dateAdded) <= 180).length || 0,
+        interviews: interviews?.filter(interview => diffDays(interview.date) <= 180).length || 0,
+        responses: responses?.filter(response => diffDays(response.date) <= 180).length || 0,
       },
     };
 

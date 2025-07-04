@@ -7,10 +7,26 @@ export const ApplicationStats = () => {
   const stats = useStats();
 
   const timeframeStats = [
-    { label: 'Cette semaine', applications: stats.timeframes?.week?.applications || 0, interviews: stats.timeframes?.week?.interviews || 0 },
-    { label: 'Ce mois', applications: stats.timeframes?.month?.applications || 0, interviews: stats.timeframes?.month?.interviews || 0 },
-    { label: '3 mois', applications: stats.timeframes?.threeMonths?.applications || 0, interviews: stats.timeframes?.threeMonths?.interviews || 0 },
-    { label: '6 mois', applications: stats.timeframes?.sixMonths?.applications || 0, interviews: stats.timeframes?.sixMonths?.interviews || 0 },
+    { 
+      label: 'Cette semaine', 
+      applications: stats.timeframes?.week?.applications || 0, 
+      interviews: stats.timeframes?.week?.interviews || 0 
+    },
+    { 
+      label: 'Ce mois', 
+      applications: stats.timeframes?.month?.applications || 0, 
+      interviews: stats.timeframes?.month?.interviews || 0 
+    },
+    { 
+      label: '3 mois', 
+      applications: stats.timeframes?.threeMonths?.applications || 0, 
+      interviews: stats.timeframes?.threeMonths?.interviews || 0 
+    },
+    { 
+      label: '6 mois', 
+      applications: stats.timeframes?.sixMonths?.applications || 0, 
+      interviews: stats.timeframes?.sixMonths?.interviews || 0 
+    },
   ];
 
   return (
