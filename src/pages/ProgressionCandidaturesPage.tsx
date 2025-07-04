@@ -3,22 +3,23 @@ import { Header } from '@/components/Header';
 import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { initialJobs } from '@/data/jobs';
+import { useJobs } from '@/hooks/useJobs';
 
 const ProgressionCandidaturesPage = () => {
-  const now = new Date('2025-01-03');
-  const allJobs = Object.values(initialJobs).flat();
+  const { jobs } = useJobs();
+  const now = new Date();
+  const appliedJobs = jobs.applied;
 
   const diffDays = (dateStr: string) => {
     return (now.getTime() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24);
   };
 
   const counts = {
-    day: allJobs.filter(job => diffDays(job.dateAdded) <= 1).length,
-    week: allJobs.filter(job => diffDays(job.dateAdded) <= 7).length,
-    month: allJobs.filter(job => diffDays(job.dateAdded) <= 30).length,
-    threeMonths: allJobs.filter(job => diffDays(job.dateAdded) <= 90).length,
-    sixMonths: allJobs.filter(job => diffDays(job.dateAdded) <= 180).length,
+    day: appliedJobs.filter(job => diffDays(job.dateAdded) <= 1).length,
+    week: appliedJobs.filter(job => diffDays(job.dateAdded) <= 7).length,
+    month: appliedJobs.filter(job => diffDays(job.dateAdded) <= 30).length,
+    threeMonths: appliedJobs.filter(job => diffDays(job.dateAdded) <= 90).length,
+    sixMonths: appliedJobs.filter(job => diffDays(job.dateAdded) <= 180).length,
   };
 
   const targets = {

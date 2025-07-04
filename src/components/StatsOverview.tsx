@@ -12,6 +12,7 @@ export const StatsOverview = () => {
   const { jobs } = useJobs();
   const { contacts } = useContacts();
 
+  const appliedJobs = jobs.applied;
   const allJobs = Object.values(jobs).flat();
   const responseRate = allJobs.length === 0
     ? 0
@@ -22,7 +23,7 @@ export const StatsOverview = () => {
   const applicationsTarget = 30;
   const applicationsProgress = Math.min(
     100,
-    Math.round((allJobs.length / applicationsTarget) * 100)
+    Math.round((appliedJobs.length / applicationsTarget) * 100)
   );
   const activeContacts = contacts.filter(c => c.status !== 'pending').length;
   const contactsProgress = Math.min(
@@ -42,7 +43,7 @@ export const StatsOverview = () => {
     },
     {
       title: 'Candidatures Envoyées',
-      value: `${allJobs.length}/${applicationsTarget}`,
+      value: `${appliedJobs.length}/${applicationsTarget}`,
       progress: applicationsProgress,
       icon: TrendingUp,
       color: 'text-[#e3007b]',
