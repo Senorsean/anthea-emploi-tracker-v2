@@ -144,6 +144,7 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
     if (saved) {
       try {
         setJobs(JSON.parse(saved));
+        return; // Skip remote fetch when local data exists
       } catch (err) {
         console.error('Failed to parse saved jobs', err);
       }
