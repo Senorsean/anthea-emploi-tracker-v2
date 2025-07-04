@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -46,14 +47,7 @@ export const JobFollowUp = () => {
   ]);
 
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newFollowUp, setNewFollowUp] = useState<{
-    jobTitle: string;
-    company: string;
-    type: 'email' | 'phone' | 'linkedin' | 'visit';
-    scheduledDate: string;
-    notes: string;
-    priority: 'low' | 'medium' | 'high';
-  }>({
+  const [newFollowUp, setNewFollowUp] = useState({
     jobTitle: '',
     company: '',
     type: 'email',
@@ -94,12 +88,7 @@ export const JobFollowUp = () => {
     const followUp: FollowUp = {
       id: Date.now().toString(),
       jobId: Date.now().toString(),
-      jobTitle: newFollowUp.jobTitle,
-      company: newFollowUp.company,
-      type: newFollowUp.type,
-      scheduledDate: newFollowUp.scheduledDate,
-      notes: newFollowUp.notes,
-      priority: newFollowUp.priority,
+      ...newFollowUp,
       status: 'pending'
     };
     
@@ -157,7 +146,7 @@ export const JobFollowUp = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Select 
                 value={newFollowUp.type} 
-                onValueChange={(value: 'email' | 'phone' | 'linkedin' | 'visit') => setNewFollowUp({...newFollowUp, type: value})}
+                onValueChange={(value) => setNewFollowUp({...newFollowUp, type: value})}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -178,7 +167,7 @@ export const JobFollowUp = () => {
               
               <Select 
                 value={newFollowUp.priority} 
-                onValueChange={(value: 'low' | 'medium' | 'high') => setNewFollowUp({...newFollowUp, priority: value})}
+                onValueChange={(value) => setNewFollowUp({...newFollowUp, priority: value})}
               >
                 <SelectTrigger>
                   <SelectValue />
