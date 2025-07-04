@@ -3,7 +3,19 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, ExternalLink, Calendar, Building, Upload, Info, Lightbulb } from 'lucide-react';
+import { Plus, ExternalLink, Calendar, Building, Upload, Info, Lightbulb, Trash } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Link } from 'react-router-dom';
 import { AddJobModal } from './AddJobModal';
@@ -37,7 +49,13 @@ interface ApplicationKanbanProps {
   onPreviewClick?: () => void;
 }
 
-const SortableJobCard: React.FC<{ job: Job; onDoubleClick?: () => void }> = ({ job, onDoubleClick }) => {
+const SortableJobCard: React.FC<{
+  job: Job;
+  selected?: boolean;
+  onSelectChange?: (checked: boolean) => void;
+  onDelete?: () => void;
+  onDoubleClick?: () => void;
+}> = ({ job, selected = false, onSelectChange, onDelete, onDoubleClick }) => {
   const {
     attributes,
     listeners,
@@ -73,10 +91,48 @@ const SortableJobCard: React.FC<{ job: Job; onDoubleClick?: () => void }> = ({ j
     >
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-2">
-          <h4 className="font-medium text-sm leading-tight">{job.title}</h4>
-          {job.url && (
-            <ExternalLink className="h-3 w-3 text-gray-400 flex-shrink-0 ml-2" />
-          )}
+          <div className="flex items-center gap-2">
+            {onSelectChange && (
+              <Checkbox
+                checked={selected}
+                onCheckedChange={(checked) => onSelectChange(!!checked)}
+                onClick={(e) => e.stopPropagation()}
+              />
+            )}
+            <h4 className="font-medium text-sm leading-tight">{job.title}</h4>
+          </div>
+          <div className="flex items-center gap-1">
+            {job.url && (
+              <ExternalLink className="h-3 w-3 text-gray-400 flex-shrink-0" />
+            )}
+            {onDelete && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Trash className="h-3 w-3" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Supprimer ce poste&nbsp;?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Cette action est irreversible.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction onClick={onDelete}>
+                      Supprimer
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
         </div>
         
         <div className="flex items-center gap-1 mb-2">
@@ -140,6 +196,7 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
   const [showAddModal, setShowAddModal] = useState(false);
   const [activeJob, setActiveJob] = useState<Job | null>(null);
   const [editJob, setEditJob] = useState<{ data: Job; columnId: string } | null>(null);
+  const [selectedJobIds, setSelectedJobIds] = useState<string[]>([]);
   const { jobs, setJobs } = useJobs();
   const { setInterviews } = useInterviews();
 
@@ -162,6 +219,26 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
       },
     })
   );
+
+  const handleSelect = (id: string, checked: boolean) => {
+    setSelectedJobIds(prev => {
+      if (checked) {
+        return prev.includes(id) ? prev : [...prev, id];
+      }
+      return prev.filter(j => j !== id);
+    });
+  };
+
+  const deleteJobs = (ids: string[]) => {
+    setJobs(prev => {
+      const newJobs: Record<string, Job[]> = {};
+      for (const [colId, colJobs] of Object.entries(prev)) {
+        newJobs[colId] = colJobs.filter(job => !ids.includes(job.id));
+      }
+      return newJobs;
+    });
+    setSelectedJobIds(prev => prev.filter(id => !ids.includes(id)));
+  };
 
   const findJobAndColumn = (jobId: string) => {
     for (const [columnId, columnJobs] of Object.entries(jobs)) {
@@ -321,6 +398,30 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
               <Plus className="h-4 w-4 mr-2" />
               Ajouter un Poste
             </Button>
+            {selectedJobIds.length > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="flex items-center gap-1">
+                    <Trash className="h-4 w-4" />
+                    Supprimer ({selectedJobIds.length})
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Supprimer les postes sélectionnés&nbsp;?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Cette action est irreversible.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Annuler</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => deleteJobs(selectedJobIds)}>
+                      Supprimer
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
             <Button variant="outline" onClick={exportJobs} className="flex items-center gap-1">
               <Upload className="h-4 w-4" />
               Sauvegarder
@@ -353,6 +454,9 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
                 <SortableJobCard
                   key={job.id}
                   job={job}
+                  selected={selectedJobIds.includes(job.id)}
+                  onSelectChange={(checked) => handleSelect(job.id, checked)}
+                  onDelete={() => deleteJobs([job.id])}
                   onDoubleClick={() => setEditJob({ data: job, columnId: column.id })}
                 />
               ))}
