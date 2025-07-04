@@ -11,6 +11,22 @@ import { useStats } from '@/hooks/useStats';
 export const AIInsights = () => {
   const stats = useStats();
 
+  // Vérifier si les stats sont disponibles avant de procéder
+  if (!stats || !stats.conversionRates || !stats.timeframes || !stats.jobs) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Brain className="h-6 w-6 text-[#a4007c]" />
+          <h2 className="text-2xl font-bold text-gray-900">Insights IA</h2>
+          <Badge className="bg-[#b3d800] text-gray-900">Nouveau</Badge>
+        </div>
+        <div className="text-center py-8">
+          <p className="text-gray-500">Chargement des insights...</p>
+        </div>
+      </div>
+    );
+  }
+
   const detectBottleneck = () => {
     const thresholds = {
       targetedToApplied: 0.4,
@@ -31,16 +47,19 @@ export const AIInsights = () => {
       finalToOffer: 'Finale → Offre',
     };
 
-    Object.entries(rates).forEach(([stage, rate]) => {
-      const threshold = thresholds[stage as keyof typeof thresholds];
-      if (rate < threshold && (!worst || rate < worst.rate)) {
-        worst = { 
-          stage, 
-          rate, 
-          label: stageLabels[stage as keyof typeof stageLabels] 
-        };
-      }
-    });
+    // Vérifier que rates existe avant d'utiliser Object.entries
+    if (rates) {
+      Object.entries(rates).forEach(([stage, rate]) => {
+        const threshold = thresholds[stage as keyof typeof thresholds];
+        if (rate < threshold && (!worst || rate < worst.rate)) {
+          worst = { 
+            stage, 
+            rate, 
+            label: stageLabels[stage as keyof typeof stageLabels] 
+          };
+        }
+      });
+    }
 
     return worst;
   };
