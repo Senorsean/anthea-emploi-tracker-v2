@@ -1,5 +1,4 @@
 
-
 export interface Job {
   id: string;
   title: string;
@@ -22,7 +21,9 @@ export const initialJobs: Record<string, Job[]> = {
       location: 'Paris, FR',
       priority: 'High',
       label: 'Tech',
-      dateAdded: '2025-01-02'
+      dateAdded: '2025-01-02',
+      offerStatus: 'pending',
+      offerType: 'job_offer'
     },
     {
       id: '2',
@@ -31,7 +32,9 @@ export const initialJobs: Record<string, Job[]> = {
       location: 'Lyon, FR',
       priority: 'Medium',
       label: 'Marketing',
-      dateAdded: '2025-01-01'
+      dateAdded: '2025-01-01',
+      offerStatus: 'pending',
+      offerType: 'job_offer'
     }
   ],
   applied: [
@@ -43,7 +46,9 @@ export const initialJobs: Record<string, Job[]> = {
       priority: 'High',
       label: 'Tech',
       url: 'https://example.com',
-      dateAdded: '2024-12-28'
+      dateAdded: '2024-12-28',
+      offerStatus: 'follow_up_pending',
+      offerType: 'job_offer'
     }
   ],
   screening: [
@@ -54,10 +59,24 @@ export const initialJobs: Record<string, Job[]> = {
       location: 'Paris, FR',
       priority: 'High',
       label: 'Marketing',
-      dateAdded: '2024-12-25'
+      dateAdded: '2024-12-25',
+      offerStatus: 'first_interview',
+      offerType: 'network'
     }
   ],
-  interview: [],
-  final: [],
-  offer: []
+  interview: [
+    {
+      id: '5',
+      title: 'Agent secret',
+      company: 'Agence 007',
+      location: 'Londres, UK',
+      priority: 'High',
+      label: 'Espionnage',
+      dateAdded: '2025-01-03',
+      offerStatus: 'second_interview',
+      offerType: 'network'
+    }
+  ],
+  offer: [],
+  final: []
 };

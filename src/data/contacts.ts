@@ -1,3 +1,4 @@
+
 export interface Contact {
   id: string;
   name: string;
@@ -51,5 +52,16 @@ export const initialContacts: Contact[] = [
     linkedin: 'in/mchen',
     status: 'pending',
     dateAdded: '2024-12-28'
+  },
+  {
+    id: '5',
+    name: 'James Bond',
+    company: 'Agence 007',
+    position: 'Agent Recruteur',
+    email: 'jbond@007.gov.uk',
+    linkedin: 'in/james-bond-007',
+    status: 'contacted',
+    dateAdded: '2025-01-03',
+    notes: 'Contact pour le poste d\'agent secret'
   }
 ];
