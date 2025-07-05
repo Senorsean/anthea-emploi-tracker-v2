@@ -1,4 +1,5 @@
 
+
 export interface Job {
   id: string;
   title: string;
@@ -9,6 +10,7 @@ export interface Job {
   url?: string;
   dateAdded: string;
   offerStatus?: 'pending' | 'follow_up_pending' | 'filled' | 'suspended' | 'first_interview' | 'second_interview';
+  offerType?: 'job_offer' | 'spontaneous_application' | 'network';
 }
 
 export const initialJobs: Record<string, Job[]> = {

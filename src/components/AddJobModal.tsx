@@ -16,6 +16,7 @@ interface JobData {
   label: string;
   url?: string;
   offerStatus?: 'pending' | 'follow_up_pending' | 'filled' | 'suspended' | 'first_interview' | 'second_interview';
+  offerType?: 'job_offer' | 'spontaneous_application' | 'network';
 }
 
 interface AddJobModalProps {
@@ -34,6 +35,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
     label: '',
     url: '',
     offerStatus: 'pending',
+    offerType: 'job_offer',
   });
 
   useEffect(() => {
@@ -48,6 +50,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
         label: '',
         url: '',
         offerStatus: 'pending',
+        offerType: 'job_offer',
       });
     }
   }, [initialData, isOpen]);
@@ -64,6 +67,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
         label: '',
         url: '',
         offerStatus: 'pending',
+        offerType: 'job_offer',
       });
       onClose();
     }
@@ -135,6 +139,25 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
               onChange={(e) => setFormData(prev => ({ ...prev, label: e.target.value }))}
               placeholder="ex: Tech, Marketing, Sales"
             />
+          </div>
+
+          <div>
+            <Label htmlFor="offerType">Nature de l'offre</Label>
+            <Select 
+              value={formData.offerType} 
+              onValueChange={(value: 'job_offer' | 'spontaneous_application' | 'network') => 
+                setFormData(prev => ({ ...prev, offerType: value }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="job_offer">Offre d'emploi</SelectItem>
+                <SelectItem value="spontaneous_application">Candidature spontanée</SelectItem>
+                <SelectItem value="network">Réseau</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
