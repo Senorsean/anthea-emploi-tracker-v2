@@ -1,3 +1,4 @@
+
 export interface Job {
   id: string;
   title: string;
@@ -7,6 +8,7 @@ export interface Job {
   label: string;
   url?: string;
   dateAdded: string;
+  offerStatus?: 'pending' | 'follow_up_pending' | 'filled' | 'suspended' | 'first_interview' | 'second_interview';
 }
 
 export const initialJobs: Record<string, Job[]> = {

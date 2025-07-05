@@ -15,6 +15,7 @@ interface JobData {
   priority: 'High' | 'Medium' | 'Low';
   label: string;
   url?: string;
+  offerStatus?: 'pending' | 'follow_up_pending' | 'filled' | 'suspended' | 'first_interview' | 'second_interview';
 }
 
 interface AddJobModalProps {
@@ -32,6 +33,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
     priority: 'Medium',
     label: '',
     url: '',
+    offerStatus: 'pending',
   });
 
   useEffect(() => {
@@ -45,6 +47,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
         priority: 'Medium',
         label: '',
         url: '',
+        offerStatus: 'pending',
       });
     }
   }, [initialData, isOpen]);
@@ -60,6 +63,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
         priority: 'Medium',
         label: '',
         url: '',
+        offerStatus: 'pending',
       });
       onClose();
     }
@@ -67,7 +71,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {initialData ? 'Modifier le Poste' : 'Ajouter un Nouveau Poste'}
@@ -131,6 +135,28 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
               onChange={(e) => setFormData(prev => ({ ...prev, label: e.target.value }))}
               placeholder="ex: Tech, Marketing, Sales"
             />
+          </div>
+
+          <div>
+            <Label htmlFor="offerStatus">Statut de l'offre</Label>
+            <Select 
+              value={formData.offerStatus} 
+              onValueChange={(value: 'pending' | 'follow_up_pending' | 'filled' | 'suspended' | 'first_interview' | 'second_interview') => 
+                setFormData(prev => ({ ...prev, offerStatus: value }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">En attente de réponse</SelectItem>
+                <SelectItem value="follow_up_pending">Relance en attente</SelectItem>
+                <SelectItem value="filled">Offre pourvue</SelectItem>
+                <SelectItem value="suspended">Offre suspendue</SelectItem>
+                <SelectItem value="first_interview">1er entretien</SelectItem>
+                <SelectItem value="second_interview">2ème entretien</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
