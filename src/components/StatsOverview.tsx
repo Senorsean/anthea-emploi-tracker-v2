@@ -1,4 +1,3 @@
-
 import React from 'react';
 import jsPDF from 'jspdf';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,45 +49,143 @@ function generateInsights(stats: ReturnType<typeof useStats>) {
   return insights;
 }
 
+function generateRecommendations(stats: ReturnType<typeof useStats>) {
+  const recommendations: string[] = [];
+  const { conversionRates, jobs, timeframes } = stats;
+
+  if (conversionRates.appliedToScreening < 0.2) {
+    recommendations.push("Optimisez votre CV et lettre de motivation pour améliorer le taux de réponse");
+    recommendations.push("Personnalisez davantage vos candidatures selon l'entreprise ciblée");
+  }
+
+  if (timeframes.week.applications < 5) {
+    recommendations.push("Augmentez votre nombre de candidatures à 5-7 par semaine minimum");
+    recommendations.push("Utilisez les plateformes LinkedIn, Indeed et sites d'entreprises");
+  }
+
+  if (conversionRates.interviewToFinal < 0.5 && jobs.interview > 0) {
+    recommendations.push("Préparez mieux vos entretiens avec la méthode STAR");
+    recommendations.push("Renseignez-vous sur l'entreprise et ses valeurs avant l'entretien");
+  }
+
+  if (jobs.targeted > jobs.applied * 2) {
+    recommendations.push("Priorisez vos candidatures sur les postes les plus alignés");
+    recommendations.push("Concentrez-vous sur la qualité plutôt que la quantité");
+  }
+
+  return recommendations;
+}
+
+function generateTodoList(stats: ReturnType<typeof useStats>) {
+  const todos: string[] = [];
+  const { conversionRates, jobs, timeframes } = stats;
+
+  todos.push("Planifier 3-5 nouvelles candidatures pour cette semaine");
+  
+  if (jobs.interview > 0) {
+    todos.push("Préparer les prochains entretiens programmés");
+  }
+
+  if (timeframes.week.responses === 0) {
+    todos.push("Faire un suivi des candidatures envoyées il y a 1-2 semaines");
+  }
+
+  todos.push("Mettre à jour le profil LinkedIn");
+  todos.push("Identifier 2-3 nouvelles entreprises cibles");
+  
+  if (conversionRates.appliedToScreening < 0.3) {
+    todos.push("Réviser et optimiser le CV principal");
+  }
+
+  todos.push("Programmer du temps de networking cette semaine");
+
+  return todos;
+}
+
 export const StatsOverview = () => {
   const stats = useStats();
 
   const handleExport = () => {
     const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text('Rapport de Statistiques', 105, 15, { align: 'center' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - 2 * margin;
 
-    const insights = generateInsights(stats);
-    doc.setFontSize(12);
-    let y = 25;
-    insights.forEach((line) => {
-      doc.text(`- ${line}`, 10, y);
-      y += 6;
+    // Colors
+    const primaryColor = '#a4007c';
+    const secondaryColor = '#e3007b';
+    const accentColor = '#b3d800';
+    const grayColor = '#6b7280';
+    const lightGray = '#f3f4f6';
+
+    // Helper functions
+    const drawRoundedRect = (x: number, y: number, width: number, height: number, radius: number, style: string) => {
+      doc.roundedRect(x, y, width, height, radius, radius, style);
+    };
+
+    const drawCapsule = (x: number, y: number, width: number, height: number, style: string) => {
+      const radius = height / 2;
+      doc.roundedRect(x, y, width, height, radius, radius, style);
+    };
+
+    // Page 1 - Cover and Overview
+    doc.setFillColor(primaryColor);
+    drawRoundedRect(0, 0, pageWidth, 80, 0, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(28);
+    doc.setFont('helvetica', 'bold');
+    doc.text('RAPPORT DE RECHERCHE D\'EMPLOI', pageWidth / 2, 35, { align: 'center' });
+
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'normal');
+    const currentDate = new Date().toLocaleDateString('fr-FR', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
     });
+    doc.text(`Généré le ${currentDate}`, pageWidth / 2, 55, { align: 'center' });
 
-    y += 4;
-    doc.text('Statistiques générales', 10, y);
-    y += 6;
-    cards.forEach((card) => {
-      const progress =
-        card.title === 'Entretiens ce Mois'
-          ? ` (${stats.goals?.interviewsProgress || 0}% de l\'objectif)`
-          : '';
-      doc.text(`${card.title}: ${card.value}${progress}`, 10, y);
-      y += 6;
-    });
+    // Stats cards
+    doc.setTextColor(0, 0, 0);
+    const cardHeight = 35;
+    const cardWidth = (contentWidth - 30) / 4;
+    const startY = 100;
 
-    y += 10;
-    doc.text('Répartition des candidatures', 10, y);
-    y += 2;
-    const stages = [
-      'Ciblées',
-      'Envoyées',
-      'Screening',
-      'Entretien',
-      'Finale',
-      'Offre',
+    const statsCards = [
+      { title: 'Candidatures\nTotales', value: stats.jobs?.total || 0, color: primaryColor },
+      { title: 'Entretiens\nce Mois', value: stats.timeframes?.month?.interviews || 0, color: secondaryColor },
+      { title: 'Offres\nObtenues', value: stats.jobs?.offer || 0, color: accentColor },
+      { title: 'Réponses\nReçues', value: stats.timeframes?.month?.responses || 0, color: grayColor }
     ];
+
+    statsCards.forEach((card, index) => {
+      const x = margin + index * (cardWidth + 10);
+      
+      doc.setFillColor(lightGray);
+      drawRoundedRect(x, startY, cardWidth, cardHeight, 8, 'F');
+      
+      doc.setFillColor(card.color);
+      drawCapsule(x + 5, startY + 5, cardWidth - 10, 6, 'F');
+      
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(20);
+      doc.setFont('helvetica', 'bold');
+      doc.text(card.value.toString(), x + cardWidth / 2, startY + 18, { align: 'center' });
+      
+      doc.setFontSize(8);
+      doc.setFont('helvetica', 'normal');
+      doc.text(card.title, x + cardWidth / 2, startY + 28, { align: 'center' });
+    });
+
+    // Funnel visualization
+    const funnelY = 160;
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('ENTONNOIR DE CANDIDATURES', margin, funnelY);
+
+    const stages = ['Ciblés', 'Postulé', 'Screening', 'Entretien', 'Finale', 'Offre'];
     const values = [
       stats.jobs.targeted,
       stats.jobs.applied,
@@ -97,29 +194,172 @@ export const StatsOverview = () => {
       stats.jobs.final,
       stats.jobs.offer,
     ];
-    const max = Math.max(...values, 1);
-    const chartHeight = 40;
-    const barWidth = 20;
-    const gap = 4;
-    const startX = 10;
-    const startY = y + chartHeight;
 
-    values.forEach((val, i) => {
-      const barHeight = (val / max) * chartHeight;
-      const x = startX + i * (barWidth + gap);
-      doc.setFillColor('#a4007c');
-      doc.rect(x, startY - barHeight, barWidth, barHeight, 'F');
-      doc.text(String(val), x + barWidth / 2, startY - barHeight - 2, {
-        align: 'center',
-      });
-      const pct = stats.jobs.total
-        ? Math.round((val / stats.jobs.total) * 100)
-        : 0;
-      doc.text(`${pct}%`, x + barWidth / 2, startY + 6, { align: 'center' });
-      doc.text(stages[i], x + barWidth / 2, startY + 12, { align: 'center' });
+    const maxValue = Math.max(...values, 1);
+    const funnelStartY = funnelY + 20;
+    const maxWidth = contentWidth - 40;
+
+    values.forEach((value, index) => {
+      const width = (value / maxValue) * maxWidth;
+      const x = margin + 20 + (maxWidth - width) / 2;
+      const y = funnelStartY + index * 12;
+      
+      // Draw funnel bar
+      doc.setFillColor(primaryColor);
+      const opacity = 1 - (index * 0.1);
+      drawCapsule(x, y, width, 8, 'F');
+      
+      // Stage label
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(9);
+      doc.text(stages[index], margin, y + 6);
+      
+      // Value
+      doc.text(value.toString(), x + width + 5, y + 6);
+      
+      // Percentage
+      const percentage = stats.jobs.total ? Math.round((value / stats.jobs.total) * 100) : 0;
+      doc.text(`${percentage}%`, x + width + 20, y + 6);
     });
 
-    doc.save('rapport.pdf');
+    // Page 2 - AI Insights
+    doc.addPage();
+    
+    // Header
+    doc.setFillColor(primaryColor);
+    drawRoundedRect(0, 0, pageWidth, 40, 0, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('INSIGHTS IA', pageWidth / 2, 25, { align: 'center' });
+
+    // AI Insights section
+    const insights = generateInsights(stats);
+    doc.setTextColor(0, 0, 0);
+    let currentY = 70;
+
+    insights.forEach((insight, index) => {
+      doc.setFillColor(lightGray);
+      drawRoundedRect(margin, currentY, contentWidth, 25, 8, 'F');
+      
+      doc.setFillColor(accentColor);
+      doc.circle(margin + 10, currentY + 12, 4, 'F');
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      const lines = doc.splitTextToSize(insight, contentWidth - 40);
+      doc.text(lines, margin + 25, currentY + 10);
+      
+      currentY += 35;
+    });
+
+    // Conversion rates chart
+    currentY += 20;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('TAUX DE CONVERSION', margin, currentY);
+
+    const conversionData = [
+      { label: 'Ciblé → Postulé', rate: stats.conversionRates.targetedToApplied },
+      { label: 'Postulé → Screening', rate: stats.conversionRates.appliedToScreening },
+      { label: 'Screening → Entretien', rate: stats.conversionRates.screeningToInterview },
+      { label: 'Entretien → Finale', rate: stats.conversionRates.interviewToFinal },
+      { label: 'Finale → Offre', rate: stats.conversionRates.finalToOffer }
+    ];
+
+    currentY += 15;
+    conversionData.forEach((item, index) => {
+      const rate = Math.round(item.rate * 100);
+      const barWidth = (rate / 100) * (contentWidth - 100);
+      
+      doc.setFontSize(9);
+      doc.text(item.label, margin, currentY + index * 15 + 5);
+      
+      doc.setFillColor(lightGray);
+      drawCapsule(margin + 80, currentY + index * 15, contentWidth - 180, 8, 'F');
+      
+      doc.setFillColor(rate > 50 ? accentColor : rate > 25 ? secondaryColor : primaryColor);
+      drawCapsule(margin + 80, currentY + index * 15, barWidth, 8, 'F');
+      
+      doc.setTextColor(0, 0, 0);
+      doc.text(`${rate}%`, margin + 80 + barWidth + 10, currentY + index * 15 + 6);
+    });
+
+    // Page 3 - Recommendations and Todo
+    doc.addPage();
+    
+    // Header
+    doc.setFillColor(secondaryColor);
+    drawRoundedRect(0, 0, pageWidth, 40, 0, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text('RECOMMANDATIONS & ACTIONS', pageWidth / 2, 25, { align: 'center' });
+
+    // Recommendations
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('RECOMMANDATIONS', margin, 70);
+
+    const recommendations = generateRecommendations(stats);
+    currentY = 90;
+
+    recommendations.forEach((rec, index) => {
+      doc.setFillColor('#fef3c7');
+      drawRoundedRect(margin, currentY, contentWidth, 20, 8, 'F');
+      
+      doc.setFillColor('#f59e0b');
+      doc.circle(margin + 10, currentY + 10, 3, 'F');
+      
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      const lines = doc.splitTextToSize(rec, contentWidth - 30);
+      doc.text(lines, margin + 20, currentY + 8);
+      
+      currentY += 30;
+    });
+
+    // Todo list
+    currentY += 20;
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('ACTIONS À RÉALISER', margin, currentY);
+
+    const todos = generateTodoList(stats);
+    currentY += 20;
+
+    todos.forEach((todo, index) => {
+      doc.setFillColor('#dcfce7');
+      drawRoundedRect(margin, currentY, contentWidth, 18, 8, 'F');
+      
+      // Checkbox
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor('#22c55e');
+      doc.rect(margin + 8, currentY + 6, 6, 6, 'FD');
+      
+      doc.setFontSize(9);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont('helvetica', 'normal');
+      const lines = doc.splitTextToSize(todo, contentWidth - 30);
+      doc.text(lines, margin + 20, currentY + 8);
+      
+      currentY += 25;
+    });
+
+    // Footer on each page
+    for (let i = 1; i <= doc.getNumberOfPages(); i++) {
+      doc.setPage(i);
+      doc.setFillColor(lightGray);
+      drawRoundedRect(0, pageHeight - 20, pageWidth, 20, 0, 'F');
+      
+      doc.setTextColor(grayColor);
+      doc.setFontSize(8);
+      doc.text('Emploi Tracker - Rapport Personnalisé', margin, pageHeight - 8);
+      doc.text(`Page ${i}/${doc.getNumberOfPages()}`, pageWidth - margin, pageHeight - 8, { align: 'right' });
+    }
+
+    doc.save('rapport-emploi-tracker.pdf');
   };
 
   const cards = [
