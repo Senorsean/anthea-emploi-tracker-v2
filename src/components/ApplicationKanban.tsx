@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -80,6 +79,27 @@ const SortableJobCard: React.FC<{
     }
   };
 
+  const getOfferStatusLabel = (status?: string) => {
+    switch (status) {
+      case 'pending': return 'En attente de réponse';
+      case 'follow_up_pending': return 'Relance en attente';
+      case 'filled': return 'Offre pourvue';
+      case 'suspended': return 'Offre suspendue';
+      case 'first_interview': return '1er entretien';
+      case 'second_interview': return '2ème entretien';
+      default: return 'En attente de réponse';
+    }
+  };
+
+  const getOfferTypeLabel = (type?: string) => {
+    switch (type) {
+      case 'job_offer': return 'Offre d\'emploi';
+      case 'spontaneous_application': return 'Candidature spontanée';
+      case 'network': return 'Réseau';
+      default: return 'Offre d\'emploi';
+    }
+  };
+
   return (
     <Card
       ref={setNodeRef}
@@ -142,7 +162,7 @@ const SortableJobCard: React.FC<{
         
         <p className="text-xs text-gray-500 mb-3">{job.location}</p>
         
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-2">
           <Badge className={`text-xs ${getPriorityColor(job.priority)}`}>
             {job.priority}
           </Badge>
@@ -157,9 +177,23 @@ const SortableJobCard: React.FC<{
           </div>
         </div>
         
-        <Badge variant="outline" className="mt-2 text-xs">
-          {job.label}
-        </Badge>
+        <div className="space-y-2">
+          <Badge variant="outline" className="text-xs">
+            {job.label}
+          </Badge>
+          
+          {job.offerStatus && (
+            <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+              {getOfferStatusLabel(job.offerStatus)}
+            </Badge>
+          )}
+          
+          {job.offerType && (
+            <Badge variant="outline" className="text-xs bg-purple-50 text-purple-700 border-purple-200">
+              {getOfferTypeLabel(job.offerType)}
+            </Badge>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
