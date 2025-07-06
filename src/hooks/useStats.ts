@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { useJobs } from './useJobs';
-import { useInterviews } from './useInterviews';
 import { useResponses } from './useResponses';
 
 export interface CentralizedStats {
@@ -60,7 +59,6 @@ export interface CentralizedStats {
 
 export function useStats(): CentralizedStats {
   const { jobs } = useJobs();
-  const { interviews } = useInterviews();
   const { responses } = useResponses();
   
   const [stats, setStats] = useState<CentralizedStats>({
@@ -116,31 +114,34 @@ export function useStats(): CentralizedStats {
       total: allJobs.length,
     };
 
-    // Time-based statistics
+    // Get interview jobs (jobs in the "interview" column)
+    const interviewJobs = jobs.interview || [];
+
+    // Time-based statistics - now using interview jobs from kanban
     const timeframes = {
       today: {
         applications: jobs.applied?.filter(job => diffDays(job.dateAdded) <= 1).length || 0,
-        interviews: interviews?.filter(interview => diffDays(interview.date) <= 1).length || 0,
+        interviews: interviewJobs.filter(job => diffDays(job.dateAdded) <= 1).length || 0,
         responses: responses?.filter(response => diffDays(response.date) <= 1).length || 0,
       },
       week: {
         applications: jobs.applied?.filter(job => diffDays(job.dateAdded) <= 7).length || 0,
-        interviews: interviews?.filter(interview => diffDays(interview.date) <= 7).length || 0,
+        interviews: interviewJobs.filter(job => diffDays(job.dateAdded) <= 7).length || 0,
         responses: responses?.filter(response => diffDays(response.date) <= 7).length || 0,
       },
       month: {
         applications: jobs.applied?.filter(job => diffDays(job.dateAdded) <= 30).length || 0,
-        interviews: interviews?.filter(interview => diffDays(interview.date) <= 30).length || 0,
+        interviews: interviewJobs.filter(job => diffDays(job.dateAdded) <= 30).length || 0,
         responses: responses?.filter(response => diffDays(response.date) <= 30).length || 0,
       },
       threeMonths: {
         applications: jobs.applied?.filter(job => diffDays(job.dateAdded) <= 90).length || 0,
-        interviews: interviews?.filter(interview => diffDays(interview.date) <= 90).length || 0,
+        interviews: interviewJobs.filter(job => diffDays(job.dateAdded) <= 90).length || 0,
         responses: responses?.filter(response => diffDays(response.date) <= 90).length || 0,
       },
       sixMonths: {
         applications: jobs.applied?.filter(job => diffDays(job.dateAdded) <= 180).length || 0,
-        interviews: interviews?.filter(interview => diffDays(interview.date) <= 180).length || 0,
+        interviews: interviewJobs.filter(job => diffDays(job.dateAdded) <= 180).length || 0,
         responses: responses?.filter(response => diffDays(response.date) <= 180).length || 0,
       },
     };
@@ -172,7 +173,7 @@ export function useStats(): CentralizedStats {
       conversionRates,
       goals,
     });
-  }, [jobs, interviews, responses]);
+  }, [jobs, responses]);
 
   return stats;
 }
