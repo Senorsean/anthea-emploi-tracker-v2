@@ -99,54 +99,65 @@ export function useStats(): CentralizedStats {
       return (now.getTime() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24);
     };
 
-    // Job counts by stage
+    // Get interview jobs (jobs in the "interview" column + jobs with interview status)
+    const interviewJobs = jobs.interview || [];
+    const jobsWithInterviewStatus = allJobs.filter(
+      (job) => job.offerStatus === 'first_interview' || job.offerStatus === 'second_interview'
+    );
+
+    // Combine both sets of interview jobs, avoiding duplicates
+    const allInterviewJobs = [
+      ...interviewJobs,
+      ...jobsWithInterviewStatus.filter(
+        (job) => !interviewJobs.some((interviewJob) => interviewJob.id === job.id)
+      ),
+    ];
+
+    // Job counts by stage - applied now includes all progressed jobs
     const jobCounts = {
       offer: jobs.offer?.length || 0,
-      applied: jobs.applied?.length || 0,
-      screening: jobs.screening?.length || 0,
-      interview: jobs.interview?.length || 0,
+      applied:
+        (jobs.applied?.length || 0) +
+        (jobs.screening?.length || 0) +
+        allInterviewJobs.length +
+        (jobs.final?.length || 0),
+      screening: (jobs.screening?.length || 0) + allInterviewJobs.length + (jobs.final?.length || 0),
+      interview: allInterviewJobs.length,
       final: jobs.final?.length || 0,
       total: allJobs.length,
     };
 
-    // Get interview jobs (jobs in the "interview" column + jobs with interview status)
-    const interviewJobs = jobs.interview || [];
-    const jobsWithInterviewStatus = allJobs.filter(job => 
-      job.offerStatus === 'first_interview' || job.offerStatus === 'second_interview'
-    );
-    
-    // Combine both sets of interview jobs, avoiding duplicates
-    const allInterviewJobs = [
-      ...interviewJobs,
-      ...jobsWithInterviewStatus.filter(job => 
-        !interviewJobs.some(interviewJob => interviewJob.id === job.id)
-      )
+    // Time-based statistics - now using combined interview jobs
+    const allAppliedJobs = [
+      ...(jobs.applied || []),
+      ...(jobs.screening || []),
+      ...allInterviewJobs,
+      ...(jobs.final || []),
     ];
 
-    // Time-based statistics - now using combined interview jobs
     const timeframes = {
       today: {
-        applications: jobs.applied?.filter(job => diffDays(job.dateAdded) <= 1).length || 0,
+        applications: allAppliedJobs.filter(job => diffDays(job.dateAdded) <= 1).length || 0,
         interviews: allInterviewJobs.filter(job => diffDays(job.dateAdded) <= 1).length || 0,
         responses: responses?.filter(response => diffDays(response.date) <= 1).length || 0,
       },
       week: {
-        applications: jobs.applied?.filter(job => diffDays(job.dateAdded) <= 7).length || 0,
+        applications: allAppliedJobs.filter(job => diffDays(job.dateAdded) <= 7).length || 0,
         interviews: allInterviewJobs.filter(job => diffDays(job.dateAdded) <= 7).length || 0,
         responses: responses?.filter(response => diffDays(response.date) <= 7).length || 0,
       },
       month: {
-        applications: jobs.applied?.filter(job => diffDays(job.dateAdded) <= 30).length || 0,
+        applications: allAppliedJobs.filter(job => diffDays(job.dateAdded) <= 30).length || 0,
         interviews: allInterviewJobs.filter(job => diffDays(job.dateAdded) <= 30).length || 0,
         responses: responses?.filter(response => diffDays(response.date) <= 30).length || 0,
       },
       threeMonths: {
-        applications: jobs.applied?.filter(job => diffDays(job.dateAdded) <= 90).length || 0,
+        applications: allAppliedJobs.filter(job => diffDays(job.dateAdded) <= 90).length || 0,
         interviews: allInterviewJobs.filter(job => diffDays(job.dateAdded) <= 90).length || 0,
         responses: responses?.filter(response => diffDays(response.date) <= 90).length || 0,
       },
       sixMonths: {
-        applications: jobs.applied?.filter(job => diffDays(job.dateAdded) <= 180).length || 0,
+        applications: allAppliedJobs.filter(job => diffDays(job.dateAdded) <= 180).length || 0,
         interviews: allInterviewJobs.filter(job => diffDays(job.dateAdded) <= 180).length || 0,
         responses: responses?.filter(response => diffDays(response.date) <= 180).length || 0,
       },
