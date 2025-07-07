@@ -10,6 +10,7 @@ import type { WeeklyAction } from '@/data/weeklyActions';
 import { initialWeeklyActions, actionTemplates } from '@/data/weeklyActions';
 import { uploadJson } from '@/integrations/supabase/storage';
 import AddWeeklyActionModal from './AddWeeklyActionModal';
+import YearCalendar2025 from './YearCalendar2025';
 
 export const GoalsModule = () => {
   const [currentGoal, setCurrentGoal] = useState('interviews');
@@ -127,6 +128,11 @@ export const GoalsModule = () => {
           <p className="text-gray-600">{selectedGoal.description}</p>
         </CardHeader>
         <CardContent>
+          {currentGoal === 'interviews' && (
+            <div className="mb-6">
+              <YearCalendar2025 />
+            </div>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div className="text-center">
               <div className="text-3xl font-bold text-[#a4007c] mb-2">
