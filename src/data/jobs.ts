@@ -8,6 +8,7 @@ export interface Job {
   label: string;
   url?: string;
   dateAdded: string;
+  interviewDate?: string;
   offerStatus?: 'pending' | 'follow_up_pending' | 'filled' | 'suspended' | 'first_interview' | 'second_interview';
   offerType?: 'job_offer' | 'spontaneous_application' | 'network';
 }
@@ -73,6 +74,7 @@ export const initialJobs: Record<string, Job[]> = {
       priority: 'High',
       label: 'Espionnage',
       dateAdded: '2025-01-03',
+      interviewDate: '2025-01-10',
       offerStatus: 'second_interview',
       offerType: 'network'
     }
