@@ -9,7 +9,14 @@ export interface Job {
   url?: string;
   dateAdded: string;
   interviewDate?: string;
-  offerStatus?: 'pending' | 'follow_up_pending' | 'filled' | 'suspended' | 'first_interview' | 'second_interview';
+  offerStatus?:
+    | 'pending'
+    | 'follow_up_pending'
+    | 'filled'
+    | 'suspended'
+    | 'first_interview'
+    | 'second_interview'
+    | 'rejected';
   offerType?: 'job_offer' | 'spontaneous_application' | 'network';
 }
 
