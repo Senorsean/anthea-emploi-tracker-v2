@@ -1,3 +1,4 @@
+
 import React from 'react';
 import jsPDF from 'jspdf';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -68,7 +69,7 @@ function generateRecommendations(stats: ReturnType<typeof useStats>) {
     recommendations.push("Renseignez-vous sur l'entreprise et ses valeurs avant l'entretien");
   }
 
-  if (jobs.targeted > jobs.applied * 2) {
+  if (jobs.offer > jobs.applied * 2) {
     recommendations.push("Priorisez vos candidatures sur les postes les plus alignés");
     recommendations.push("Concentrez-vous sur la qualité plutôt que la quantité");
   }
@@ -185,14 +186,13 @@ export const StatsOverview = () => {
     doc.setFont('helvetica', 'bold');
     doc.text('ENTONNOIR DE CANDIDATURES', margin, funnelY);
 
-    const stages = ['Ciblés', 'Postulé', 'Screening', 'Entretien', 'Finale', 'Offre'];
+    const stages = ['Offre', 'Candidature', 'Relances', 'Entretien', 'Finale'];
     const values = [
-      stats.jobs.targeted,
+      stats.jobs.offer,
       stats.jobs.applied,
       stats.jobs.screening,
       stats.jobs.interview,
       stats.jobs.final,
-      stats.jobs.offer,
     ];
 
     const maxValue = Math.max(...values, 1);
@@ -260,11 +260,10 @@ export const StatsOverview = () => {
     doc.text('TAUX DE CONVERSION', margin, currentY);
 
     const conversionData = [
-      { label: 'Ciblé → Postulé', rate: stats.conversionRates.targetedToApplied },
-      { label: 'Postulé → Screening', rate: stats.conversionRates.appliedToScreening },
-      { label: 'Screening → Entretien', rate: stats.conversionRates.screeningToInterview },
-      { label: 'Entretien → Finale', rate: stats.conversionRates.interviewToFinal },
-      { label: 'Finale → Offre', rate: stats.conversionRates.finalToOffer }
+      { label: 'Offre → Candidature', rate: stats.conversionRates.offerToApplied },
+      { label: 'Candidature → Relances', rate: stats.conversionRates.appliedToScreening },
+      { label: 'Relances → Entretien', rate: stats.conversionRates.screeningToInterview },
+      { label: 'Entretien → Finale', rate: stats.conversionRates.interviewToFinal }
     ];
 
     currentY += 15;
