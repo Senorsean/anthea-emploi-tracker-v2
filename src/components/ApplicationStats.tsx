@@ -1,37 +1,45 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useStats } from '@/hooks/useStats';
+import { useJobs } from '@/hooks/useJobs';
 
 export const ApplicationStats = () => {
-  const stats = useStats();
+  const { jobs } = useJobs();
 
-  const timeframeStats = [
+  // Calculer les statistiques basées sur les statuts des offres
+  const allJobs = Object.values(jobs).flat();
+  
+  const pendingOffers = allJobs.filter(job => job.offerStatus === 'pending').length;
+  const suspendedOffers = allJobs.filter(job => job.offerStatus === 'suspended').length;
+  const filledOffers = allJobs.filter(job => job.offerStatus === 'filled').length;
+  const followUpPending = allJobs.filter(job => job.offerStatus === 'follow_up_pending').length;
+
+  const statusStats = [
     { 
-      label: 'Cette semaine', 
-      applications: stats.timeframes?.week?.applications || 0, 
-      interviews: stats.timeframes?.week?.interviews || 0 
+      label: 'En attente de réponse', 
+      value: pendingOffers,
+      color: 'text-[#e3007b]'
     },
     { 
-      label: 'Ce mois', 
-      applications: stats.timeframes?.month?.applications || 0, 
-      interviews: stats.timeframes?.month?.interviews || 0 
+      label: 'Offre suspendue', 
+      value: suspendedOffers,
+      color: 'text-[#a4007c]'
     },
     { 
-      label: '3 mois', 
-      applications: stats.timeframes?.threeMonths?.applications || 0, 
-      interviews: stats.timeframes?.threeMonths?.interviews || 0 
+      label: 'Offre pourvue', 
+      value: filledOffers,
+      color: 'text-gray-600'
     },
     { 
-      label: '6 mois', 
-      applications: stats.timeframes?.sixMonths?.applications || 0, 
-      interviews: stats.timeframes?.sixMonths?.interviews || 0 
+      label: 'Nombres de relances', 
+      value: followUpPending,
+      color: 'text-[#e3007b]'
     },
   ];
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
-      {timeframeStats.map((stat, index) => (
+      {statusStats.map((stat, index) => (
         <Card key={index} className="text-center">
           <CardHeader>
             <CardTitle className="text-sm font-medium text-gray-600">
@@ -41,12 +49,7 @@ export const ApplicationStats = () => {
           <CardContent>
             <div className="space-y-2">
               <div>
-                <div className="text-2xl font-bold text-[#e3007b]">{stat.applications}</div>
-                <div className="text-xs text-gray-500">Candidatures</div>
-              </div>
-              <div>
-                <div className="text-xl font-bold text-[#a4007c]">{stat.interviews}</div>
-                <div className="text-xs text-gray-500">Entretiens</div>
+                <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
               </div>
             </div>
           </CardContent>
