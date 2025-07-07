@@ -15,6 +15,7 @@ interface JobData {
   label: string;
   url?: string;
   interviewDate?: string;
+  followUpDate?: string;
   offerStatus?:
     | 'pending'
     | 'follow_up_pending'
@@ -42,13 +43,18 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
     label: '',
     url: '',
     interviewDate: '',
+    followUpDate: '',
     offerStatus: 'pending',
     offerType: 'job_offer',
   });
 
   useEffect(() => {
     if (initialData) {
-      setFormData({ ...initialData, interviewDate: initialData.interviewDate || '' });
+      setFormData({
+        ...initialData,
+        interviewDate: initialData.interviewDate || '',
+        followUpDate: initialData.followUpDate || ''
+      });
     } else {
       setFormData({
         title: '',
@@ -58,6 +64,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
         label: '',
         url: '',
         interviewDate: '',
+        followUpDate: '',
         offerStatus: 'pending',
         offerType: 'job_offer',
       });
@@ -76,6 +83,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
         label: '',
         url: '',
         interviewDate: '',
+        followUpDate: '',
         offerStatus: 'pending',
         offerType: 'job_offer',
       });
@@ -207,6 +215,16 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
               type="date"
               value={formData.interviewDate}
               onChange={(e) => setFormData(prev => ({ ...prev, interviewDate: e.target.value }))}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="followUpDate">Date de relance</Label>
+            <Input
+              id="followUpDate"
+              type="date"
+              value={formData.followUpDate}
+              onChange={(e) => setFormData(prev => ({ ...prev, followUpDate: e.target.value }))}
             />
           </div>
 
