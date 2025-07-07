@@ -208,6 +208,18 @@ const SortableJobCard: React.FC<{
               </span>
             </div>
           )}
+
+          {job.followUpDate && (
+            <div className="flex items-center gap-1 text-gray-500">
+              <Calendar className="h-3 w-3" />
+              <span className="text-xs">
+                {new Date(job.followUpDate).toLocaleDateString('fr-FR', {
+                  month: 'short',
+                  day: 'numeric'
+                })}
+              </span>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
