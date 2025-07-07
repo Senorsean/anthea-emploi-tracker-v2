@@ -89,6 +89,7 @@ const SortableJobCard: React.FC<{
       case 'suspended': return 'Offre suspendue';
       case 'first_interview': return '1er entretien';
       case 'second_interview': return '2ème entretien';
+      case 'rejected': return 'Non retenu';
       default: return 'En attente de réponse';
     }
   };

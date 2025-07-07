@@ -15,7 +15,14 @@ interface JobData {
   label: string;
   url?: string;
   interviewDate?: string;
-  offerStatus?: 'pending' | 'follow_up_pending' | 'filled' | 'suspended' | 'first_interview' | 'second_interview';
+  offerStatus?:
+    | 'pending'
+    | 'follow_up_pending'
+    | 'filled'
+    | 'suspended'
+    | 'first_interview'
+    | 'second_interview'
+    | 'rejected';
   offerType?: 'job_offer' | 'spontaneous_application' | 'network';
 }
 
@@ -167,7 +174,14 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
             <Label htmlFor="offerStatus">Statut de l'offre</Label>
             <Select
               value={formData.offerStatus}
-              onValueChange={(value: 'pending' | 'follow_up_pending' | 'filled' | 'suspended' | 'first_interview' | 'second_interview') =>
+              onValueChange={(value:
+                | 'pending'
+                | 'follow_up_pending'
+                | 'filled'
+                | 'suspended'
+                | 'first_interview'
+                | 'second_interview'
+                | 'rejected') =>
                 setFormData(prev => ({ ...prev, offerStatus: value }))
               }
             >
@@ -181,6 +195,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
                 <SelectItem value="suspended">Offre suspendue</SelectItem>
                 <SelectItem value="first_interview">1er entretien</SelectItem>
                 <SelectItem value="second_interview">2ème entretien</SelectItem>
+                <SelectItem value="rejected">Non retenu</SelectItem>
               </SelectContent>
             </Select>
           </div>
