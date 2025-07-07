@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 
 interface JobData {
   id?: string;
@@ -15,6 +14,7 @@ interface JobData {
   priority: 'High' | 'Medium' | 'Low';
   label: string;
   url?: string;
+  interviewDate?: string;
   offerStatus?: 'pending' | 'follow_up_pending' | 'filled' | 'suspended' | 'first_interview' | 'second_interview';
   offerType?: 'job_offer' | 'spontaneous_application' | 'network';
 }
@@ -34,13 +34,14 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
     priority: 'Medium',
     label: '',
     url: '',
+    interviewDate: '',
     offerStatus: 'pending',
     offerType: 'job_offer',
   });
 
   useEffect(() => {
     if (initialData) {
-      setFormData({ ...initialData });
+      setFormData({ ...initialData, interviewDate: initialData.interviewDate || '' });
     } else {
       setFormData({
         title: '',
@@ -49,6 +50,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
         priority: 'Medium',
         label: '',
         url: '',
+        interviewDate: '',
         offerStatus: 'pending',
         offerType: 'job_offer',
       });
@@ -66,6 +68,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
         priority: 'Medium',
         label: '',
         url: '',
+        interviewDate: '',
         offerStatus: 'pending',
         offerType: 'job_offer',
       });
@@ -162,9 +165,9 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
 
           <div>
             <Label htmlFor="offerStatus">Statut de l'offre</Label>
-            <Select 
-              value={formData.offerStatus} 
-              onValueChange={(value: 'pending' | 'follow_up_pending' | 'filled' | 'suspended' | 'first_interview' | 'second_interview') => 
+            <Select
+              value={formData.offerStatus}
+              onValueChange={(value: 'pending' | 'follow_up_pending' | 'filled' | 'suspended' | 'first_interview' | 'second_interview') =>
                 setFormData(prev => ({ ...prev, offerStatus: value }))
               }
             >
@@ -180,6 +183,16 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
                 <SelectItem value="second_interview">2ème entretien</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="interviewDate">Date de l'entretien</Label>
+            <Input
+              id="interviewDate"
+              type="date"
+              value={formData.interviewDate}
+              onChange={(e) => setFormData(prev => ({ ...prev, interviewDate: e.target.value }))}
+            />
           </div>
 
           <div>

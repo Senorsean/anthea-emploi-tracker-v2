@@ -195,6 +195,18 @@ const SortableJobCard: React.FC<{
               {getOfferTypeLabel(job.offerType)}
             </Badge>
           )}
+
+          {job.interviewDate && (
+            <div className="flex items-center gap-1 text-gray-500">
+              <Calendar className="h-3 w-3" />
+              <span className="text-xs">
+                {new Date(job.interviewDate).toLocaleDateString('fr-FR', {
+                  month: 'short',
+                  day: 'numeric'
+                })}
+              </span>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -348,6 +360,9 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
       newJobs[targetColumnId] = [...newJobs[targetColumnId], result.job];
 
       if (targetColumnId === 'interview' && result.columnId !== 'interview') {
+        if (!result.job.interviewDate) {
+          result.job.interviewDate = new Date().toISOString().split('T')[0];
+        }
         setInterviews(prev => [
           ...prev,
           { id: Date.now().toString(), date: new Date().toISOString().split('T')[0] }
