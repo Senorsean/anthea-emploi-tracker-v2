@@ -5,12 +5,11 @@ import { useResponses } from './useResponses';
 
 export interface CentralizedStats {
   jobs: {
-    targeted: number;
+    offer: number;
     applied: number;
     screening: number;
     interview: number;
     final: number;
-    offer: number;
     total: number;
   };
   timeframes: {
@@ -41,11 +40,10 @@ export interface CentralizedStats {
     };
   };
   conversionRates: {
-    targetedToApplied: number;
+    offerToApplied: number;
     appliedToScreening: number;
     screeningToInterview: number;
     interviewToFinal: number;
-    finalToOffer: number;
   };
   goals: {
     interviewsThisWeek: number;
@@ -63,12 +61,11 @@ export function useStats(): CentralizedStats {
   
   const [stats, setStats] = useState<CentralizedStats>({
     jobs: {
-      targeted: 0,
+      offer: 0,
       applied: 0,
       screening: 0,
       interview: 0,
       final: 0,
-      offer: 0,
       total: 0,
     },
     timeframes: {
@@ -79,11 +76,10 @@ export function useStats(): CentralizedStats {
       sixMonths: { applications: 0, interviews: 0, responses: 0 },
     },
     conversionRates: {
-      targetedToApplied: 0,
+      offerToApplied: 0,
       appliedToScreening: 0,
       screeningToInterview: 0,
       interviewToFinal: 0,
-      finalToOffer: 0,
     },
     goals: {
       interviewsThisWeek: 0,
@@ -105,12 +101,11 @@ export function useStats(): CentralizedStats {
 
     // Job counts by stage
     const jobCounts = {
-      targeted: jobs.targeted?.length || 0,
+      offer: jobs.offer?.length || 0,
       applied: jobs.applied?.length || 0,
       screening: jobs.screening?.length || 0,
       interview: jobs.interview?.length || 0,
       final: jobs.final?.length || 0,
-      offer: jobs.offer?.length || 0,
       total: allJobs.length,
     };
 
@@ -157,13 +152,12 @@ export function useStats(): CentralizedStats {
       },
     };
 
-    // Conversion rates
+    // Conversion rates - updated for new structure
     const conversionRates = {
-      targetedToApplied: jobCounts.targeted ? jobCounts.applied / jobCounts.targeted : 0,
+      offerToApplied: jobCounts.offer ? jobCounts.applied / jobCounts.offer : 0,
       appliedToScreening: jobCounts.applied ? jobCounts.screening / jobCounts.applied : 0,
       screeningToInterview: jobCounts.screening ? jobCounts.interview / jobCounts.screening : 0,
       interviewToFinal: jobCounts.interview ? jobCounts.final / jobCounts.interview : 0,
-      finalToOffer: jobCounts.final ? jobCounts.offer / jobCounts.final : 0,
     };
 
     // Goals calculation

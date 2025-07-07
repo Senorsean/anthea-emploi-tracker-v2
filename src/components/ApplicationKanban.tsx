@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -234,13 +235,12 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
   const { jobs, setJobs } = useJobs();
   const { setInterviews } = useInterviews();
 
-  // Recalculate columns with current job counts
+  // Updated columns with new structure: Offre, Postulé, Relances, Entretien, Finale
   const columns = [
-    { id: 'targeted', title: 'Ciblés', color: 'bg-gray-100', count: jobs.targeted?.length || 0 },
-    { id: 'applied', title: 'Postulé', color: 'bg-blue-100', count: jobs.applied?.length || 0 },
-    { id: 'screening', title: 'Screening', color: 'bg-yellow-100', count: jobs.screening?.length || 0 },
-    { id: 'interview', title: 'Entretien', color: 'bg-orange-100', count: jobs.interview?.length || 0 },
     { id: 'offer', title: 'Offre', color: 'bg-green-100', count: jobs.offer?.length || 0 },
+    { id: 'applied', title: 'Postulé', color: 'bg-blue-100', count: jobs.applied?.length || 0 },
+    { id: 'screening', title: 'Relances', color: 'bg-yellow-100', count: jobs.screening?.length || 0 },
+    { id: 'interview', title: 'Entretien', color: 'bg-orange-100', count: jobs.interview?.length || 0 },
     { id: 'final', title: 'Finale', color: 'bg-purple-100', count: jobs.final?.length || 0 },
   ];
 
@@ -368,7 +368,7 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
 
     setJobs(prev => ({
       ...prev,
-      targeted: [...prev.targeted, newJob]
+      offer: [...prev.offer, newJob]
     }));
   };
 
@@ -400,7 +400,7 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4 h-full">
+          <div className="grid grid-cols-3 md:grid-cols-5 gap-4 h-full">
             {columns.map(column => {
               const columnJobs = jobs[column.id] || [];
               return (
@@ -487,7 +487,7 @@ export const ApplicationKanban: React.FC<ApplicationKanbanProps> = ({ preview = 
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
           {columns.map(column => {
             const columnJobs = jobs[column.id] || [];
             return (

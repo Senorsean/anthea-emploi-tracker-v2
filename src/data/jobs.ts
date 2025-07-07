@@ -13,7 +13,7 @@ export interface Job {
 }
 
 export const initialJobs: Record<string, Job[]> = {
-  targeted: [
+  offer: [
     {
       id: '1',
       title: 'Product Manager',
@@ -77,6 +77,5 @@ export const initialJobs: Record<string, Job[]> = {
       offerType: 'network'
     }
   ],
-  offer: [],
   final: []
 };
