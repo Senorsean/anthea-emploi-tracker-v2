@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useJobs } from './useJobs';
 import { useResponses } from './useResponses';
+import { useInterviews } from './useInterviews';
 
 export interface CentralizedStats {
   jobs: {
@@ -58,6 +59,7 @@ export interface CentralizedStats {
 export function useStats(): CentralizedStats {
   const { jobs } = useJobs();
   const { responses } = useResponses();
+  const { interviews } = useInterviews();
   
   const [stats, setStats] = useState<CentralizedStats>({
     jobs: {
@@ -127,7 +129,7 @@ export function useStats(): CentralizedStats {
       total: allJobs.length,
     };
 
-    // Time-based statistics - now using combined interview jobs
+    // Time-based statistics
     const allAppliedJobs = [
       ...(jobs.applied || []),
       ...(jobs.screening || []),
@@ -135,30 +137,38 @@ export function useStats(): CentralizedStats {
       ...(jobs.final || []),
     ];
 
+    const interviewCounts = {
+      day: interviews.filter(i => diffDays(i.date) <= 1).length || 0,
+      week: interviews.filter(i => diffDays(i.date) <= 7).length || 0,
+      month: interviews.filter(i => diffDays(i.date) <= 30).length || 0,
+      threeMonths: interviews.filter(i => diffDays(i.date) <= 90).length || 0,
+      sixMonths: interviews.filter(i => diffDays(i.date) <= 180).length || 0,
+    };
+
     const timeframes = {
       today: {
         applications: allAppliedJobs.filter(job => diffDays(job.dateAdded) <= 1).length || 0,
-        interviews: allInterviewJobs.filter(job => diffDays(job.dateAdded) <= 1).length || 0,
+        interviews: interviewCounts.day,
         responses: responses?.filter(response => diffDays(response.date) <= 1).length || 0,
       },
       week: {
         applications: allAppliedJobs.filter(job => diffDays(job.dateAdded) <= 7).length || 0,
-        interviews: allInterviewJobs.filter(job => diffDays(job.dateAdded) <= 7).length || 0,
+        interviews: interviewCounts.week,
         responses: responses?.filter(response => diffDays(response.date) <= 7).length || 0,
       },
       month: {
         applications: allAppliedJobs.filter(job => diffDays(job.dateAdded) <= 30).length || 0,
-        interviews: allInterviewJobs.filter(job => diffDays(job.dateAdded) <= 30).length || 0,
+        interviews: interviewCounts.month,
         responses: responses?.filter(response => diffDays(response.date) <= 30).length || 0,
       },
       threeMonths: {
         applications: allAppliedJobs.filter(job => diffDays(job.dateAdded) <= 90).length || 0,
-        interviews: allInterviewJobs.filter(job => diffDays(job.dateAdded) <= 90).length || 0,
+        interviews: interviewCounts.threeMonths,
         responses: responses?.filter(response => diffDays(response.date) <= 90).length || 0,
       },
       sixMonths: {
         applications: allAppliedJobs.filter(job => diffDays(job.dateAdded) <= 180).length || 0,
-        interviews: allInterviewJobs.filter(job => diffDays(job.dateAdded) <= 180).length || 0,
+        interviews: interviewCounts.sixMonths,
         responses: responses?.filter(response => diffDays(response.date) <= 180).length || 0,
       },
     };
@@ -189,7 +199,7 @@ export function useStats(): CentralizedStats {
       conversionRates,
       goals,
     });
-  }, [jobs, responses]);
+  }, [jobs, responses, interviews]);
 
   return stats;
 }
