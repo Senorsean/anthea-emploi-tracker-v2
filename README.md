@@ -69,10 +69,13 @@ Simply open [Lovable](https://lovable.dev/projects/203d2aff-eb03-48ba-81af-fd416
 Créez un fichier `.env` à la racine du projet en vous inspirant de `.env.example` :
 
 ```bash
-VITE_POLE_EMPLOI_API_KEY=<votre clé Pôle Emploi>
+VITE_POLE_EMPLOI_CLIENT_ID=<votre identifiant partenaire>
+VITE_POLE_EMPLOI_CLIENT_SECRET=<votre clé secrète>
+# Optionnel : jeton d'accès déjà obtenu
+VITE_POLE_EMPLOI_API_KEY=<votre jeton d'accès>
 ```
 
-Ce fichier n'est pas suivi par git et vous permet d'ajouter votre clé API en toute sécurité.
+Ce fichier n'est pas suivi par git et vous permet d'ajouter vos identifiants en toute sécurité.
 
 ## Offres du jour
 
