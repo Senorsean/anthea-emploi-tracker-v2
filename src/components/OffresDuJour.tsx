@@ -29,6 +29,8 @@ export const OffresDuJour = () => {
   const [city, setCity] = useState(preferences.city);
   const [region, setRegion] = useState(preferences.region);
   const [contract, setContract] = useState(preferences.contractType || "CDD");
+  const [minDate, setMinDate] = useState("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [apiOffers, setApiOffers] = useState<PoleEmploiOffer[]>([]);
 
   useEffect(() => {
@@ -38,38 +40,52 @@ export const OffresDuJour = () => {
     setContract(preferences.contractType || "CDD");
   }, [preferences]);
 
+  const fetchAndSetOffers = async (params: Parameters<typeof searchOffers>[0]) => {
+    try {
+      const results = await searchOffers(params);
+      let filtered = results;
+      if (minDate) {
+        const min = new Date(minDate);
+        filtered = filtered.filter(
+          (o) => !o.dateCreation || new Date(o.dateCreation) >= min
+        );
+      }
+      filtered.sort((a, b) => {
+        const aDate = new Date(a.dateCreation || 0).getTime();
+        const bDate = new Date(b.dateCreation || 0).getTime();
+        return sortOrder === "asc" ? aDate - bDate : bDate - aDate;
+      });
+      setApiOffers(filtered);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     if (
       preferences.keywords ||
       preferences.city ||
       preferences.region
     ) {
-      searchOffers({
+      fetchAndSetOffers({
         keywords: preferences.keywords,
         city: preferences.city,
         region: preferences.region,
         contractType: preferences.contractType,
-      })
-        .then(setApiOffers)
-        .catch((err) => console.error(err));
+      });
     }
-  }, [preferences]);
+  }, [preferences, minDate, sortOrder]);
 
-  const handleSearch = async (e: React.FormEvent) => {
+  const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      const params = {
-        keywords,
-        city,
-        region,
-        contractType: contract,
-      };
-      setPreferences(params);
-      const offers = await searchOffers(params);
-      setApiOffers(offers);
-    } catch (err) {
-      console.error(err);
-    }
+    const params = {
+      keywords,
+      city,
+      region,
+      contractType: contract,
+    };
+    setPreferences(params);
+    fetchAndSetOffers(params);
   };
 
   return (
@@ -81,7 +97,7 @@ export const OffresDuJour = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-6 gap-4">
           <Input
             placeholder="Poste"
             value={keywords}
@@ -115,7 +131,21 @@ export const OffresDuJour = () => {
               <SelectItem value="SAI">Saisonnier</SelectItem>
             </SelectContent>
           </Select>
-          <Button type="submit" className="md:col-span-4 bg-[#a4007c] hover:bg-[#a4007c]/90">
+          <Input
+            type="date"
+            value={minDate}
+            onChange={(e) => setMinDate(e.target.value)}
+          />
+          <Select value={sortOrder} onValueChange={setSortOrder}>
+            <SelectTrigger>
+              <SelectValue placeholder="Tri" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="desc">Récentes</SelectItem>
+              <SelectItem value="asc">Anciennes</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button type="submit" className="md:col-span-6 bg-[#a4007c] hover:bg-[#a4007c]/90">
             Rechercher
           </Button>
         </form>
