@@ -1,4 +1,4 @@
-// Utilities for accessing the P\u00f4le Emploi (France Travail) API
+// Utilities for accessing the France Travail API (formerly Pôle Emploi)
 // The API requires an OAuth access token which can be obtained using
 // your client ID and client secret. Optionally you can provide an
 // already created token via `VITE_POLE_EMPLOI_API_KEY`.
@@ -83,7 +83,7 @@ export async function searchOffers(params: SearchParams): Promise<PoleEmploiOffe
   if (params.contractType) searchParams.set('typeContrat', params.contractType);
   searchParams.set('range', '0-20');
 
-  const url = `https://api.pole-emploi.io/partenaire/offresdemploi/v2/offres/search?${searchParams.toString()}`;
+  const url = `https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search?${searchParams.toString()}`;
   const res = await fetch(url, {
     headers: {
       Authorization: `Bearer ${token}`,
