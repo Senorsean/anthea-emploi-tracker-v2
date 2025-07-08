@@ -74,6 +74,10 @@ VITE_POLE_EMPLOI_API_KEY=<votre clé Pôle Emploi>
 
 Ce fichier n'est pas suivi par git et vous permet d'ajouter votre clé API en toute sécurité.
 
+## Offres du jour
+
+Renseignez vos préférences (poste, localisation et type de contrat) dans le module **Offres du jour**. Ces préférences sont enregistrées localement et synchronisées avec votre compte Supabase. À chaque visite, l'application récupère automatiquement des annonces correspondant à ces critères grâce à l'API Pôle Emploi.
+
 ## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!

@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Briefcase } from "lucide-react";
 import { useJobs } from "@/hooks/useJobs";
+import { useJobPreferences } from "@/hooks/useJobPreferences";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,6 +16,7 @@ import { searchOffers, PoleEmploiOffer } from "@/integrations/pole-emploi/client
 
 export const OffresDuJour = () => {
   const { jobs } = useJobs();
+  const { preferences, setPreferences } = useJobPreferences();
   const allJobs = Object.values(jobs).flat();
   const todayOffers = allJobs.filter((job) => {
     const diffDays =
@@ -22,21 +24,47 @@ export const OffresDuJour = () => {
     return diffDays <= 1 && job.offerType === "job_offer";
   });
 
-  const [keywords, setKeywords] = useState("");
-  const [city, setCity] = useState("");
-  const [region, setRegion] = useState("");
-  const [contract, setContract] = useState("CDD");
+  const [keywords, setKeywords] = useState(preferences.keywords);
+  const [city, setCity] = useState(preferences.city);
+  const [region, setRegion] = useState(preferences.region);
+  const [contract, setContract] = useState(preferences.contractType || "CDD");
   const [apiOffers, setApiOffers] = useState<PoleEmploiOffer[]>([]);
+
+  useEffect(() => {
+    setKeywords(preferences.keywords);
+    setCity(preferences.city);
+    setRegion(preferences.region);
+    setContract(preferences.contractType || "CDD");
+  }, [preferences]);
+
+  useEffect(() => {
+    if (
+      preferences.keywords ||
+      preferences.city ||
+      preferences.region
+    ) {
+      searchOffers({
+        keywords: preferences.keywords,
+        city: preferences.city,
+        region: preferences.region,
+        contractType: preferences.contractType,
+      })
+        .then(setApiOffers)
+        .catch((err) => console.error(err));
+    }
+  }, [preferences]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const offers = await searchOffers({
+      const params = {
         keywords,
         city,
         region,
         contractType: contract,
-      });
+      };
+      setPreferences(params);
+      const offers = await searchOffers(params);
       setApiOffers(offers);
     } catch (err) {
       console.error(err);
