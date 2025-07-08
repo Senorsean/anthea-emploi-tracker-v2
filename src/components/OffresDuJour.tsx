@@ -43,6 +43,7 @@ export const OffresDuJour = () => {
   const fetchAndSetOffers = async (params: Parameters<typeof searchOffers>[0]) => {
     try {
       const results = await searchOffers(params);
+      console.log("🟢 Résultats France Travail :", results);
       let filtered = results;
       if (minDate) {
         const min = new Date(minDate);
