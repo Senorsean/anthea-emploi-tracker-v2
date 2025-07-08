@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { frenchRegions } from "@/data/regions";
-import { searchOffers, PoleEmploiOffer } from "@/integrations/pole-emploi/client";
+import { searchOffers, FranceTravailOffer } from "@/integrations/france-travail/client";
 
 export const OffresDuJour = () => {
   const { jobs } = useJobs();
@@ -31,7 +31,7 @@ export const OffresDuJour = () => {
   const [contract, setContract] = useState(preferences.contractType || "CDD");
   const [minDate, setMinDate] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [apiOffers, setApiOffers] = useState<PoleEmploiOffer[]>([]);
+  const [apiOffers, setApiOffers] = useState<FranceTravailOffer[]>([]);
 
   useEffect(() => {
     setKeywords(preferences.keywords);
