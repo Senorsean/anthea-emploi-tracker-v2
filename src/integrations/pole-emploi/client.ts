@@ -14,6 +14,7 @@ export interface PoleEmploiOffer {
   entreprise?: { nom: string };
   lieuTravail?: { libelle?: string };
   typeContrat?: string;
+  dateCreation?: string;
   origine?: { url?: string };
 }
 
