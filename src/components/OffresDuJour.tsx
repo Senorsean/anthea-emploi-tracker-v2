@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { frenchRegions } from "@/data/regions";
 import { searchOffers, PoleEmploiOffer } from "@/integrations/pole-emploi/client";
 
 export const OffresDuJour = () => {
@@ -91,11 +92,18 @@ export const OffresDuJour = () => {
             value={city}
             onChange={(e) => setCity(e.target.value)}
           />
-          <Input
-            placeholder="Région"
-            value={region}
-            onChange={(e) => setRegion(e.target.value)}
-          />
+          <Select value={region} onValueChange={setRegion}>
+            <SelectTrigger>
+              <SelectValue placeholder="Région" />
+            </SelectTrigger>
+            <SelectContent>
+              {frenchRegions.map((r) => (
+                <SelectItem key={r} value={r}>
+                  {r}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Select value={contract} onValueChange={setContract}>
             <SelectTrigger>
               <SelectValue placeholder="Contrat" />
