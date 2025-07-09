@@ -13,6 +13,13 @@ export const OverviewFocusAreas = () => {
       external: true,
     },
     {
+      title: 'Créer votre CV',
+      description:
+        'Générez un CV professionnel en quelques minutes avec des modèles adaptés.',
+      link: 'https://cv-compass-generator.lovable.app/',
+      external: true,
+    },
+    {
       title: 'Optimiser votre CV',
       description:
         'Mettez en valeur vos compétences clés pour augmenter votre taux de réponse.',
