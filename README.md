@@ -64,23 +64,6 @@ This project is built with:
 
 Simply open [Lovable](https://lovable.dev/projects/203d2aff-eb03-48ba-81af-fd4166240394) and click on Share -> Publish.
 
-## Configuration des clés API
-
-Créez un fichier `.env` à la racine du projet en vous inspirant de `.env.example` :
-
-```bash
-VITE_POLE_EMPLOI_CLIENT_ID=<votre identifiant partenaire>
-VITE_POLE_EMPLOI_CLIENT_SECRET=<votre clé secrète>
-# Optionnel : jeton d'accès déjà obtenu
-VITE_POLE_EMPLOI_API_KEY=<votre jeton d'accès>
-```
-Ces variables sont utilisées pour l'API France Travail disponible sur `https://api.francetravail.io`.
-
-Ce fichier n'est pas suivi par git et vous permet d'ajouter vos identifiants en toute sécurité.
-
-## Offres du jour
-
-Renseignez vos préférences (poste, localisation et type de contrat) dans le module **Offres du jour**. Ces préférences sont enregistrées localement et synchronisées avec votre compte Supabase. À chaque visite, l'application récupère automatiquement des annonces correspondant à ces critères grâce à l'API France Travail (anciennement Pôle Emploi).
 
 ## Can I connect a custom domain to my Lovable project?
 
