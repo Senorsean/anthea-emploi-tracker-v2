@@ -8,7 +8,6 @@ import { AIInsights } from "@/components/AIInsights";
 import { OverviewFocusAreas } from "@/components/OverviewFocusAreas";
 import { GoalsModule } from "@/components/GoalsModule";
 import WebzinesAnthea from "@/components/WebzinesAnthea";
-import OffresDuJour from "@/components/OffresDuJour";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const Index = () => {
@@ -51,7 +50,6 @@ const Index = () => {
                 onPreviewClick={() => setActiveTab("network")}
               />
             </div>
-            <OffresDuJour />
             <WebzinesAnthea />
           </TabsContent>
 
