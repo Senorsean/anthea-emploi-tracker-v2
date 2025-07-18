@@ -5,13 +5,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { Briefcase } from 'lucide-react';
 import type { Contact } from '@/data/contacts';
+import type { Job } from '@/data/jobs';
+import { CreateJobFromContactModal } from './CreateJobFromContactModal';
 
 interface EditContactModalProps {
   isOpen: boolean;
   onClose: () => void;
   contact: Contact;
   onUpdate: (contact: Contact) => void;
+  onCreateJob?: (job: Omit<Job, 'id' | 'dateAdded'>) => void;
 }
 
 export const EditContactModal: React.FC<EditContactModalProps> = ({
@@ -19,8 +23,10 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({
   onClose,
   contact,
   onUpdate,
+  onCreateJob,
 }) => {
   const [formData, setFormData] = useState<Contact>(contact);
+  const [showCreateJobModal, setShowCreateJobModal] = useState(false);
 
   useEffect(() => {
     setFormData(contact);
@@ -125,11 +131,31 @@ export const EditContactModal: React.FC<EditContactModalProps> = ({
             <Button type="button" variant="outline" onClick={onClose} className="flex-1">
               Annuler
             </Button>
+            {onCreateJob && (
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowCreateJobModal(true)}
+                className="flex-1 flex items-center gap-2"
+              >
+                <Briefcase className="h-4 w-4" />
+                Créer offre
+              </Button>
+            )}
             <Button type="submit" className="flex-1 bg-[#e3007b] hover:bg-[#e3007b]/90">
               Enregistrer
             </Button>
           </div>
         </form>
+
+        {onCreateJob && (
+          <CreateJobFromContactModal
+            isOpen={showCreateJobModal}
+            onClose={() => setShowCreateJobModal(false)}
+            contact={contact}
+            onCreateJob={onCreateJob}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

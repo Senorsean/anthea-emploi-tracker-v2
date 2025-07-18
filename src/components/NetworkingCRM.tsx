@@ -24,6 +24,8 @@ import { AddContactModal } from './AddContactModal';
 import EditContactModal from './EditContactModal';
 import { ImportContactsModal } from './ImportContactsModal';
 import { useContacts } from '@/hooks/useContacts';
+import { useJobs } from '@/hooks/useJobs';
+import { Job } from '@/data/jobs';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface NetworkingCRMProps {
@@ -37,6 +39,7 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const { contacts, setContacts } = useContacts();
+  const { jobs, setJobs } = useJobs();
   const [editContact, setEditContact] = useState<Contact | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [selectedContactIds, setSelectedContactIds] = useState<string[]>([]);
@@ -109,6 +112,20 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
     }));
 
     setContacts(prev => [...newContacts, ...prev]);
+  };
+
+  const createJobFromContact = (jobData: Omit<Job, 'id' | 'dateAdded'>) => {
+    const newJob: Job = {
+      ...jobData,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      dateAdded: new Date().toISOString().split('T')[0]
+    };
+
+    // Ajouter le job dans la catégorie "offer" par défaut
+    setJobs(prev => ({
+      ...prev,
+      offer: [newJob, ...prev.offer]
+    }));
   };
 
   const exportContacts = async () => {
@@ -338,6 +355,7 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
             updateContact(data);
             setEditContact(null);
           }}
+          onCreateJob={createJobFromContact}
         />
       )}
     </div>
