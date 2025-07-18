@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Download, Upload, FileText, AlertCircle } from 'lucide-react';
 import { Contact } from '@/data/contacts';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import * as XLSX from 'xlsx';
 
 interface ImportContactsModalProps {
   isOpen: boolean;
@@ -29,19 +30,13 @@ export const ImportContactsModal: React.FC<ImportContactsModalProps> = ({
       ['Jane Smith', 'StartupXYZ', 'Product Manager', 'jane@startupxyz.com', 'in/jane-smith', 'contacted', '']
     ];
 
-    const csvContent = template.map(row => 
-      row.map(cell => `"${cell}"`).join(',')
-    ).join('\n');
+    // Créer un workbook Excel
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet(template);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Contacts');
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'template_contacts.csv');
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Télécharger le fichier Excel
+    XLSX.writeFile(workbook, 'template_contacts.xlsx');
   };
 
   const parseCSV = (text: string): string[][] => {
@@ -75,14 +70,26 @@ export const ImportContactsModal: React.FC<ImportContactsModalProps> = ({
     setError(null);
 
     try {
-      const text = await file.text();
-      const rows = parseCSV(text);
+      let rows: string[][];
+
+      if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+        // Traitement des fichiers Excel
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      } else {
+        // Traitement des fichiers CSV
+        const text = await file.text();
+        rows = parseCSV(text);
+      }
       
       if (rows.length < 2) {
         throw new Error('Le fichier doit contenir au moins une ligne d\'en-tête et une ligne de données');
       }
 
-      const headers = rows[0].map(h => h.toLowerCase().replace(/"/g, ''));
+      const headers = rows[0].map(h => String(h).toLowerCase().replace(/"/g, ''));
       const dataRows = rows.slice(1);
 
       // Vérifier les colonnes requises
@@ -97,7 +104,7 @@ export const ImportContactsModal: React.FC<ImportContactsModalProps> = ({
         const contact: any = {};
         
         headers.forEach((header, i) => {
-          const value = row[i]?.replace(/"/g, '') || '';
+          const value = String(row[i] || '').replace(/"/g, '');
           switch (header) {
             case 'nom':
               contact.name = value;
@@ -170,7 +177,7 @@ export const ImportContactsModal: React.FC<ImportContactsModalProps> = ({
               className="w-full flex items-center gap-2"
             >
               <Download className="h-4 w-4" />
-              Télécharger le template CSV
+              Télécharger le template Excel
             </Button>
             <p className="text-sm text-muted-foreground">
               Utilisez ce template pour formater vos contacts correctement.
@@ -183,7 +190,7 @@ export const ImportContactsModal: React.FC<ImportContactsModalProps> = ({
               <Input
                 ref={fileInputRef}
                 type="file"
-                accept=".csv"
+                accept=".csv,.xlsx,.xls"
                 onChange={handleFileUpload}
                 disabled={isLoading}
                 className="cursor-pointer"
@@ -198,7 +205,7 @@ export const ImportContactsModal: React.FC<ImportContactsModalProps> = ({
               </Button>
             </div>
             <p className="text-sm text-muted-foreground">
-              Accepte uniquement les fichiers CSV.
+              Accepte les fichiers CSV, Excel (.xlsx) et Excel (.xls).
             </p>
           </div>
 
