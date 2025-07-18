@@ -14,7 +14,195 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      resumes: {
+        Row: {
+          color_scheme_id: number | null
+          created_at: string
+          custom_sections: Json | null
+          education: Json | null
+          experiences: Json | null
+          id: string
+          interests: Json | null
+          is_public: boolean | null
+          languages: Json | null
+          pdf_url: string | null
+          personal_info: Json
+          qr_code_url: string | null
+          skills: Json | null
+          template_id: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color_scheme_id?: number | null
+          created_at?: string
+          custom_sections?: Json | null
+          education?: Json | null
+          experiences?: Json | null
+          id?: string
+          interests?: Json | null
+          is_public?: boolean | null
+          languages?: Json | null
+          pdf_url?: string | null
+          personal_info?: Json
+          qr_code_url?: string | null
+          skills?: Json | null
+          template_id: number
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color_scheme_id?: number | null
+          created_at?: string
+          custom_sections?: Json | null
+          education?: Json | null
+          experiences?: Json | null
+          id?: string
+          interests?: Json | null
+          is_public?: boolean | null
+          languages?: Json | null
+          pdf_url?: string | null
+          personal_info?: Json
+          qr_code_url?: string | null
+          skills?: Json | null
+          template_id?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shared_resumes: {
+        Row: {
+          access_count: number | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          resume_id: string
+          share_token: string
+        }
+        Insert: {
+          access_count?: number | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          resume_id: string
+          share_token: string
+        }
+        Update: {
+          access_count?: number | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          resume_id?: string
+          share_token?: string
+        }
+        Relationships: []
+      }
+      template_colors: {
+        Row: {
+          accent_color: string | null
+          background_color: string | null
+          color_name: string
+          created_at: string
+          id: number
+          is_default: boolean | null
+          primary_color: string
+          secondary_color: string | null
+          template_id: number
+          text_color: string | null
+        }
+        Insert: {
+          accent_color?: string | null
+          background_color?: string | null
+          color_name: string
+          created_at?: string
+          id?: number
+          is_default?: boolean | null
+          primary_color: string
+          secondary_color?: string | null
+          template_id: number
+          text_color?: string | null
+        }
+        Update: {
+          accent_color?: string | null
+          background_color?: string | null
+          color_name?: string
+          created_at?: string
+          id?: number
+          is_default?: boolean | null
+          primary_color?: string
+          secondary_color?: string | null
+          template_id?: number
+          text_color?: string | null
+        }
+        Relationships: []
+      }
+      templates: {
+        Row: {
+          created_at: string
+          css_styles: string
+          description: string | null
+          display_order: number | null
+          html_template: string
+          id: number
+          is_active: boolean | null
+          name: string
+          preview_image_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          css_styles: string
+          description?: string | null
+          display_order?: number | null
+          html_template: string
+          id?: number
+          is_active?: boolean | null
+          name: string
+          preview_image_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          css_styles?: string
+          description?: string | null
+          display_order?: number | null
+          html_template?: string
+          id?: number
+          is_active?: boolean | null
+          name?: string
+          preview_image_url?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

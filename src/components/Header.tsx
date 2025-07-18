@@ -9,6 +9,19 @@ import { Link } from 'react-router-dom';
 import { useAlerts } from '@/hooks/useAlerts';
 import type { Alert } from '@/data/alerts';
 
+const cleanupAuthState = () => {
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  Object.keys(sessionStorage || {}).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      sessionStorage.removeItem(key);
+    }
+  });
+};
+
 interface UserMetadata {
   first_name?: string;
   firstName?: string;
@@ -66,6 +79,21 @@ export const Header = ({ onLogoClick }: HeaderProps) => {
   const { alerts, markAsRead, cancelAlert, updateAlertDate, unreadCount } = useAlerts();
 
   const [editingAlert, setEditingAlert] = useState<Alert | null>(null);
+
+  const handleLogout = async () => {
+    try {
+      cleanupAuthState();
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+      }
+      window.location.href = '/login';
+    } catch (error) {
+      // Force redirect even if logout fails
+      window.location.href = '/login';
+    }
+  };
   
   useEffect(() => {
     supabase.auth
@@ -167,7 +195,7 @@ export const Header = ({ onLogoClick }: HeaderProps) => {
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => supabase.auth.signOut()}
+              onClick={handleLogout}
             >
               <LogOut className="h-4 w-4 text-white" />
             </Button>
