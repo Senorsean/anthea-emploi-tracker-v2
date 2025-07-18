@@ -182,31 +182,57 @@ export function useStats(): CentralizedStats {
       }).length,
     };
 
+    // Calculer les réponses reçues (incluant les refus)
+    const rejectedJobs = allJobs.filter(job => job.offerStatus === 'rejected');
+    
+    const responsesCounts = {
+      day: {
+        fromTable: responses?.filter(response => diffDays(response.date) <= 1).length || 0,
+        fromRejected: rejectedJobs.filter(job => diffDays(job.dateAdded) <= 1).length,
+      },
+      week: {
+        fromTable: responses?.filter(response => diffDays(response.date) <= 7).length || 0,
+        fromRejected: rejectedJobs.filter(job => diffDays(job.dateAdded) <= 7).length,
+      },
+      month: {
+        fromTable: responses?.filter(response => diffDays(response.date) <= 30).length || 0,
+        fromRejected: rejectedJobs.filter(job => diffDays(job.dateAdded) <= 30).length,
+      },
+      threeMonths: {
+        fromTable: responses?.filter(response => diffDays(response.date) <= 90).length || 0,
+        fromRejected: rejectedJobs.filter(job => diffDays(job.dateAdded) <= 90).length,
+      },
+      sixMonths: {
+        fromTable: responses?.filter(response => diffDays(response.date) <= 180).length || 0,
+        fromRejected: rejectedJobs.filter(job => diffDays(job.dateAdded) <= 180).length,
+      },
+    };
+
     const timeframes = {
       today: {
         applications: allAppliedJobs.filter(job => diffDays(job.dateAdded) <= 1).length || 0,
         interviews: interviewCounts.day,
-        responses: responses?.filter(response => diffDays(response.date) <= 1).length || 0,
+        responses: responsesCounts.day.fromTable + responsesCounts.day.fromRejected,
       },
       week: {
         applications: allAppliedJobs.filter(job => diffDays(job.dateAdded) <= 7).length || 0,
         interviews: interviewCounts.week,
-        responses: responses?.filter(response => diffDays(response.date) <= 7).length || 0,
+        responses: responsesCounts.week.fromTable + responsesCounts.week.fromRejected,
       },
       month: {
         applications: allAppliedJobs.filter(job => diffDays(job.dateAdded) <= 30).length || 0,
         interviews: interviewCounts.month,
-        responses: responses?.filter(response => diffDays(response.date) <= 30).length || 0,
+        responses: responsesCounts.month.fromTable + responsesCounts.month.fromRejected,
       },
       threeMonths: {
         applications: allAppliedJobs.filter(job => diffDays(job.dateAdded) <= 90).length || 0,
         interviews: interviewCounts.threeMonths,
-        responses: responses?.filter(response => diffDays(response.date) <= 90).length || 0,
+        responses: responsesCounts.threeMonths.fromTable + responsesCounts.threeMonths.fromRejected,
       },
       sixMonths: {
         applications: allAppliedJobs.filter(job => diffDays(job.dateAdded) <= 180).length || 0,
         interviews: interviewCounts.sixMonths,
-        responses: responses?.filter(response => diffDays(response.date) <= 180).length || 0,
+        responses: responsesCounts.sixMonths.fromTable + responsesCounts.sixMonths.fromRejected,
       },
     };
 
