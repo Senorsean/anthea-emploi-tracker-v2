@@ -137,12 +137,45 @@ export function useStats(): CentralizedStats {
       ...(jobs.final || []),
     ];
 
+    // Calculer les entretiens basés sur les jobs avec statut d'entretien
+    // On compte les jobs avec statut d'entretien, qu'ils aient une date ou non
+    const allJobsWithInterviewStatus = allJobs.filter(job => 
+      job.offerStatus === 'first_interview' || job.offerStatus === 'second_interview'
+    );
+
     const interviewCounts = {
-      day: interviews.filter(i => diffDays(i.date) <= 1).length || 0,
-      week: interviews.filter(i => diffDays(i.date) <= 7).length || 0,
-      month: interviews.filter(i => diffDays(i.date) <= 30).length || 0,
-      threeMonths: interviews.filter(i => diffDays(i.date) <= 90).length || 0,
-      sixMonths: interviews.filter(i => diffDays(i.date) <= 180).length || 0,
+      day: allJobsWithInterviewStatus.filter(job => {
+        // Si le job a une date d'entretien, on vérifie la date
+        if (job.interviewDate) {
+          return diffDays(job.interviewDate) <= 1;
+        }
+        // Sinon, on considère la date d'ajout du job
+        return diffDays(job.dateAdded) <= 1;
+      }).length,
+      week: allJobsWithInterviewStatus.filter(job => {
+        if (job.interviewDate) {
+          return diffDays(job.interviewDate) <= 7;
+        }
+        return diffDays(job.dateAdded) <= 7;
+      }).length,
+      month: allJobsWithInterviewStatus.filter(job => {
+        if (job.interviewDate) {
+          return diffDays(job.interviewDate) <= 30;
+        }
+        return diffDays(job.dateAdded) <= 30;
+      }).length,
+      threeMonths: allJobsWithInterviewStatus.filter(job => {
+        if (job.interviewDate) {
+          return diffDays(job.interviewDate) <= 90;
+        }
+        return diffDays(job.dateAdded) <= 90;
+      }).length,
+      sixMonths: allJobsWithInterviewStatus.filter(job => {
+        if (job.interviewDate) {
+          return diffDays(job.interviewDate) <= 180;
+        }
+        return diffDays(job.dateAdded) <= 180;
+      }).length,
     };
 
     const timeframes = {
