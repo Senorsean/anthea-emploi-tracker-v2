@@ -7,20 +7,8 @@ import { Bell, Check, Settings, LogOut, Pencil, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Link } from 'react-router-dom';
 import { useAlerts } from '@/hooks/useAlerts';
+import { cleanupOnLogout } from '@/lib/auth-cleanup';
 import type { Alert } from '@/data/alerts';
-
-const cleanupAuthState = () => {
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      localStorage.removeItem(key);
-    }
-  });
-  Object.keys(sessionStorage || {}).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      sessionStorage.removeItem(key);
-    }
-  });
-};
 
 interface UserMetadata {
   first_name?: string;
@@ -82,7 +70,7 @@ export const Header = ({ onLogoClick }: HeaderProps) => {
 
   const handleLogout = async () => {
     try {
-      cleanupAuthState();
+      cleanupOnLogout();
       try {
         await supabase.auth.signOut({ scope: 'global' });
       } catch (err) {

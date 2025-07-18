@@ -5,35 +5,70 @@ import { supabase } from '@/integrations/supabase/client';
 
 export function useResponses() {
   const [responses, setResponses] = useState<Response[]>(initialResponses);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem('responses');
-    if (saved) {
-      try {
-        setResponses(JSON.parse(saved));
+    const initializeUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        setResponses(initialResponses);
+        setCurrentUserId(null);
         return;
-      } catch (err) {
-        console.error('Failed to parse saved responses', err);
       }
-    }
-    const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await downloadJson<Response[]>('data-emploi-tracker', `${user.id}/responses.json`);
-      if (data) setResponses(data);
+
+      if (currentUserId && currentUserId !== user.id) {
+        setResponses(initialResponses);
+      }
+      
+      setCurrentUserId(user.id);
+      
+      const userSpecificKey = `responses_${user.id}`;
+      const saved = localStorage.getItem(userSpecificKey);
+      
+      if (saved) {
+        try {
+          const parsedResponses = JSON.parse(saved);
+          setResponses(parsedResponses);
+          return;
+        } catch (err) {
+          console.error('Failed to parse saved responses', err);
+        }
+      }
+      
+      try {
+        const { data } = await downloadJson<Response[]>('data-emploi-tracker', `${user.id}/responses.json`);
+        if (data) {
+          setResponses(data);
+          localStorage.setItem(userSpecificKey, JSON.stringify(data));
+        }
+      } catch (error) {
+        console.error('Failed to load responses from Supabase:', error);
+      }
     };
-    load();
-  }, []);
+
+    initializeUserData();
+  }, [currentUserId]);
 
   useEffect(() => {
-    localStorage.setItem('responses', JSON.stringify(responses));
-    const save = async () => {
+    const saveResponses = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      await uploadJson('data-emploi-tracker', `${user.id}/responses.json`, responses);
+
+      const userSpecificKey = `responses_${user.id}`;
+      localStorage.setItem(userSpecificKey, JSON.stringify(responses));
+      
+      try {
+        await uploadJson('data-emploi-tracker', `${user.id}/responses.json`, responses);
+      } catch (error) {
+        console.error('Failed to save responses to Supabase:', error);
+      }
     };
-    save();
-  }, [responses]);
+
+    if (currentUserId) {
+      saveResponses();
+    }
+  }, [responses, currentUserId]);
 
   return { responses, setResponses };
 }

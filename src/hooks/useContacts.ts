@@ -5,35 +5,70 @@ import { supabase } from '@/integrations/supabase/client';
 
 export function useContacts() {
   const [contacts, setContacts] = useState<Contact[]>(initialContacts);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem('contacts');
-    if (saved) {
-      try {
-        setContacts(JSON.parse(saved));
+    const initializeUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        setContacts(initialContacts);
+        setCurrentUserId(null);
         return;
-      } catch (err) {
-        console.error('Failed to parse saved contacts', err);
       }
-    }
-    const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await downloadJson<Contact[]>('data-emploi-tracker', `${user.id}/contacts.json`);
-      if (data) setContacts(data);
+
+      if (currentUserId && currentUserId !== user.id) {
+        setContacts(initialContacts);
+      }
+      
+      setCurrentUserId(user.id);
+      
+      const userSpecificKey = `contacts_${user.id}`;
+      const saved = localStorage.getItem(userSpecificKey);
+      
+      if (saved) {
+        try {
+          const parsedContacts = JSON.parse(saved);
+          setContacts(parsedContacts);
+          return;
+        } catch (err) {
+          console.error('Failed to parse saved contacts', err);
+        }
+      }
+      
+      try {
+        const { data } = await downloadJson<Contact[]>('data-emploi-tracker', `${user.id}/contacts.json`);
+        if (data) {
+          setContacts(data);
+          localStorage.setItem(userSpecificKey, JSON.stringify(data));
+        }
+      } catch (error) {
+        console.error('Failed to load contacts from Supabase:', error);
+      }
     };
-    load();
-  }, []);
+
+    initializeUserData();
+  }, [currentUserId]);
 
   useEffect(() => {
-    localStorage.setItem('contacts', JSON.stringify(contacts));
-    const save = async () => {
+    const saveContacts = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      await uploadJson('data-emploi-tracker', `${user.id}/contacts.json`, contacts);
+
+      const userSpecificKey = `contacts_${user.id}`;
+      localStorage.setItem(userSpecificKey, JSON.stringify(contacts));
+      
+      try {
+        await uploadJson('data-emploi-tracker', `${user.id}/contacts.json`, contacts);
+      } catch (error) {
+        console.error('Failed to save contacts to Supabase:', error);
+      }
     };
-    save();
-  }, [contacts]);
+
+    if (currentUserId) {
+      saveContacts();
+    }
+  }, [contacts, currentUserId]);
 
   return { contacts, setContacts };
 }

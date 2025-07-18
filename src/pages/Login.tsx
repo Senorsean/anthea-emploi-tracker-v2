@@ -7,19 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Eye, EyeOff } from 'lucide-react';
-
-const cleanupAuthState = () => {
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      localStorage.removeItem(key);
-    }
-  });
-  Object.keys(sessionStorage || {}).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      sessionStorage.removeItem(key);
-    }
-  });
-};
+import { cleanupAuthState, cleanupOnUserSwitch } from '@/lib/auth-cleanup';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -63,6 +51,8 @@ const Login = () => {
       if (error) throw error;
       
       if (data.user) {
+        // Clean up any previous user data
+        cleanupOnUserSwitch(data.user.id);
         window.location.href = '/';
       }
     } catch (error: any) {

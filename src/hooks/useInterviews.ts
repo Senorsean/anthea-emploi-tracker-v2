@@ -5,35 +5,70 @@ import { supabase } from '@/integrations/supabase/client';
 
 export function useInterviews() {
   const [interviews, setInterviews] = useState<Interview[]>(initialInterviews);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const saved = localStorage.getItem('interviews');
-    if (saved) {
-      try {
-        setInterviews(JSON.parse(saved));
+    const initializeUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        setInterviews(initialInterviews);
+        setCurrentUserId(null);
         return;
-      } catch (err) {
-        console.error('Failed to parse saved interviews', err);
       }
-    }
-    const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const { data } = await downloadJson<Interview[]>('data-emploi-tracker', `${user.id}/interviews.json`);
-      if (data) setInterviews(data);
+
+      if (currentUserId && currentUserId !== user.id) {
+        setInterviews(initialInterviews);
+      }
+      
+      setCurrentUserId(user.id);
+      
+      const userSpecificKey = `interviews_${user.id}`;
+      const saved = localStorage.getItem(userSpecificKey);
+      
+      if (saved) {
+        try {
+          const parsedInterviews = JSON.parse(saved);
+          setInterviews(parsedInterviews);
+          return;
+        } catch (err) {
+          console.error('Failed to parse saved interviews', err);
+        }
+      }
+      
+      try {
+        const { data } = await downloadJson<Interview[]>('data-emploi-tracker', `${user.id}/interviews.json`);
+        if (data) {
+          setInterviews(data);
+          localStorage.setItem(userSpecificKey, JSON.stringify(data));
+        }
+      } catch (error) {
+        console.error('Failed to load interviews from Supabase:', error);
+      }
     };
-    load();
-  }, []);
+
+    initializeUserData();
+  }, [currentUserId]);
 
   useEffect(() => {
-    localStorage.setItem('interviews', JSON.stringify(interviews));
-    const save = async () => {
+    const saveInterviews = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      await uploadJson('data-emploi-tracker', `${user.id}/interviews.json`, interviews);
+
+      const userSpecificKey = `interviews_${user.id}`;
+      localStorage.setItem(userSpecificKey, JSON.stringify(interviews));
+      
+      try {
+        await uploadJson('data-emploi-tracker', `${user.id}/interviews.json`, interviews);
+      } catch (error) {
+        console.error('Failed to save interviews to Supabase:', error);
+      }
     };
-    save();
-  }, [interviews]);
+
+    if (currentUserId) {
+      saveInterviews();
+    }
+  }, [interviews, currentUserId]);
 
   return { interviews, setInterviews };
 }
