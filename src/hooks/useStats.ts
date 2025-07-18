@@ -117,6 +117,9 @@ export function useStats(): CentralizedStats {
 
     // Job counts by stage - applied now includes all progressed jobs
     const offersReceived = allJobs.filter(job => job.offerStatus === 'offer_received').length;
+    console.log('All jobs:', allJobs);
+    console.log('Jobs with offer_received status:', allJobs.filter(job => job.offerStatus === 'offer_received'));
+    console.log('Offers received count:', offersReceived);
     const jobCounts = {
       offer: offersReceived,
       applied:
