@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, ExternalLink, Mail, Search, Filter, Pencil, LayoutGrid, List, Upload, Trash } from 'lucide-react';
+import { Plus, ExternalLink, Mail, Search, Filter, Pencil, LayoutGrid, List, Upload, Trash, FileDown } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -22,6 +22,7 @@ import { uploadJson } from '@/integrations/supabase/storage';
 import { supabase } from '@/integrations/supabase/client';
 import { AddContactModal } from './AddContactModal';
 import EditContactModal from './EditContactModal';
+import { ImportContactsModal } from './ImportContactsModal';
 import { useContacts } from '@/hooks/useContacts';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -32,6 +33,7 @@ interface NetworkingCRMProps {
 
 export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, onPreviewClick }) => {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const { contacts, setContacts } = useContacts();
@@ -99,6 +101,16 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
     deleteContacts([id]);
   };
 
+  const importContacts = (importedContacts: Omit<Contact, 'id' | 'dateAdded'>[]) => {
+    const newContacts: Contact[] = importedContacts.map(contactData => ({
+      ...contactData,
+      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      dateAdded: new Date().toISOString().split('T')[0]
+    }));
+
+    setContacts(prev => [...newContacts, ...prev]);
+  };
+
   const exportContacts = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -151,6 +163,10 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
             onClick={() => setViewMode('grid')}
           >
             <LayoutGrid className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" onClick={() => setShowImportModal(true)} className="flex items-center gap-1">
+            <FileDown className="h-4 w-4" />
+            Importer contacts
           </Button>
           <Button onClick={() => setShowAddModal(true)} className="bg-[#e3007b] hover:bg-[#e3007b]/90">
             <Plus className="h-4 w-4 mr-2" />
@@ -305,6 +321,12 @@ export const NetworkingCRM: React.FC<NetworkingCRMProps> = ({ preview = false, o
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onAdd={addContact}
+      />
+
+      <ImportContactsModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={importContacts}
       />
 
       {editContact && (
