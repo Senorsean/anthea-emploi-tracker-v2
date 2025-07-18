@@ -115,6 +115,14 @@ export function useStats(): CentralizedStats {
       ),
     ];
 
+    // Time-based statistics - Define allAppliedJobs first
+    const allAppliedJobs = [
+      ...(jobs.applied || []),
+      ...(jobs.screening || []),
+      ...allInterviewJobs,
+      ...(jobs.final || []),
+    ];
+
     // Job counts by stage - applied now includes all progressed jobs
     const offersReceived = allJobs.filter(job => job.offerStatus === 'offer_received').length;
     const jobCounts = {
@@ -127,16 +135,8 @@ export function useStats(): CentralizedStats {
       screening: (jobs.screening?.length || 0) + allInterviewJobs.length + (jobs.final?.length || 0),
       interview: allInterviewJobs.length,
       final: jobs.final?.length || 0,
-      total: allJobs.length,
+      total: allAppliedJobs.length, // Only count actual applications, not discovered offers
     };
-
-    // Time-based statistics
-    const allAppliedJobs = [
-      ...(jobs.applied || []),
-      ...(jobs.screening || []),
-      ...allInterviewJobs,
-      ...(jobs.final || []),
-    ];
 
     // Calculer les entretiens basés sur les jobs avec statut d'entretien
     // On compte les jobs avec statut d'entretien, qu'ils aient une date ou non
