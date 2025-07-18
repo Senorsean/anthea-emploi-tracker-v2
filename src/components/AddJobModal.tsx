@@ -23,7 +23,8 @@ interface JobData {
     | 'suspended'
     | 'first_interview'
     | 'second_interview'
-    | 'rejected';
+    | 'rejected'
+    | 'offer_received';
   offerType?: 'job_offer' | 'spontaneous_application' | 'network';
 }
 
@@ -189,7 +190,8 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
                 | 'suspended'
                 | 'first_interview'
                 | 'second_interview'
-                | 'rejected') =>
+                | 'rejected'
+                | 'offer_received') =>
                 setFormData(prev => ({ ...prev, offerStatus: value }))
               }
             >
@@ -204,6 +206,7 @@ export const AddJobModal: React.FC<AddJobModalProps> = ({ isOpen, onClose, onSub
                 <SelectItem value="first_interview">1er entretien</SelectItem>
                 <SelectItem value="second_interview">2ème entretien</SelectItem>
                 <SelectItem value="rejected">Non retenu</SelectItem>
+                <SelectItem value="offer_received">Offre reçue</SelectItem>
               </SelectContent>
             </Select>
           </div>

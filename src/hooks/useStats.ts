@@ -116,8 +116,9 @@ export function useStats(): CentralizedStats {
     ];
 
     // Job counts by stage - applied now includes all progressed jobs
+    const offersReceived = allJobs.filter(job => job.offerStatus === 'offer_received').length;
     const jobCounts = {
-      offer: jobs.offer?.length || 0,
+      offer: offersReceived,
       applied:
         (jobs.applied?.length || 0) +
         (jobs.screening?.length || 0) +

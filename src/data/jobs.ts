@@ -17,7 +17,8 @@ export interface Job {
     | 'suspended'
     | 'first_interview'
     | 'second_interview'
-    | 'rejected';
+    | 'rejected'
+    | 'offer_received';
   offerType?: 'job_offer' | 'spontaneous_application' | 'network';
 }
 
@@ -89,5 +90,28 @@ export const initialJobs: Record<string, Job[]> = {
       offerType: 'network'
     }
   ],
-  final: []
+  final: [
+    {
+      id: '6',
+      title: 'DSI',
+      company: 'Tech Solutions',
+      location: 'Paris, FR',
+      priority: 'High',
+      label: 'Offre obtenue',
+      dateAdded: '2024-01-10',
+      offerStatus: 'offer_received',
+      offerType: 'job_offer'
+    },
+    {
+      id: '7',
+      title: 'Directeur Technique',
+      company: 'StartupTech',
+      location: 'Lyon, FR',
+      priority: 'High',
+      label: 'Offre obtenue par réseau',
+      dateAdded: '2024-01-15',
+      offerStatus: 'offer_received',
+      offerType: 'network'
+    }
+  ]
 };
