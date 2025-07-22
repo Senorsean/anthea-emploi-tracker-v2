@@ -221,22 +221,33 @@ export default function PreparationEntretienPage() {
     const maxWidth = pageWidth - (2 * margin);
     let currentY = 25;
     
-    // En-tête avec logo/design
-    doc.setFillColor(59, 130, 246); // bg-blue-500
-    doc.rect(0, 0, pageWidth, 35, 'F');
+    // En-tête avec dégradé bleu-violet et logo Anthea
+    // Simuler un dégradé avec plusieurs rectangles
+    for (let i = 0; i < pageWidth; i += 2) {
+      const ratio = i / pageWidth;
+      const r = Math.round(96 + (138 - 96) * ratio);   // De bleu (96) vers violet (138)
+      const g = Math.round(165 + (43 - 165) * ratio);  // De bleu (165) vers violet (43)  
+      const b = Math.round(250 + (226 - 250) * ratio); // De bleu (250) vers violet (226)
+      doc.setFillColor(r, g, b);
+      doc.rect(i, 0, 2, 45, 'F');
+    }
     
+    // Logo Anthea
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(20);
+    doc.setFontSize(28);
     doc.setFont("helvetica", "bold");
-    doc.text("Rapport de Preparation d'Entretien", margin, 22);
+    doc.text("anthea", pageWidth / 2 - 25, 20);
     
-    // Date de génération
-    doc.setFontSize(10);
+    doc.setFontSize(14);
     doc.setFont("helvetica", "normal");
-    const today = new Date().toLocaleDateString('fr-FR');
-    doc.text(`Genere le ${today}`, pageWidth - 60, 30);
+    doc.text("emploi Tracker", pageWidth / 2 - 20, 32);
     
-    currentY = 50;
+    // Titre du rapport
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Rapport de Preparation d'Entretien", pageWidth / 2 - 45, 40);
+    
+    currentY = 55;
     doc.setTextColor(0, 0, 0);
     
     // Section Score avec encadré coloré
