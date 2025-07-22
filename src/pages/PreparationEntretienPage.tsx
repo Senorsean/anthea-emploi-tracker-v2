@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Clock, Star, ArrowRight } from "lucide-react";
+import { CheckCircle, Clock, Star, ArrowRight, Download } from "lucide-react";
+import jsPDF from 'jspdf';
 
 const interviewQuestions = [
   {
@@ -103,6 +104,202 @@ export default function PreparationEntretienPage() {
     return { level: "À améliorer", color: "bg-red-500", message: "Continuez à vous entraîner" };
   };
 
+  const analyzeResponses = () => {
+    const advice = [];
+    
+    interviewQuestions.forEach((question) => {
+      const response = responses[question.id];
+      if (!response || response.trim().length < 50) {
+        advice.push({
+          category: question.category,
+          question: question.question,
+          issue: "Réponse trop courte ou manquante",
+          recommendation: "Développez davantage votre réponse en donnant des exemples concrets."
+        });
+        return;
+      }
+
+      const responseText = response.toLowerCase();
+      
+      // Analyse spécifique par catégorie
+      switch(question.category) {
+        case "Présentation":
+          if (!responseText.includes("expérience") && !responseText.includes("parcours")) {
+            advice.push({
+              category: question.category,
+              question: question.question,
+              issue: "Manque de structure dans la présentation",
+              recommendation: "Structurez votre présentation : parcours, expériences clés, compétences, motivations."
+            });
+          }
+          break;
+          
+        case "Motivation":
+          if (!responseText.includes("entreprise") && !responseText.includes("mission") && !responseText.includes("valeurs")) {
+            advice.push({
+              category: question.category,
+              question: question.question,
+              issue: "Manque de recherche sur l'entreprise",
+              recommendation: "Montrez que vous connaissez l'entreprise, ses valeurs et ses projets."
+            });
+          }
+          break;
+          
+        case "Compétences":
+          if (!responseText.includes("résultat") && !responseText.includes("solution") && !responseText.includes("action")) {
+            advice.push({
+              category: question.category,
+              question: question.question,
+              issue: "Méthode STAR incomplète",
+              recommendation: "Utilisez la méthode STAR : Situation, Tâche, Action, Résultat."
+            });
+          }
+          break;
+          
+        case "Faiblesses":
+          if (responseText.includes("perfectionniste") || responseText.includes("travailleur")) {
+            advice.push({
+              category: question.category,
+              question: question.question,
+              issue: "Cliché dans la réponse",
+              recommendation: "Évitez les clichés. Choisissez une vraie faiblesse avec un plan d'amélioration concret."
+            });
+          }
+          break;
+          
+        case "Travail d'équipe":
+          if (!responseText.includes("écoute") && !responseText.includes("communication") && !responseText.includes("solution")) {
+            advice.push({
+              category: question.category,
+              question: question.question,
+              issue: "Manque d'accent sur la résolution",
+              recommendation: "Mettez l'accent sur l'écoute, la communication et la résolution du conflit."
+            });
+          }
+          break;
+          
+        case "Leadership":
+          if (!responseText.includes("initiative") && !responseText.includes("équipe") && !responseText.includes("impact")) {
+            advice.push({
+              category: question.category,
+              question: question.question,
+              issue: "Manque d'exemples de leadership",
+              recommendation: "Donnez des exemples concrets d'initiatives prises et de leur impact."
+            });
+          }
+          break;
+      }
+      
+      // Vérifications générales
+      if (response.length < 100) {
+        advice.push({
+          category: question.category,
+          question: question.question,
+          issue: "Réponse trop courte",
+          recommendation: "Développez votre réponse avec plus de détails et d'exemples."
+        });
+      }
+      
+      if (response.length > 500) {
+        advice.push({
+          category: question.category,
+          question: question.question,
+          issue: "Réponse trop longue",
+          recommendation: "Soyez plus concis, l'idéal est entre 100-300 mots."
+        });
+      }
+    });
+    
+    return advice;
+  };
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    const pageHeight = doc.internal.pageSize.height;
+    let currentY = 20;
+    
+    // Titre
+    doc.setFontSize(20);
+    doc.setFont("helvetica", "bold");
+    doc.text("Rapport de Préparation d'Entretien", 20, currentY);
+    currentY += 20;
+    
+    // Score de préparation
+    const readiness = getReadinessScore();
+    doc.setFontSize(14);
+    doc.text(`Niveau de préparation : ${readiness.level}`, 20, currentY);
+    currentY += 10;
+    doc.setFontSize(12);
+    doc.text(`Questions complétées : ${completedQuestions.size}/${interviewQuestions.length}`, 20, currentY);
+    currentY += 20;
+    
+    // Mes réponses
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("Mes Réponses", 20, currentY);
+    currentY += 15;
+    
+    interviewQuestions.forEach((question, index) => {
+      if (currentY > pageHeight - 40) {
+        doc.addPage();
+        currentY = 20;
+      }
+      
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text(`${index + 1}. ${question.question}`, 20, currentY);
+      currentY += 8;
+      
+      const response = responses[question.id];
+      if (response) {
+        doc.setFont("helvetica", "normal");
+        const splitResponse = doc.splitTextToSize(response, 170);
+        doc.text(splitResponse, 20, currentY);
+        currentY += splitResponse.length * 5 + 10;
+      } else {
+        doc.setFont("helvetica", "italic");
+        doc.text("Pas de réponse fournie", 20, currentY);
+        currentY += 15;
+      }
+    });
+    
+    // Conseils personnalisés
+    const advice = analyzeResponses();
+    if (advice.length > 0) {
+      if (currentY > pageHeight - 40) {
+        doc.addPage();
+        currentY = 20;
+      }
+      
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.text("Conseils Personnalisés", 20, currentY);
+      currentY += 15;
+      
+      advice.forEach((item, index) => {
+        if (currentY > pageHeight - 30) {
+          doc.addPage();
+          currentY = 20;
+        }
+        
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        doc.text(`${index + 1}. ${item.category}`, 20, currentY);
+        currentY += 6;
+        
+        doc.setFont("helvetica", "normal");
+        doc.text(`Problème : ${item.issue}`, 25, currentY);
+        currentY += 6;
+        
+        const splitReco = doc.splitTextToSize(`Conseil : ${item.recommendation}`, 165);
+        doc.text(splitReco, 25, currentY);
+        currentY += splitReco.length * 5 + 8;
+      });
+    }
+    
+    doc.save('preparation-entretien.pdf');
+  };
+
   const resetTraining = () => {
     setCurrentQuestionIndex(0);
     setResponses({});
@@ -154,22 +351,50 @@ export default function PreparationEntretienPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>💡 Recommandations</CardTitle>
+                <CardTitle>🎯 Conseils personnalisés</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {progress < 100 && (
-                    <p className="text-sm">• Complétez toutes les questions pour une préparation optimale</p>
+                <div className="space-y-4">
+                  {analyzeResponses().length === 0 ? (
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <p className="text-green-800 font-medium">🎉 Excellente préparation !</p>
+                      <p className="text-green-600 text-sm mt-1">Vos réponses sont bien structurées et complètes.</p>
+                    </div>
+                  ) : (
+                    analyzeResponses().slice(0, 5).map((advice, index) => (
+                      <div key={index} className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+                        <p className="font-medium text-blue-800">{advice.category}</p>
+                        <p className="text-sm text-blue-600 mt-1">
+                          <span className="font-medium">Problème :</span> {advice.issue}
+                        </p>
+                        <p className="text-sm text-blue-600 mt-1">
+                          <span className="font-medium">Conseil :</span> {advice.recommendation}
+                        </p>
+                      </div>
+                    ))
                   )}
-                  <p className="text-sm">• Relisez la <Link to="/methode-star" className="text-blue-600 hover:underline">méthode STAR</Link> pour structurer vos réponses</p>
-                  <p className="text-sm">• Entraînez-vous à voix haute devant un miroir</p>
-                  <p className="text-sm">• Préparez des questions à poser au recruteur</p>
+                  
+                  <div className="mt-4 pt-4 border-t">
+                    <h4 className="font-medium mb-2">Conseils généraux :</h4>
+                    <div className="space-y-1 text-sm text-gray-600">
+                      {progress < 100 && (
+                        <p>• Complétez toutes les questions pour une préparation optimale</p>
+                      )}
+                      <p>• Relisez la <Link to="/methode-star" className="text-blue-600 hover:underline">méthode STAR</Link> pour structurer vos réponses</p>
+                      <p>• Entraînez-vous à voix haute devant un miroir</p>
+                      <p>• Préparez des questions à poser au recruteur</p>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
           <div className="flex justify-center gap-4">
+            <Button onClick={generatePDF} variant="outline">
+              <Download className="mr-2 h-4 w-4" />
+              Télécharger PDF
+            </Button>
             <Button onClick={resetTraining} variant="outline">
               Recommencer l'entraînement
             </Button>
