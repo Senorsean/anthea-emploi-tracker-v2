@@ -237,11 +237,12 @@ export default function PreparationEntretienPage() {
     logoImg.src = '/lovable-uploads/fef3bb44-e7e2-43c8-98ca-9836521aa20f.png';
     
     const generatePDFContent = () => {
-      // Titre du rapport à droite
+      // Titre du rapport centré
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
-      doc.text("Rapport de Preparation d'Entretien", pageWidth - 130, 28);
+      const titleWidth = doc.getTextWidth("Rapport de Preparation d'Entretien");
+      doc.text("Rapport de Preparation d'Entretien", (pageWidth - titleWidth) / 2, 28);
       
       // Date de génération
       doc.setFontSize(10);
