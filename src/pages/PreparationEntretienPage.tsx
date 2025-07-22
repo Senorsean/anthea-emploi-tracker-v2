@@ -248,7 +248,7 @@ export default function PreparationEntretienPage() {
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       const today = new Date().toLocaleDateString('fr-FR');
-      doc.text(`Genere le ${today}`, pageWidth - 60, 38);
+      doc.text(`Genere le ${today}`, pageWidth - 45, 38);
       
       currentY = 55;
       doc.setTextColor(0, 0, 0);
