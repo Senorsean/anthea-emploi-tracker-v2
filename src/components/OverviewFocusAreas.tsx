@@ -33,10 +33,17 @@ export const OverviewFocusAreas = () => {
       link: '/renforcez-votre-reseau',
       external: false,
     },
+    {
+      title: 'Améliorer mes entretiens',
+      description:
+        'Préparez-vous aux questions d\'entretien et entraînez-vous pour le jour J.',
+      link: '/ameliorer-entretiens',
+      external: false,
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
       {areas.map((area, idx) => (
         <Card key={idx} className="h-full">
           <CardHeader>
