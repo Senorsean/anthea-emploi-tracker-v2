@@ -316,9 +316,9 @@ export default function PreparationEntretienPage() {
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(55, 65, 81); // text-gray-700
-        const splitResponse = doc.splitTextToSize(response, maxWidth - 20);
+        const splitResponse = doc.splitTextToSize(response, maxWidth - 40);
         doc.text(splitResponse, margin + 10, currentY);
-        currentY += splitResponse.length * 4 + 15;
+        currentY += splitResponse.length * 5 + 15;
       } else {
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
