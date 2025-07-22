@@ -378,17 +378,11 @@ export default function PreparationEntretienPage() {
       doc.setLineWidth(0.5);
       doc.rect(margin, currentY - 5, maxWidth, 60, 'S');
       
-      // Icône cible colorée en en-tête
-      doc.setFontSize(16);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(239, 68, 68); // Rouge pour l'icône cible
-      doc.text("🎯", margin + 8, currentY + 8);
-      
-      // Titre avec meilleure typographie
+      // Titre avec meilleure typographie (sans emoji)
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(31, 41, 55); // text-gray-800
-      doc.text("Resultats de votre preparation", margin + 20, currentY + 8);
+      doc.text("Resultats de votre preparation", margin + 10, currentY + 8);
       
       // Badge niveau avec design amélioré
       let badgeBgColor, badgeTextColor;
@@ -410,7 +404,7 @@ export default function PreparationEntretienPage() {
       }
       
       // Badge avec design moderne
-      const badgeText = `⭐ Niveau : ${readiness.level} (${readiness.score}/100)`;
+      const badgeText = `Niveau : ${readiness.level} (${readiness.score}/100)`;
       doc.setFontSize(10);
       doc.setFont("helvetica", "bold");
       const badgeWidth = doc.getTextWidth(badgeText) + 20;
