@@ -221,8 +221,7 @@ export default function PreparationEntretienPage() {
     const maxWidth = pageWidth - (2 * margin);
     let currentY = 25;
     
-    // En-tête avec dégradé bleu-violet et logo Anthea
-    // Simuler un dégradé avec plusieurs rectangles
+    // En-tête avec dégradé bleu-violet
     for (let i = 0; i < pageWidth; i += 2) {
       const ratio = i / pageWidth;
       const r = Math.round(96 + (138 - 96) * ratio);   // De bleu (96) vers violet (138)
@@ -232,202 +231,223 @@ export default function PreparationEntretienPage() {
       doc.rect(i, 0, 2, 45, 'F');
     }
     
-    // Logo Anthéa en haut à gauche
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(24);
-    doc.setFont("helvetica", "bold");
-    doc.text("anthéa", margin, 20);
+    // Logo avec fallback
+    const logoImg = new Image();
+    logoImg.crossOrigin = 'anonymous';
+    logoImg.src = '/lovable-uploads/fef3bb44-e7e2-43c8-98ca-9836521aa20f.png';
     
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
-    doc.text("emploi Tracker", margin, 32);
-    
-    // Titre du rapport à droite
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.text("Rapport de Preparation d'Entretien", pageWidth - 130, 28);
-    
-    // Date de génération
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    const today = new Date().toLocaleDateString('fr-FR');
-    doc.text(`Genere le ${today}`, pageWidth - 60, 38);
-    
-    currentY = 55;
-    doc.setTextColor(0, 0, 0);
-    
-    // Section Score avec encadré coloré
-    const readiness = getReadinessScore();
-    doc.setFillColor(248, 250, 252); // bg-slate-50
-    doc.rect(margin, currentY - 5, maxWidth, 35, 'F');
-    doc.setDrawColor(226, 232, 240); // border-slate-200
-    doc.rect(margin, currentY - 5, maxWidth, 35, 'S');
-    
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(15, 23, 42); // text-slate-900
-    doc.text("Evaluation de votre preparation", margin + 5, currentY + 5);
-    
-    doc.setFontSize(14);
-    doc.setTextColor(59, 130, 246); // text-blue-600
-    doc.text(`Niveau : ${readiness.level}`, margin + 5, currentY + 15);
-    
-    doc.setFontSize(12);
-    doc.setTextColor(71, 85, 105); // text-slate-600
-    doc.text(`Questions completees : ${completedQuestions.size}/${interviewQuestions.length} (${Math.round(progress)}%)`, margin + 5, currentY + 25);
-    
-    currentY += 50;
-    
-    // Section Mes Réponses
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(15, 23, 42);
-    doc.text("Mes Reponses", margin, currentY);
-    currentY += 15;
-    
-    interviewQuestions.forEach((question, index) => {
+    const generatePDFContent = () => {
+      // Titre du rapport à droite
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.text("Rapport de Preparation d'Entretien", pageWidth - 130, 28);
+      
+      // Date de génération
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      const today = new Date().toLocaleDateString('fr-FR');
+      doc.text(`Genere le ${today}`, pageWidth - 60, 38);
+      
+      currentY = 55;
+      doc.setTextColor(0, 0, 0);
+      
+      // Section Score avec encadré coloré
+      const readiness = getReadinessScore();
+      doc.setFillColor(248, 250, 252); // bg-slate-50
+      doc.rect(margin, currentY - 5, maxWidth, 35, 'F');
+      doc.setDrawColor(226, 232, 240); // border-slate-200
+      doc.rect(margin, currentY - 5, maxWidth, 35, 'S');
+      
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(15, 23, 42); // text-slate-900
+      doc.text("Evaluation de votre preparation", margin + 5, currentY + 5);
+      
+      doc.setFontSize(14);
+      doc.setTextColor(59, 130, 246); // text-blue-600
+      doc.text(`Niveau : ${readiness.level}`, margin + 5, currentY + 15);
+      
+      doc.setFontSize(12);
+      doc.setTextColor(71, 85, 105); // text-slate-600
+      doc.text(`Questions completees : ${completedQuestions.size}/${interviewQuestions.length} (${Math.round(progress)}%)`, margin + 5, currentY + 25);
+      
+      currentY += 50;
+      
+      // Section Mes Réponses
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(15, 23, 42);
+      doc.text("Mes Reponses", margin, currentY);
+      currentY += 15;
+      
+      interviewQuestions.forEach((question, index) => {
+        if (currentY > pageHeight - 60) {
+          doc.addPage();
+          currentY = 25;
+        }
+        
+        // Encadré pour chaque question
+        doc.setFillColor(249, 250, 251); // bg-gray-50
+        
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(15, 23, 42);
+        const questionText = doc.splitTextToSize(`${index + 1}. ${question.question}`, maxWidth - 10);
+        doc.text(questionText, margin + 5, currentY + 8);
+        
+        // Badge de catégorie
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        doc.setFillColor(219, 234, 254); // bg-blue-100
+        doc.setTextColor(29, 78, 216); // text-blue-700
+        const badgeWidth = Math.min(doc.getTextWidth(question.category) + 8, maxWidth - 10);
+        doc.rect(margin + 5, currentY + 12, badgeWidth, 8, 'F');
+        doc.text(question.category, margin + 9, currentY + 17);
+        
+        currentY += 25;
+        
+        const response = responses[question.id];
+        if (response) {
+          // Nettoyer le texte de la réponse pour éviter les problèmes d'affichage
+          const cleanResponse = response.replace(/\s+/g, ' ').trim();
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(55, 65, 81); // text-gray-700
+          const splitResponse = doc.splitTextToSize(cleanResponse, maxWidth - 40);
+          doc.text(splitResponse, margin + 10, currentY);
+          currentY += splitResponse.length * 5 + 15;
+        } else {
+          doc.setFontSize(10);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(156, 163, 175); // text-gray-400
+          doc.text("Pas de reponse fournie", margin + 10, currentY);
+          currentY += 20;
+        }
+        
+        // Ligne de séparation
+        doc.setDrawColor(229, 231, 235); // border-gray-200
+        doc.line(margin, currentY - 5, pageWidth - margin, currentY - 5);
+      });
+      
+      // Section Conseils personnalisés
+      const advice = analyzeResponses();
+      if (currentY > pageHeight - 40) {
+        doc.addPage();
+        currentY = 25;
+      }
+      
+      currentY += 15;
+      doc.setFontSize(18);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(15, 23, 42);
+      doc.text("Conseils Personnalises", margin, currentY);
+      currentY += 15;
+      
+      if (advice.length === 0) {
+        doc.setFillColor(240, 253, 244); // bg-green-50
+        doc.rect(margin, currentY - 5, maxWidth, 25, 'F');
+        doc.setDrawColor(34, 197, 94); // border-green-500
+        doc.rect(margin, currentY - 5, maxWidth, 25, 'S');
+        
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(21, 128, 61); // text-green-700
+        doc.text("Excellente preparation !", margin + 5, currentY + 5);
+        
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(21, 128, 61);
+        doc.text("Vos reponses sont bien structurees et completes.", margin + 5, currentY + 15);
+        currentY += 35;
+      } else {
+        advice.slice(0, 8).forEach((item, index) => {
+          if (currentY > pageHeight - 50) {
+            doc.addPage();
+            currentY = 25;
+          }
+          
+          // Encadré conseil avec hauteur dynamique
+          const estimatedHeight = 40;
+          doc.setFillColor(254, 249, 195); // bg-yellow-100
+          doc.rect(margin, currentY - 3, maxWidth, estimatedHeight, 'F');
+          doc.setDrawColor(251, 191, 36); // border-yellow-400
+          doc.rect(margin, currentY - 3, maxWidth, estimatedHeight, 'S');
+          
+          doc.setFontSize(11);
+          doc.setFont("helvetica", "bold");
+          doc.setTextColor(146, 64, 14); // text-yellow-800
+          doc.text(`${index + 1}. ${item.category}`, margin + 5, currentY + 5);
+          
+          doc.setFontSize(9);
+          doc.setFont("helvetica", "normal");
+          doc.setTextColor(120, 53, 15); // text-yellow-900
+          const issueText = doc.splitTextToSize(`Probleme : ${item.issue}`, maxWidth - 15);
+          doc.text(issueText, margin + 10, currentY + 13);
+          
+          const recoText = doc.splitTextToSize(`Conseil : ${item.recommendation}`, maxWidth - 15);
+          doc.text(recoText, margin + 10, currentY + 23);
+          currentY += 45;
+        });
+      }
+      
+      // Pied de page avec conseils généraux
       if (currentY > pageHeight - 60) {
         doc.addPage();
         currentY = 25;
       }
       
-      // Encadré pour chaque question
-      doc.setFillColor(249, 250, 251); // bg-gray-50
-      
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(15, 23, 42);
-      const questionText = doc.splitTextToSize(`${index + 1}. ${question.question}`, maxWidth - 10);
-      doc.text(questionText, margin + 5, currentY + 8);
-      
-      // Badge de catégorie
-      doc.setFontSize(9);
-      doc.setFont("helvetica", "normal");
-      doc.setFillColor(219, 234, 254); // bg-blue-100
-      doc.setTextColor(29, 78, 216); // text-blue-700
-      const badgeWidth = Math.min(doc.getTextWidth(question.category) + 8, maxWidth - 10);
-      doc.rect(margin + 5, currentY + 12, badgeWidth, 8, 'F');
-      doc.text(question.category, margin + 9, currentY + 17);
-      
-      currentY += 25;
-      
-      const response = responses[question.id];
-      if (response) {
-        // Nettoyer le texte de la réponse pour éviter les problèmes d'affichage
-        const cleanResponse = response.replace(/\s+/g, ' ').trim();
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(55, 65, 81); // text-gray-700
-        const splitResponse = doc.splitTextToSize(cleanResponse, maxWidth - 40);
-        doc.text(splitResponse, margin + 10, currentY);
-        currentY += splitResponse.length * 5 + 15;
-      } else {
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(156, 163, 175); // text-gray-400
-        doc.text("Pas de reponse fournie", margin + 10, currentY);
-        currentY += 20;
-      }
-      
-      // Ligne de séparation
-      doc.setDrawColor(229, 231, 235); // border-gray-200
-      doc.line(margin, currentY - 5, pageWidth - margin, currentY - 5);
-    });
-    
-    // Section Conseils personnalisés
-    const advice = analyzeResponses();
-    if (currentY > pageHeight - 40) {
-      doc.addPage();
-      currentY = 25;
-    }
-    
-    currentY += 15;
-    doc.setFontSize(18);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(15, 23, 42);
-    doc.text("Conseils Personnalises", margin, currentY);
-    currentY += 15;
-    
-    if (advice.length === 0) {
-      doc.setFillColor(240, 253, 244); // bg-green-50
-      doc.rect(margin, currentY - 5, maxWidth, 25, 'F');
-      doc.setDrawColor(34, 197, 94); // border-green-500
-      doc.rect(margin, currentY - 5, maxWidth, 25, 'S');
+      currentY += 15;
+      doc.setFillColor(239, 246, 255); // bg-blue-50
+      doc.rect(margin, currentY - 5, maxWidth, 50, 'F');
+      doc.setDrawColor(147, 197, 253); // border-blue-300
+      doc.rect(margin, currentY - 5, maxWidth, 50, 'S');
       
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(21, 128, 61); // text-green-700
-      doc.text("Excellente preparation !", margin + 5, currentY + 5);
+      doc.setTextColor(30, 64, 175); // text-blue-800
+      doc.text("Conseils generaux pour reussir", margin + 5, currentY + 8);
       
-      doc.setFontSize(11);
+      doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(21, 128, 61);
-      doc.text("Vos reponses sont bien structurees et completes.", margin + 5, currentY + 15);
-      currentY += 35;
-    } else {
-      advice.slice(0, 8).forEach((item, index) => {
-        if (currentY > pageHeight - 50) {
-          doc.addPage();
-          currentY = 25;
-        }
-        
-        // Encadré conseil avec hauteur dynamique
-        const estimatedHeight = 40;
-        doc.setFillColor(254, 249, 195); // bg-yellow-100
-        doc.rect(margin, currentY - 3, maxWidth, estimatedHeight, 'F');
-        doc.setDrawColor(251, 191, 36); // border-yellow-400
-        doc.rect(margin, currentY - 3, maxWidth, estimatedHeight, 'S');
-        
-        doc.setFontSize(11);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(146, 64, 14); // text-yellow-800
-        doc.text(`${index + 1}. ${item.category}`, margin + 5, currentY + 5);
-        
-        doc.setFontSize(9);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(120, 53, 15); // text-yellow-900
-        const issueText = doc.splitTextToSize(`Probleme : ${item.issue}`, maxWidth - 15);
-        doc.text(issueText, margin + 10, currentY + 13);
-        
-        const recoText = doc.splitTextToSize(`Conseil : ${item.recommendation}`, maxWidth - 15);
-        doc.text(recoText, margin + 10, currentY + 23);
-        currentY += 45;
+      doc.setTextColor(30, 58, 138); // text-blue-900
+      const generalTips = [
+        "• Entrainez-vous a voix haute devant un miroir",
+        "• Preparez des questions a poser au recruteur", 
+        "• Recherchez l'entreprise et ses valeurs",
+        "• Arrivez 10 minutes en avance le jour J"
+      ];
+      
+      generalTips.forEach((tip, index) => {
+        const tipText = doc.splitTextToSize(tip, maxWidth - 15);
+        doc.text(tipText, margin + 10, currentY + 18 + (index * 8));
       });
-    }
+      
+      doc.save('preparation-entretien.pdf');
+    };
     
-    // Pied de page avec conseils généraux
-    if (currentY > pageHeight - 60) {
-      doc.addPage();
-      currentY = 25;
-    }
+    // Essayer de charger le logo
+    logoImg.onload = () => {
+      try {
+        doc.addImage(logoImg, 'PNG', margin, 8, 60, 20);
+      } catch (error) {
+        console.error('Erreur lors du chargement du logo:', error);
+      }
+      generatePDFContent();
+    };
     
-    currentY += 15;
-    doc.setFillColor(239, 246, 255); // bg-blue-50
-    doc.rect(margin, currentY - 5, maxWidth, 50, 'F');
-    doc.setDrawColor(147, 197, 253); // border-blue-300
-    doc.rect(margin, currentY - 5, maxWidth, 50, 'S');
-    
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(30, 64, 175); // text-blue-800
-    doc.text("Conseils generaux pour reussir", margin + 5, currentY + 8);
-    
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(30, 58, 138); // text-blue-900
-    const generalTips = [
-      "• Entrainez-vous a voix haute devant un miroir",
-      "• Preparez des questions a poser au recruteur", 
-      "• Recherchez l'entreprise et ses valeurs",
-      "• Arrivez 10 minutes en avance le jour J"
-    ];
-    
-    generalTips.forEach((tip, index) => {
-      const tipText = doc.splitTextToSize(tip, maxWidth - 15);
-      doc.text(tipText, margin + 10, currentY + 18 + (index * 8));
-    });
-    
-    doc.save('preparation-entretien.pdf');
+    // Fallback si le logo ne charge pas
+    logoImg.onerror = () => {
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(24);
+      doc.setFont("helvetica", "bold");
+      doc.text("anthéa", margin, 20);
+      
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.text("emploi Tracker", margin, 32);
+      generatePDFContent();
+    };
   };
 
   const resetTraining = () => {
