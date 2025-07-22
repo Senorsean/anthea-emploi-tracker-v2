@@ -114,7 +114,8 @@ export default function PreparationEntretienPage() {
           category: question.category,
           question: question.question,
           issue: "Réponse trop courte ou manquante",
-          recommendation: "Développez davantage votre réponse en donnant des exemples concrets."
+          recommendation: "Développez davantage votre réponse en donnant des exemples concrets.",
+          severity: "high" // Rouge
         });
         return;
       }
@@ -129,7 +130,8 @@ export default function PreparationEntretienPage() {
               category: question.category,
               question: question.question,
               issue: "Manque de structure dans la présentation",
-              recommendation: "Structurez votre présentation : parcours, expériences clés, compétences, motivations."
+              recommendation: "Structurez votre présentation : parcours, expériences clés, compétences, motivations.",
+              severity: "high" // Rouge
             });
           }
           break;
@@ -140,7 +142,8 @@ export default function PreparationEntretienPage() {
               category: question.category,
               question: question.question,
               issue: "Manque de recherche sur l'entreprise",
-              recommendation: "Montrez que vous connaissez l'entreprise, ses valeurs et ses projets."
+              recommendation: "Montrez que vous connaissez l'entreprise, ses valeurs et ses projets.",
+              severity: "high" // Rouge
             });
           }
           break;
@@ -151,7 +154,8 @@ export default function PreparationEntretienPage() {
               category: question.category,
               question: question.question,
               issue: "Méthode STAR incomplète",
-              recommendation: "Utilisez la méthode STAR : Situation, Tâche, Action, Résultat."
+              recommendation: "Utilisez la méthode STAR : Situation, Tâche, Action, Résultat.",
+              severity: "medium" // Orange
             });
           }
           break;
@@ -162,7 +166,8 @@ export default function PreparationEntretienPage() {
               category: question.category,
               question: question.question,
               issue: "Cliché dans la réponse",
-              recommendation: "Évitez les clichés. Choisissez une vraie faiblesse avec un plan d'amélioration concret."
+              recommendation: "Évitez les clichés. Choisissez une vraie faiblesse avec un plan d'amélioration concret.",
+              severity: "medium" // Orange
             });
           }
           break;
@@ -173,7 +178,8 @@ export default function PreparationEntretienPage() {
               category: question.category,
               question: question.question,
               issue: "Manque d'accent sur la résolution",
-              recommendation: "Mettez l'accent sur l'écoute, la communication et la résolution du conflit."
+              recommendation: "Mettez l'accent sur l'écoute, la communication et la résolution du conflit.",
+              severity: "medium" // Orange
             });
           }
           break;
@@ -184,7 +190,8 @@ export default function PreparationEntretienPage() {
               category: question.category,
               question: question.question,
               issue: "Manque d'exemples de leadership",
-              recommendation: "Donnez des exemples concrets d'initiatives prises et de leur impact."
+              recommendation: "Donnez des exemples concrets d'initiatives prises et de leur impact.",
+              severity: "medium" // Orange
             });
           }
           break;
@@ -196,7 +203,8 @@ export default function PreparationEntretienPage() {
           category: question.category,
           question: question.question,
           issue: "Réponse trop courte",
-          recommendation: "Développez votre réponse avec plus de détails et d'exemples."
+          recommendation: "Développez votre réponse avec plus de détails et d'exemples.",
+          severity: "medium" // Orange
         });
       }
       
@@ -205,7 +213,8 @@ export default function PreparationEntretienPage() {
           category: question.category,
           question: question.question,
           issue: "Réponse trop longue",
-          recommendation: "Soyez plus concis, l'idéal est entre 100-300 mots."
+          recommendation: "Soyez plus concis, l'idéal est entre 100-300 mots.",
+          severity: "medium" // Orange
         });
       }
     });
@@ -368,21 +377,40 @@ export default function PreparationEntretienPage() {
             currentY = 25;
           }
           
-          // Encadré conseil avec hauteur dynamique
+          // Couleurs selon la gravité
+          let bgColor, borderColor, textColor;
+          if (item.severity === "high") {
+            // Rouge pour les problèmes graves
+            bgColor = [254, 226, 226]; // bg-red-100
+            borderColor = [239, 68, 68]; // border-red-500
+            textColor = [153, 27, 27]; // text-red-800
+          } else if (item.severity === "medium") {
+            // Orange pour les problèmes moyens
+            bgColor = [254, 243, 199]; // bg-orange-100
+            borderColor = [249, 115, 22]; // border-orange-500
+            textColor = [154, 52, 18]; // text-orange-800
+          } else {
+            // Vert pour les bonnes pratiques (fallback)
+            bgColor = [220, 252, 231]; // bg-green-100
+            borderColor = [34, 197, 94]; // border-green-500
+            textColor = [21, 128, 61]; // text-green-800
+          }
+          
+          // Encadré conseil avec couleur appropriée
           const estimatedHeight = 40;
-          doc.setFillColor(254, 249, 195); // bg-yellow-100
+          doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
           doc.rect(margin, currentY - 3, maxWidth, estimatedHeight, 'F');
-          doc.setDrawColor(251, 191, 36); // border-yellow-400
+          doc.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
           doc.rect(margin, currentY - 3, maxWidth, estimatedHeight, 'S');
           
           doc.setFontSize(11);
           doc.setFont("helvetica", "bold");
-          doc.setTextColor(146, 64, 14); // text-yellow-800
+          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
           doc.text(`${index + 1}. ${item.category}`, margin + 5, currentY + 5);
           
           doc.setFontSize(9);
           doc.setFont("helvetica", "normal");
-          doc.setTextColor(120, 53, 15); // text-yellow-900
+          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
           const issueText = doc.splitTextToSize(`Probleme : ${item.issue}`, maxWidth - 15);
           doc.text(issueText, margin + 10, currentY + 13);
           
