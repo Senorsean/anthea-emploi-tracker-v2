@@ -364,24 +364,33 @@ export default function PreparationEntretienPage() {
       currentY = 55;
       doc.setTextColor(0, 0, 0);
       
-      // Section Score avec design similaire à l'interface web
+      // Section Score avec design professionnel et moderne
       const readiness = getReadinessScore();
       
-      // Encadré principal avec fond blanc
+      // Ombre portée légère pour l'encadré
+      doc.setFillColor(0, 0, 0, 0.1); // Ombre
+      doc.rect(margin + 2, currentY - 3, maxWidth, 60, 'F');
+      
+      // Encadré principal avec fond blanc et bordure subtile
       doc.setFillColor(255, 255, 255); // bg-white
-      doc.rect(margin, currentY - 5, maxWidth, 55, 'F');
+      doc.rect(margin, currentY - 5, maxWidth, 60, 'F');
       doc.setDrawColor(229, 231, 235); // border-gray-200
-      doc.setLineWidth(1);
-      doc.rect(margin, currentY - 5, maxWidth, 55, 'S');
-      doc.setLineWidth(0.5); // Reset line width
+      doc.setLineWidth(0.5);
+      doc.rect(margin, currentY - 5, maxWidth, 60, 'S');
       
-      // Titre principal
-      doc.setFontSize(18);
+      // Icône cible colorée en en-tête
+      doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(15, 23, 42); // text-slate-900
-      doc.text("🎯 Resultats de votre preparation", margin + 5, currentY + 8);
+      doc.setTextColor(239, 68, 68); // Rouge pour l'icône cible
+      doc.text("🎯", margin + 8, currentY + 8);
       
-      // Badge niveau coloré selon le niveau (comme dans l'interface)
+      // Titre avec meilleure typographie
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(31, 41, 55); // text-gray-800
+      doc.text("Resultats de votre preparation", margin + 20, currentY + 8);
+      
+      // Badge niveau avec design amélioré
       let badgeBgColor, badgeTextColor;
       if (readiness.level === "Excellent") {
         badgeBgColor = [34, 197, 94]; // bg-green-500
@@ -394,53 +403,70 @@ export default function PreparationEntretienPage() {
         badgeTextColor = [255, 255, 255]; // text-white
       } else if (readiness.level === "Correct") {
         badgeBgColor = [251, 191, 36]; // bg-yellow-400
-        badgeTextColor = [0, 0, 0]; // text-black
+        badgeTextColor = [31, 41, 55]; // text-gray-800
       } else {
         badgeBgColor = [239, 68, 68]; // bg-red-500
         badgeTextColor = [255, 255, 255]; // text-white
       }
       
-      // Badge avec coins arrondis
+      // Badge avec design moderne
       const badgeText = `⭐ Niveau : ${readiness.level} (${readiness.score}/100)`;
-      const badgeWidth = doc.getTextWidth(badgeText) + 16;
-      doc.setFillColor(badgeBgColor[0], badgeBgColor[1], badgeBgColor[2]);
-      doc.roundedRect(margin + 5, currentY + 15, badgeWidth, 12, 6, 6, 'F');
-      
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(badgeTextColor[0], badgeTextColor[1], badgeTextColor[2]);
-      doc.text(badgeText, margin + 13, currentY + 23);
-      
-      // Message d'encouragement
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(107, 114, 128); // text-gray-500
-      doc.text(readiness.message, margin + 5, currentY + 35);
-      
-      // Barre de progression (style interface web)
-      const progressBarWidth = maxWidth - 20;
-      const progressBarHeight = 4;
-      const progressBarX = margin + 10;
-      const progressBarY = currentY + 42;
-      
-      // Fond de la barre de progression (gris)
-      doc.setFillColor(229, 231, 235); // bg-gray-200
-      doc.roundedRect(progressBarX, progressBarY, progressBarWidth, progressBarHeight, 2, 2, 'F');
-      
-      // Barre de progression remplie (noire comme dans l'interface)
-      const filledWidth = (progress / 100) * progressBarWidth;
-      doc.setFillColor(31, 41, 55); // bg-gray-800
-      doc.roundedRect(progressBarX, progressBarY, filledWidth, progressBarHeight, 2, 2, 'F');
-      
-      // Texte de progression centré
       doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      const badgeWidth = doc.getTextWidth(badgeText) + 20;
+      
+      // Ombre du badge
+      doc.setFillColor(0, 0, 0, 0.15);
+      doc.roundedRect(margin + 10 + 1, currentY + 19 + 1, badgeWidth, 14, 7, 7, 'F');
+      
+      // Badge principal
+      doc.setFillColor(badgeBgColor[0], badgeBgColor[1], badgeBgColor[2]);
+      doc.roundedRect(margin + 10, currentY + 19, badgeWidth, 14, 7, 7, 'F');
+      
+      doc.setTextColor(badgeTextColor[0], badgeTextColor[1], badgeTextColor[2]);
+      doc.text(badgeText, margin + 20, currentY + 28);
+      
+      // Message avec meilleure typographie
+      doc.setFontSize(11);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(107, 114, 128); // text-gray-500
+      doc.text(readiness.message, margin + 10, currentY + 42);
+      
+      // Barre de progression moderne avec dégradé simulé
+      const progressBarWidth = maxWidth - 30;
+      const progressBarHeight = 6;
+      const progressBarX = margin + 15;
+      const progressBarY = currentY + 48;
+      
+      // Fond de la barre avec coins arrondis
+      doc.setFillColor(243, 244, 246); // bg-gray-100
+      doc.roundedRect(progressBarX, progressBarY, progressBarWidth, progressBarHeight, 3, 3, 'F');
+      
+      // Barre de progression avec effet de dégradé (simulation)
+      const filledWidth = (progress / 100) * progressBarWidth;
+      if (filledWidth > 0) {
+        // Couleur selon le niveau
+        if (readiness.level === "Excellent") {
+          doc.setFillColor(34, 197, 94); // vert
+        } else if (readiness.level === "Très bien") {
+          doc.setFillColor(59, 130, 246); // bleu
+        } else if (readiness.level === "Bien") {
+          doc.setFillColor(249, 115, 22); // orange
+        } else {
+          doc.setFillColor(156, 163, 175); // gris
+        }
+        doc.roundedRect(progressBarX, progressBarY, filledWidth, progressBarHeight, 3, 3, 'F');
+      }
+      
+      // Texte de progression centré et stylé
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(156, 163, 175); // text-gray-400
       const progressText = `${completedQuestions.size}/${interviewQuestions.length} questions completees`;
       const progressTextWidth = doc.getTextWidth(progressText);
-      doc.text(progressText, (pageWidth - progressTextWidth) / 2, progressBarY + 12);
+      doc.text(progressText, (pageWidth - progressTextWidth) / 2, progressBarY + 16);
       
-      currentY += 70;
+      currentY += 75;
       
       // Section Mes Réponses
       doc.setFontSize(18);
