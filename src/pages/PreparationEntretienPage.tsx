@@ -403,22 +403,23 @@ export default function PreparationEntretienPage() {
         badgeTextColor = [255, 255, 255]; // text-white
       }
       
-      // Badge avec design moderne
+      // Badge avec design moderne centré
       const badgeText = `Niveau : ${readiness.level} (${readiness.score}/100)`;
       doc.setFontSize(10);
       doc.setFont("helvetica", "bold");
       const badgeWidth = doc.getTextWidth(badgeText) + 20;
+      const badgeX = (pageWidth - badgeWidth) / 2; // Centrer le badge
       
       // Ombre du badge
       doc.setFillColor(0, 0, 0, 0.15);
-      doc.roundedRect(margin + 10 + 1, currentY + 19 + 1, badgeWidth, 14, 7, 7, 'F');
+      doc.roundedRect(badgeX + 1, currentY + 19 + 1, badgeWidth, 14, 7, 7, 'F');
       
-      // Badge principal
+      // Badge principal centré
       doc.setFillColor(badgeBgColor[0], badgeBgColor[1], badgeBgColor[2]);
-      doc.roundedRect(margin + 10, currentY + 19, badgeWidth, 14, 7, 7, 'F');
+      doc.roundedRect(badgeX, currentY + 19, badgeWidth, 14, 7, 7, 'F');
       
       doc.setTextColor(badgeTextColor[0], badgeTextColor[1], badgeTextColor[2]);
-      doc.text(badgeText, margin + 20, currentY + 28);
+      doc.text(badgeText, badgeX + 10, currentY + 28);
       
       // Message avec meilleure typographie
       doc.setFontSize(11);
