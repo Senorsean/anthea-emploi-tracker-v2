@@ -9,10 +9,12 @@ import { Target, TrendingUp, Calendar, CheckCircle, AlertCircle, Pencil, Plus, T
 import type { WeeklyAction } from '@/data/weeklyActions';
 import { initialWeeklyActions, actionTemplates } from '@/data/weeklyActions';
 import { uploadJson } from '@/integrations/supabase/storage';
+import { useInterviewPreparation } from '@/hooks/useInterviewPreparation';
 import AddWeeklyActionModal from './AddWeeklyActionModal';
 
 export const GoalsModule = () => {
   const [currentGoal, setCurrentGoal] = useState('interviews');
+  const { getReadinessScore } = useInterviewPreparation();
 
   const goals = {
     interviews: {
@@ -176,31 +178,53 @@ export const GoalsModule = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {weeklyActions.map(action => (
-                <div key={action.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center gap-3 flex-1">
-                    {getStatusIcon(action.status)}
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{action.action}</p>
-                      <p className="text-xs text-gray-500">
-                        {action.completed}/{action.target} complété
-                      </p>
+              {weeklyActions.map(action => {
+                const readinessScore = action.action === 'Préparer les entretiens de la semaine' ? getReadinessScore() : null;
+                
+                return (
+                  <div key={action.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-3 flex-1">
+                      {getStatusIcon(action.status)}
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{action.action}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs text-gray-500">
+                            {action.completed}/{action.target} complété
+                          </p>
+                          {readinessScore && (
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs text-gray-400">•</span>
+                              <Badge 
+                                className={`text-xs px-2 py-0.5 ${
+                                  readinessScore.level === 'Excellent' ? 'bg-green-100 text-green-800' :
+                                  readinessScore.level === 'Très bien' ? 'bg-blue-100 text-blue-800' :
+                                  readinessScore.level === 'Bien' ? 'bg-orange-100 text-orange-800' :
+                                  readinessScore.level === 'Correct' ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-red-100 text-red-800'
+                                }`}
+                              >
+                                {readinessScore.level} ({readinessScore.score}/100)
+                              </Badge>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getStatusColor(action.status)}>
+                        {action.status === 'completed' ? 'Terminé' :
+                         action.status === 'in-progress' ? 'En cours' : 'À faire'}
+                      </Badge>
+                      <Button variant="ghost" size="icon" onClick={() => setEditAction(action)}>
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => deleteAction(action.id)}>
+                        <Trash className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className={getStatusColor(action.status)}>
-                      {action.status === 'completed' ? 'Terminé' :
-                       action.status === 'in-progress' ? 'En cours' : 'À faire'}
-                    </Badge>
-                    <Button variant="ghost" size="icon" onClick={() => setEditAction(action)}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" onClick={() => deleteAction(action.id)}>
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
