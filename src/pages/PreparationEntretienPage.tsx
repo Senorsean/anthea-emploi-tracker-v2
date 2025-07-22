@@ -131,7 +131,37 @@ export default function PreparationEntretienPage() {
               question: question.question,
               issue: "Manque de structure dans la présentation",
               recommendation: "Structurez votre présentation : parcours, expériences clés, compétences, motivations.",
-              severity: "high" // Rouge
+              severity: "medium" // Orange pour Présentation
+            });
+          } else {
+            // Si tout va bien pour Présentation, on l'affiche quand même en orange
+            advice.push({
+              category: question.category,
+              question: question.question,
+              issue: "Présentation correcte",
+              recommendation: "Continuez à structurer votre présentation de manière claire.",
+              severity: "medium" // Orange
+            });
+          }
+          break;
+          
+        case "Travail d'équipe":
+          if (!responseText.includes("écoute") && !responseText.includes("communication") && !responseText.includes("solution")) {
+            advice.push({
+              category: question.category,
+              question: question.question,
+              issue: "Manque d'accent sur la résolution",
+              recommendation: "Mettez l'accent sur l'écoute, la communication et la résolution du conflit.",
+              severity: "medium" // Orange pour Travail d'équipe
+            });
+          } else {
+            // Si tout va bien pour Travail d'équipe, on l'affiche quand même en orange
+            advice.push({
+              category: question.category,
+              question: question.question,
+              issue: "Approche collaborative correcte",
+              recommendation: "Continuez à mettre l'accent sur la communication et la résolution.",
+              severity: "medium" // Orange
             });
           }
           break;
@@ -145,6 +175,15 @@ export default function PreparationEntretienPage() {
               recommendation: "Montrez que vous connaissez l'entreprise, ses valeurs et ses projets.",
               severity: "high" // Rouge
             });
+          } else {
+            // Si tout va bien pour les autres catégories, vert
+            advice.push({
+              category: question.category,
+              question: question.question,
+              issue: "Motivation bien exprimée",
+              recommendation: "Excellente connaissance de l'entreprise et motivation claire.",
+              severity: "low" // Vert
+            });
           }
           break;
           
@@ -156,6 +195,14 @@ export default function PreparationEntretienPage() {
               issue: "Méthode STAR incomplète",
               recommendation: "Utilisez la méthode STAR : Situation, Tâche, Action, Résultat.",
               severity: "medium" // Orange
+            });
+          } else {
+            advice.push({
+              category: question.category,
+              question: question.question,
+              issue: "Compétences bien démontrées",
+              recommendation: "Excellente utilisation d'exemples concrets et de résultats.",
+              severity: "low" // Vert
             });
           }
           break;
@@ -169,17 +216,13 @@ export default function PreparationEntretienPage() {
               recommendation: "Évitez les clichés. Choisissez une vraie faiblesse avec un plan d'amélioration concret.",
               severity: "medium" // Orange
             });
-          }
-          break;
-          
-        case "Travail d'équipe":
-          if (!responseText.includes("écoute") && !responseText.includes("communication") && !responseText.includes("solution")) {
+          } else {
             advice.push({
               category: question.category,
               question: question.question,
-              issue: "Manque d'accent sur la résolution",
-              recommendation: "Mettez l'accent sur l'écoute, la communication et la résolution du conflit.",
-              severity: "medium" // Orange
+              issue: "Approche authentique des faiblesses",
+              recommendation: "Bonne présentation d'une faiblesse réelle avec plan d'amélioration.",
+              severity: "low" // Vert
             });
           }
           break;
@@ -193,11 +236,30 @@ export default function PreparationEntretienPage() {
               recommendation: "Donnez des exemples concrets d'initiatives prises et de leur impact.",
               severity: "medium" // Orange
             });
+          } else {
+            advice.push({
+              category: question.category,
+              question: question.question,
+              issue: "Leadership bien démontré",
+              recommendation: "Excellents exemples d'initiatives et d'impact positif.",
+              severity: "low" // Vert
+            });
           }
+          break;
+
+        default:
+          // Pour les autres catégories, si tout va bien, vert
+          advice.push({
+            category: question.category,
+            question: question.question,
+            issue: "Réponse appropriée",
+            recommendation: "Réponse bien structurée et complète.",
+            severity: "low" // Vert
+          });
           break;
       }
       
-      // Vérifications générales
+      // Vérifications générales pour la longueur
       if (response.length < 100) {
         advice.push({
           category: question.category,
@@ -390,7 +452,7 @@ export default function PreparationEntretienPage() {
             borderColor = [249, 115, 22]; // border-orange-500
             textColor = [154, 52, 18]; // text-orange-800
           } else {
-            // Vert pour les bonnes pratiques (fallback)
+            // Vert pour les bonnes pratiques
             bgColor = [220, 252, 231]; // bg-green-100
             borderColor = [34, 197, 94]; // border-green-500
             textColor = [21, 128, 61]; // text-green-800
@@ -550,7 +612,7 @@ export default function PreparationEntretienPage() {
                         bgColor = "bg-orange-50";
                         borderColor = "border-orange-400";
                         textColor = "text-orange-800";
-                      } else {
+                      } else if (advice.severity === "low") {
                         bgColor = "bg-green-50";
                         borderColor = "border-green-400";
                         textColor = "text-green-800";
