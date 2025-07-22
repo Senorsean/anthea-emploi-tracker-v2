@@ -359,6 +359,29 @@ export default function PreparationEntretienPage() {
           currentY = 25;
         }
         
+        // Analyser la sévérité pour cette question spécifique
+        const response = responses[question.id];
+        let badgeSeverity = "low"; // Par défaut vert
+        
+        if (question.category === "Présentation" || question.category === "Travail d'équipe") {
+          badgeSeverity = "medium"; // Orange pour ces catégories
+        }
+        
+        if (!response || response.trim().length < 50) {
+          badgeSeverity = "high"; // Rouge si pas de réponse
+        } else if (response) {
+          const responseText = response.toLowerCase();
+          
+          // Vérifications spécifiques selon la catégorie
+          if (question.category === "Présentation" && !responseText.includes("expérience") && !responseText.includes("parcours")) {
+            badgeSeverity = "medium"; // Orange
+          } else if (question.category === "Travail d'équipe" && !responseText.includes("écoute") && !responseText.includes("communication")) {
+            badgeSeverity = "medium"; // Orange
+          } else if (question.category === "Motivation" && !responseText.includes("entreprise") && !responseText.includes("mission")) {
+            badgeSeverity = "high"; // Rouge
+          }
+        }
+        
         // Encadré pour chaque question
         doc.setFillColor(249, 250, 251); // bg-gray-50
         
@@ -368,21 +391,32 @@ export default function PreparationEntretienPage() {
         const questionText = doc.splitTextToSize(`${index + 1}. ${question.question}`, maxWidth - 10);
         doc.text(questionText, margin + 5, currentY + 8);
         
-        // Badge de catégorie
+        // Badge de catégorie avec couleur selon la sévérité
         doc.setFontSize(9);
         doc.setFont("helvetica", "normal");
-        doc.setFillColor(219, 234, 254); // bg-blue-100
-        doc.setTextColor(29, 78, 216); // text-blue-700
+        
+        // Couleurs selon la sévérité
+        if (badgeSeverity === "high") {
+          doc.setFillColor(254, 226, 226); // bg-red-100
+          doc.setTextColor(153, 27, 27); // text-red-800
+        } else if (badgeSeverity === "medium") {
+          doc.setFillColor(254, 243, 199); // bg-orange-100
+          doc.setTextColor(154, 52, 18); // text-orange-800
+        } else {
+          doc.setFillColor(220, 252, 231); // bg-green-100
+          doc.setTextColor(21, 128, 61); // text-green-800
+        }
+        
         const badgeWidth = Math.min(doc.getTextWidth(question.category) + 8, maxWidth - 10);
         doc.rect(margin + 5, currentY + 12, badgeWidth, 8, 'F');
         doc.text(question.category, margin + 9, currentY + 17);
         
         currentY += 25;
         
-        const response = responses[question.id];
-        if (response) {
+        const questionResponse = responses[question.id];
+        if (questionResponse) {
           // Nettoyer le texte de la réponse pour éviter les problèmes d'affichage
-          const cleanResponse = response.replace(/\s+/g, ' ').trim();
+          const cleanResponse = questionResponse.replace(/\s+/g, ' ').trim();
           doc.setFontSize(10);
           doc.setFont("helvetica", "normal");
           doc.setTextColor(55, 65, 81); // text-gray-700
