@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import AmeliorerEntretiensPage from "./pages/AmeliorerEntretiensPage";
+import PreparationEntretienPage from "./pages/PreparationEntretienPage";
 import MethodeStarPage from "./pages/MethodeStarPage";
 import RenforcezVotreReseauPage from "./pages/RenforcezVotreReseauPage";
 import ProgressionEntretiensPage from "./pages/ProgressionEntretiensPage";
@@ -73,6 +74,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <TauxReponsePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/preparation-entretien"
+            element={
+              <RequireAuth>
+                <PreparationEntretienPage />
               </RequireAuth>
             }
           />

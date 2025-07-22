@@ -12,7 +12,7 @@ export default function AmeliorerEntretiensPage() {
           <h2 className="text-xl font-semibold">1. Comment bien se préparer</h2>
           <ul className="list-disc list-inside mt-2 space-y-2">
             <li>Analysez l'offre d'emploi pour identifier les attentes du poste.</li>
-            <li>Renseignez-vous sur l’entreprise (valeurs, secteur, culture).</li>
+            <li>Renseignez-vous sur l'entreprise (valeurs, secteur, culture).</li>
             <li>
               Préparez des exemples concrets de vos expériences passées (
               <Link to="/methode-star" className="text-blue-600 hover:underline">
@@ -33,7 +33,7 @@ export default function AmeliorerEntretiensPage() {
           <ul className="list-disc list-inside mt-2 space-y-2">
             <li>Votre parcours en résumé.</li>
             <li>Ce que vous avez accompli et ce qui vous motive.</li>
-            <li>Pourquoi vous êtes ici aujourd’hui.</li>
+            <li>Pourquoi vous êtes ici aujourd'hui.</li>
           </ul>
         </section>
 
@@ -41,16 +41,30 @@ export default function AmeliorerEntretiensPage() {
           <h2 className="text-xl font-semibold">3. Quelles questions poser au recruteur</h2>
           <ul className="list-disc list-inside mt-2 space-y-2">
             <li>Quels sont les défis du poste dans les 6 prochains mois ?</li>
-            <li>Comment l’équipe est-elle structurée ?</li>
-            <li>Quelles sont les perspectives d’évolution ?</li>
+            <li>Comment l'équipe est-elle structurée ?</li>
+            <li>Quelles sont les perspectives d'évolution ?</li>
             <li>Comment mesurez-vous le succès sur ce poste ?</li>
             <li>Quelle est la prochaine étape du processus de recrutement ?</li>
           </ul>
         </section>
 
+        <section className="mb-6 bg-blue-50 p-6 rounded-lg">
+          <h2 className="text-xl font-semibold mb-4">🎯 Entraînez-vous maintenant !</h2>
+          <p className="mb-4">
+            Préparez-vous concrètement avec notre simulateur d'entretien interactif.
+            Répondez aux questions les plus courantes et évaluez votre niveau de préparation.
+          </p>
+          <Link 
+            to="/preparation-entretien" 
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Commencer l'entraînement →
+          </Link>
+        </section>
+
         <div className="mt-8">
           <Link to="/" className="text-sm text-gray-600 hover:underline">
-            ← Retour à l’accueil
+            ← Retour à l'accueil
           </Link>
         </div>
       </main>

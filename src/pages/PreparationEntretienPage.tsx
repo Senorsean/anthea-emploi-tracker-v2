@@ -296,7 +296,7 @@ export default function PreparationEntretienPage() {
                       <div className="flex-1">
                         <p className="text-sm font-medium">{q.question}</p>
                         <div className="flex gap-1 mt-1">
-                          <Badge size="sm" variant="outline">{q.category}</Badge>
+                          <Badge variant="outline">{q.category}</Badge>
                         </div>
                       </div>
                       {completedQuestions.has(q.id) && (
