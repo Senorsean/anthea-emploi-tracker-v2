@@ -364,85 +364,83 @@ export default function PreparationEntretienPage() {
       currentY = 55;
       doc.setTextColor(0, 0, 0);
       
-      // Section Score avec design graphique amélioré
+      // Section Score avec design similaire à l'interface web
       const readiness = getReadinessScore();
       
-      // Couleurs selon le niveau
-      let bgColor, borderColor, textColor;
-      if (readiness.level === "Excellent") {
-        bgColor = [220, 252, 231]; // bg-green-100
-        borderColor = [34, 197, 94]; // border-green-500
-        textColor = [21, 128, 61]; // text-green-800
-      } else if (readiness.level === "Très bien") {
-        bgColor = [219, 234, 254]; // bg-blue-100
-        borderColor = [59, 130, 246]; // border-blue-500
-        textColor = [30, 64, 175]; // text-blue-800
-      } else if (readiness.level === "Bien") {
-        bgColor = [254, 243, 199]; // bg-orange-100
-        borderColor = [249, 115, 22]; // border-orange-500
-        textColor = [154, 52, 18]; // text-orange-800
-      } else if (readiness.level === "Correct") {
-        bgColor = [254, 249, 195]; // bg-yellow-100
-        borderColor = [251, 191, 36]; // border-yellow-400
-        textColor = [146, 64, 14]; // text-yellow-800
-      } else {
-        bgColor = [254, 226, 226]; // bg-red-100
-        borderColor = [239, 68, 68]; // border-red-500
-        textColor = [153, 27, 27]; // text-red-800
-      }
-      
-      // Encadré principal coloré selon le niveau
-      doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
-      doc.rect(margin, currentY - 5, maxWidth, 50, 'F');
-      doc.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
-      doc.setLineWidth(2);
-      doc.rect(margin, currentY - 5, maxWidth, 50, 'S');
+      // Encadré principal avec fond blanc
+      doc.setFillColor(255, 255, 255); // bg-white
+      doc.rect(margin, currentY - 5, maxWidth, 55, 'F');
+      doc.setDrawColor(229, 231, 235); // border-gray-200
+      doc.setLineWidth(1);
+      doc.rect(margin, currentY - 5, maxWidth, 55, 'S');
       doc.setLineWidth(0.5); // Reset line width
       
-      // Titre avec icône cible
+      // Titre principal
       doc.setFontSize(18);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+      doc.setTextColor(15, 23, 42); // text-slate-900
       doc.text("🎯 Resultats de votre preparation", margin + 5, currentY + 8);
       
-      // Badge niveau avec fond coloré
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.setFillColor(255, 255, 255); // Fond blanc pour le badge
+      // Badge niveau coloré selon le niveau (comme dans l'interface)
+      let badgeBgColor, badgeTextColor;
+      if (readiness.level === "Excellent") {
+        badgeBgColor = [34, 197, 94]; // bg-green-500
+        badgeTextColor = [255, 255, 255]; // text-white
+      } else if (readiness.level === "Très bien") {
+        badgeBgColor = [59, 130, 246]; // bg-blue-500
+        badgeTextColor = [255, 255, 255]; // text-white
+      } else if (readiness.level === "Bien") {
+        badgeBgColor = [249, 115, 22]; // bg-orange-500
+        badgeTextColor = [255, 255, 255]; // text-white
+      } else if (readiness.level === "Correct") {
+        badgeBgColor = [251, 191, 36]; // bg-yellow-400
+        badgeTextColor = [0, 0, 0]; // text-black
+      } else {
+        badgeBgColor = [239, 68, 68]; // bg-red-500
+        badgeTextColor = [255, 255, 255]; // text-white
+      }
+      
+      // Badge avec coins arrondis
       const badgeText = `⭐ Niveau : ${readiness.level} (${readiness.score}/100)`;
-      const badgeWidth = doc.getTextWidth(badgeText) + 12;
-      doc.roundedRect(margin + 5, currentY + 15, badgeWidth, 12, 3, 3, 'F');
-      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-      doc.text(badgeText, margin + 11, currentY + 23);
+      const badgeWidth = doc.getTextWidth(badgeText) + 16;
+      doc.setFillColor(badgeBgColor[0], badgeBgColor[1], badgeBgColor[2]);
+      doc.roundedRect(margin + 5, currentY + 15, badgeWidth, 12, 6, 6, 'F');
+      
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(badgeTextColor[0], badgeTextColor[1], badgeTextColor[2]);
+      doc.text(badgeText, margin + 13, currentY + 23);
       
       // Message d'encouragement
       doc.setFontSize(12);
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
+      doc.setTextColor(107, 114, 128); // text-gray-500
       doc.text(readiness.message, margin + 5, currentY + 35);
       
-      // Barre de progression graphique
+      // Barre de progression (style interface web)
       const progressBarWidth = maxWidth - 20;
-      const progressBarHeight = 6;
+      const progressBarHeight = 4;
       const progressBarX = margin + 10;
       const progressBarY = currentY + 42;
       
-      // Fond de la barre de progression
-      doc.setFillColor(255, 255, 255);
+      // Fond de la barre de progression (gris)
+      doc.setFillColor(229, 231, 235); // bg-gray-200
       doc.roundedRect(progressBarX, progressBarY, progressBarWidth, progressBarHeight, 2, 2, 'F');
       
-      // Barre de progression remplie
+      // Barre de progression remplie (noire comme dans l'interface)
       const filledWidth = (progress / 100) * progressBarWidth;
-      doc.setFillColor(borderColor[0], borderColor[1], borderColor[2]);
+      doc.setFillColor(31, 41, 55); // bg-gray-800
       doc.roundedRect(progressBarX, progressBarY, filledWidth, progressBarHeight, 2, 2, 'F');
       
-      // Texte de progression
+      // Texte de progression centré
       doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
-      doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-      doc.text(`${completedQuestions.size}/${interviewQuestions.length} questions completees`, progressBarX, progressBarY + 14);
+      doc.setTextColor(107, 114, 128); // text-gray-500
+      const progressText = `${completedQuestions.size}/${interviewQuestions.length} questions completees`;
+      const progressTextWidth = doc.getTextWidth(progressText);
+      doc.text(progressText, (pageWidth - progressTextWidth) / 2, progressBarY + 12);
       
-      currentY += 65;
+      currentY += 70;
       
       // Section Mes Réponses
       doc.setFontSize(18);
