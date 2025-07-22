@@ -96,12 +96,52 @@ export default function PreparationEntretienPage() {
   const getReadinessScore = () => {
     const totalQuestions = interviewQuestions.length;
     const completedCount = completedQuestions.size;
-    const score = (completedCount / totalQuestions) * 100;
+    const completionRate = (completedCount / totalQuestions) * 100;
     
-    if (score >= 90) return { level: "Excellent", color: "bg-green-500", message: "Vous êtes prêt pour l'entretien !" };
-    if (score >= 70) return { level: "Bien", color: "bg-blue-500", message: "Bonne préparation, continuez !" };
-    if (score >= 50) return { level: "Correct", color: "bg-orange-500", message: "Vous progressez bien" };
-    return { level: "À améliorer", color: "bg-red-500", message: "Continuez à vous entraîner" };
+    // Analyser la qualité des réponses
+    const advice = analyzeResponses();
+    const highSeverityIssues = advice.filter(item => item.severity === "high").length;
+    const mediumSeverityIssues = advice.filter(item => item.severity === "medium").length;
+    
+    // Calcul du score de qualité (sur 100)
+    let qualityScore = 100;
+    qualityScore -= highSeverityIssues * 15; // -15 points par problème grave
+    qualityScore -= mediumSeverityIssues * 8; // -8 points par problème moyen
+    qualityScore = Math.max(0, qualityScore);
+    
+    // Score global (moyenne entre taux de completion et qualité)
+    const globalScore = (completionRate + qualityScore) / 2;
+    
+    if (globalScore >= 85) return { 
+      level: "Excellent", 
+      color: "bg-green-500", 
+      message: "Vous êtes parfaitement prêt pour l'entretien !",
+      score: Math.round(globalScore)
+    };
+    if (globalScore >= 70) return { 
+      level: "Très bien", 
+      color: "bg-blue-500", 
+      message: "Très bonne préparation, quelques ajustements mineurs !",
+      score: Math.round(globalScore)
+    };
+    if (globalScore >= 55) return { 
+      level: "Bien", 
+      color: "bg-orange-500", 
+      message: "Bonne base, continuez à améliorer vos réponses !",
+      score: Math.round(globalScore)
+    };
+    if (globalScore >= 40) return { 
+      level: "Correct", 
+      color: "bg-yellow-500", 
+      message: "Préparation correcte, plusieurs points à améliorer",
+      score: Math.round(globalScore)
+    };
+    return { 
+      level: "À améliorer", 
+      color: "bg-red-500", 
+      message: "Continuez à vous entraîner, beaucoup de travail reste à faire",
+      score: Math.round(globalScore)
+    };
   };
 
   const analyzeResponses = () => {
@@ -338,7 +378,7 @@ export default function PreparationEntretienPage() {
       
       doc.setFontSize(14);
       doc.setTextColor(59, 130, 246); // text-blue-600
-      doc.text(`Niveau : ${readiness.level}`, margin + 5, currentY + 15);
+      doc.text(`Niveau : ${readiness.level} (${readiness.score}/100)`, margin + 5, currentY + 15);
       
       doc.setFontSize(12);
       doc.setTextColor(71, 85, 105); // text-slate-600
@@ -594,7 +634,7 @@ export default function PreparationEntretienPage() {
             <div className="mb-6">
               <div className={`inline-flex items-center px-4 py-2 rounded-full text-white ${readiness.color} mb-4`}>
                 <Star className="mr-2 h-5 w-5" />
-                Niveau : {readiness.level}
+                Niveau : {readiness.level} ({readiness.score}/100)
               </div>
               <p className="text-lg text-gray-600">{readiness.message}</p>
             </div>
