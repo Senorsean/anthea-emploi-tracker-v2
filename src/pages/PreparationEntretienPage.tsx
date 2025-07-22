@@ -321,7 +321,7 @@ export default function PreparationEntretienPage() {
         currentY += splitResponse.length * 4 + 15;
       } else {
         doc.setFontSize(10);
-        doc.setFont("helvetica", "italic");
+        doc.setFont("helvetica", "normal");
         doc.setTextColor(156, 163, 175); // text-gray-400
         doc.text("Pas de reponse fournie", margin + 10, currentY);
         currentY += 20;
@@ -359,6 +359,7 @@ export default function PreparationEntretienPage() {
       
       doc.setFontSize(11);
       doc.setFont("helvetica", "normal");
+      doc.setTextColor(21, 128, 61);
       doc.text("Vos reponses sont bien structurees et completes.", margin + 5, currentY + 15);
       currentY += 35;
     } else {
@@ -369,7 +370,7 @@ export default function PreparationEntretienPage() {
         }
         
         // Encadré conseil avec hauteur dynamique
-        const estimatedHeight = 35;
+        const estimatedHeight = 40;
         doc.setFillColor(254, 249, 195); // bg-yellow-100
         doc.rect(margin, currentY - 3, maxWidth, estimatedHeight, 'F');
         doc.setDrawColor(251, 191, 36); // border-yellow-400
@@ -387,8 +388,8 @@ export default function PreparationEntretienPage() {
         doc.text(issueText, margin + 10, currentY + 13);
         
         const recoText = doc.splitTextToSize(`Conseil : ${item.recommendation}`, maxWidth - 15);
-        doc.text(recoText, margin + 10, currentY + 20);
-        currentY += estimatedHeight + 10;
+        doc.text(recoText, margin + 10, currentY + 23);
+        currentY += 45;
       });
     }
     
