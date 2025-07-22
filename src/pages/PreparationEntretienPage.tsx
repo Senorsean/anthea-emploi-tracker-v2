@@ -313,10 +313,12 @@ export default function PreparationEntretienPage() {
       
       const response = responses[question.id];
       if (response) {
+        // Nettoyer le texte de la réponse pour éviter les problèmes d'affichage
+        const cleanResponse = response.replace(/\s+/g, ' ').trim();
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(55, 65, 81); // text-gray-700
-        const splitResponse = doc.splitTextToSize(response, maxWidth - 40);
+        const splitResponse = doc.splitTextToSize(cleanResponse, maxWidth - 40);
         doc.text(splitResponse, margin + 10, currentY);
         currentY += splitResponse.length * 5 + 15;
       } else {
