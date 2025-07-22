@@ -426,41 +426,15 @@ export default function PreparationEntretienPage() {
       doc.setTextColor(107, 114, 128); // text-gray-500
       doc.text(readiness.message, margin + 10, currentY + 42);
       
-      // Barre de progression moderne avec dégradé simulé
-      const progressBarWidth = maxWidth - 30;
-      const progressBarHeight = 6;
-      const progressBarX = margin + 15;
-      const progressBarY = currentY + 48;
-      
-      // Fond de la barre avec coins arrondis
-      doc.setFillColor(243, 244, 246); // bg-gray-100
-      doc.roundedRect(progressBarX, progressBarY, progressBarWidth, progressBarHeight, 3, 3, 'F');
-      
-      // Barre de progression avec effet de dégradé (simulation)
-      const filledWidth = (progress / 100) * progressBarWidth;
-      if (filledWidth > 0) {
-        // Couleur selon le niveau
-        if (readiness.level === "Excellent") {
-          doc.setFillColor(34, 197, 94); // vert
-        } else if (readiness.level === "Très bien") {
-          doc.setFillColor(59, 130, 246); // bleu
-        } else if (readiness.level === "Bien") {
-          doc.setFillColor(249, 115, 22); // orange
-        } else {
-          doc.setFillColor(156, 163, 175); // gris
-        }
-        doc.roundedRect(progressBarX, progressBarY, filledWidth, progressBarHeight, 3, 3, 'F');
-      }
-      
-      // Texte de progression centré et stylé
-      doc.setFontSize(9);
+      // Texte de progression dans le cadre (sans barre)
+      doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(156, 163, 175); // text-gray-400
       const progressText = `${completedQuestions.size}/${interviewQuestions.length} questions completees`;
       const progressTextWidth = doc.getTextWidth(progressText);
-      doc.text(progressText, (pageWidth - progressTextWidth) / 2, progressBarY + 16);
+      doc.text(progressText, (pageWidth - progressTextWidth) / 2, currentY + 52);
       
-      currentY += 75;
+      currentY += 70;
       
       // Section Mes Réponses
       doc.setFontSize(18);
