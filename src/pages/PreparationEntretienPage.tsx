@@ -232,20 +232,26 @@ export default function PreparationEntretienPage() {
       doc.rect(i, 0, 2, 45, 'F');
     }
     
-    // Logo Anthea
+    // Logo Anthea en haut à gauche
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(28);
+    doc.setFontSize(24);
     doc.setFont("helvetica", "bold");
-    doc.text("anthea", pageWidth / 2 - 25, 20);
+    doc.text("anthea", margin, 20);
     
-    doc.setFontSize(14);
-    doc.setFont("helvetica", "normal");
-    doc.text("emploi Tracker", pageWidth / 2 - 20, 32);
-    
-    // Titre du rapport
     doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text("emploi Tracker", margin, 32);
+    
+    // Titre du rapport à droite
+    doc.setFontSize(16);
     doc.setFont("helvetica", "bold");
-    doc.text("Rapport de Preparation d'Entretien", pageWidth / 2 - 45, 40);
+    doc.text("Rapport de Preparation d'Entretien", pageWidth - 130, 28);
+    
+    // Date de génération
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    const today = new Date().toLocaleDateString('fr-FR');
+    doc.text(`Genere le ${today}`, pageWidth - 60, 38);
     
     currentY = 55;
     doc.setTextColor(0, 0, 0);
@@ -314,6 +320,7 @@ export default function PreparationEntretienPage() {
         doc.text(splitResponse, margin + 10, currentY);
         currentY += splitResponse.length * 4 + 15;
       } else {
+        doc.setFontSize(10);
         doc.setFont("helvetica", "italic");
         doc.setTextColor(156, 163, 175); // text-gray-400
         doc.text("Pas de reponse fournie", margin + 10, currentY);
