@@ -540,17 +540,34 @@ export default function PreparationEntretienPage() {
                       <p className="text-green-600 text-sm mt-1">Vos réponses sont bien structurées et complètes.</p>
                     </div>
                   ) : (
-                    analyzeResponses().slice(0, 5).map((advice, index) => (
-                      <div key={index} className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
-                        <p className="font-medium text-blue-800">{advice.category}</p>
-                        <p className="text-sm text-blue-600 mt-1">
-                          <span className="font-medium">Problème :</span> {advice.issue}
-                        </p>
-                        <p className="text-sm text-blue-600 mt-1">
-                          <span className="font-medium">Conseil :</span> {advice.recommendation}
-                        </p>
-                      </div>
-                    ))
+                    analyzeResponses().slice(0, 5).map((advice, index) => {
+                      let bgColor, borderColor, textColor;
+                      if (advice.severity === "high") {
+                        bgColor = "bg-red-50";
+                        borderColor = "border-red-400";
+                        textColor = "text-red-800";
+                      } else if (advice.severity === "medium") {
+                        bgColor = "bg-orange-50";
+                        borderColor = "border-orange-400";
+                        textColor = "text-orange-800";
+                      } else {
+                        bgColor = "bg-green-50";
+                        borderColor = "border-green-400";
+                        textColor = "text-green-800";
+                      }
+                      
+                      return (
+                        <div key={index} className={`${bgColor} p-4 rounded-lg border-l-4 ${borderColor}`}>
+                          <p className={`font-medium ${textColor}`}>{advice.category}</p>
+                          <p className={`text-sm ${textColor} mt-1`}>
+                            <span className="font-medium">Problème :</span> {advice.issue}
+                          </p>
+                          <p className={`text-sm ${textColor} mt-1`}>
+                            <span className="font-medium">Conseil :</span> {advice.recommendation}
+                          </p>
+                        </div>
+                      );
+                    })
                   )}
                   
                   <div className="mt-4 pt-4 border-t">
