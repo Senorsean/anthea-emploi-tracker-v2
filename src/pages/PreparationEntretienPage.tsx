@@ -429,7 +429,7 @@ export default function PreparationEntretienPage() {
     // Essayer de charger le logo
     logoImg.onload = () => {
       try {
-        doc.addImage(logoImg, 'PNG', margin, 8, 60, 20);
+        doc.addImage(logoImg, 'PNG', margin, 8, 20, 7);
       } catch (error) {
         console.error('Erreur lors du chargement du logo:', error);
       }
