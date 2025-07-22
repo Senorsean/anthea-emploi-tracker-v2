@@ -232,11 +232,11 @@ export default function PreparationEntretienPage() {
       doc.rect(i, 0, 2, 45, 'F');
     }
     
-    // Logo Anthea en haut à gauche
+    // Logo Anthéa en haut à gauche
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(24);
     doc.setFont("helvetica", "bold");
-    doc.text("anthea", margin, 20);
+    doc.text("anthéa", margin, 20);
     
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
