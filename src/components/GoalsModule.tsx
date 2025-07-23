@@ -175,8 +175,8 @@ export const GoalsModule = () => {
             </div>
             <Progress
               value={selectedGoal.progress}
-              indicatorClassName="bg-[#a4007c]"
-              className="h-3"
+              variant="thermometer"
+              className="h-6 mb-2"
             />
           </div>
         </CardContent>
