@@ -102,7 +102,7 @@ export const useInterviewPreparation = () => {
 
       const wordCount = response.trim().split(/\s+/).length;
       
-      if (wordCount <= 10) {
+      if (wordCount <= 20) {
         advice.push({
           category: question.category,
           question: question.question,
@@ -113,7 +113,7 @@ export const useInterviewPreparation = () => {
         return;
       }
       
-      if (wordCount <= 35) {
+      if (wordCount <= 50) {
         advice.push({
           category: question.category,
           question: question.question,
