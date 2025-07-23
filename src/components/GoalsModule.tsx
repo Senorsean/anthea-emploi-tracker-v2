@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +14,14 @@ import AddWeeklyActionModal from './AddWeeklyActionModal';
 
 export const GoalsModule = () => {
   const [currentGoal, setCurrentGoal] = useState('interviews');
+  const [refreshKey, setRefreshKey] = useState(0);
   const { getReadinessScore } = useInterviewPreparation();
+
+  // Force refresh of data when component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => setRefreshKey(prev => prev + 1), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const goals = {
     interviews: {
