@@ -85,18 +85,20 @@ export const useInterviewPreparation = () => {
   const checkRelevance = (responseText: string, category: string): boolean => {
     // Mots-clés requis pour chaque catégorie
     const requiredKeywords: Record<string, string[]> = {
-      "Présentation": ["parcours", "expérience", "formation", "compétence", "diplôme", "travail", "poste", "carrière"],
-      "Motivation": ["entreprise", "poste", "mission", "valeurs", "projet", "équipe", "développer", "contribuer"],
-      "Compétences": ["situation", "défi", "problème", "solution", "action", "résultat", "exemple", "projet"],
-      "Faiblesses": ["faiblesse", "défaut", "améliorer", "développer", "travailler", "point", "difficulté", "progrès"],
-      "Ambition": ["objectif", "avenir", "développement", "évolution", "carrière", "apprendre", "grandir", "projets"],
-      "Gestion du stress": ["stress", "pression", "gestion", "technique", "calme", "organisation", "priorité", "méthode"],
-      "Travail d'équipe": ["équipe", "collègue", "conflit", "communication", "collaboration", "résolution", "écoute", "groupe"],
-      "Leadership": ["initiative", "direction", "équipe", "projet", "décision", "responsabilité", "encadrer", "motiver"]
+      "Présentation": ["parcours", "expérience", "formation", "compétence", "diplôme", "travail", "poste", "carrière", "moi", "je", "mon", "ma", "mes", "étude", "université", "école"],
+      "Motivation": ["entreprise", "poste", "mission", "valeurs", "projet", "équipe", "développer", "contribuer", "intéresse", "passion", "objectif", "société", "organisation"],
+      "Compétences": ["situation", "défi", "problème", "solution", "action", "résultat", "exemple", "projet", "réussi", "accompli", "géré", "organisé", "dirigé"],
+      "Faiblesses": ["faiblesse", "défaut", "améliorer", "développer", "travailler", "point", "difficulté", "progrès", "faible", "difficile", "peine", "mal", "problème"],
+      "Ambition": ["objectif", "avenir", "développement", "évolution", "carrière", "apprendre", "grandir", "projets", "futur", "ans", "évoluer", "progresser"],
+      "Gestion du stress": ["stress", "pression", "gestion", "technique", "calme", "organisation", "priorité", "méthode", "gérer", "pression", "difficile", "tension"],
+      "Travail d'équipe": ["équipe", "collègue", "conflit", "communication", "collaboration", "résolution", "écoute", "groupe", "travail", "ensemble", "coopération"],
+      "Leadership": ["initiative", "direction", "équipe", "projet", "décision", "responsabilité", "encadrer", "motiver", "dirigé", "mené", "organisé", "coordonné"]
     };
 
     const keywords = requiredKeywords[category] || [];
-    return keywords.some(keyword => responseText.includes(keyword));
+    // Vérifier qu'au moins 2 mots-clés sont présents pour considérer la réponse comme pertinente
+    const matchCount = keywords.filter(keyword => responseText.includes(keyword)).length;
+    return matchCount >= 2;
   };
 
   const analyzeResponses = () => {
