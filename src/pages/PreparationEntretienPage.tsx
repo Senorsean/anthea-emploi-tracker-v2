@@ -342,11 +342,6 @@ export default function PreparationEntretienPage() {
       doc.rect(i, 0, 2, 45, 'F');
     }
     
-    // Logo avec fallback
-    const logoImg = new Image();
-    logoImg.crossOrigin = 'anonymous';
-    logoImg.src = '/lovable-uploads/fef3bb44-e7e2-43c8-98ca-9836521aa20f.png';
-    
     const generatePDFContent = () => {
       // Titre du rapport centré
       doc.setTextColor(255, 255, 255);
@@ -642,28 +637,8 @@ export default function PreparationEntretienPage() {
       doc.save('preparation-entretien.pdf');
     };
     
-    // Essayer de charger le logo
-    logoImg.onload = () => {
-      try {
-        doc.addImage(logoImg, 'PNG', margin, 8, 20, 7);
-      } catch (error) {
-        console.error('Erreur lors du chargement du logo:', error);
-      }
-      generatePDFContent();
-    };
-    
-    // Fallback si le logo ne charge pas
-    logoImg.onerror = () => {
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(24);
-      doc.setFont("helvetica", "bold");
-      doc.text("anthéa", margin, 20);
-      
-      doc.setFontSize(12);
-      doc.setFont("helvetica", "normal");
-      doc.text("emploi Tracker", margin, 32);
-      generatePDFContent();
-    };
+    // Générer directement le PDF
+    generatePDFContent();
   };
 
   const resetTraining = () => {
