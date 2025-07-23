@@ -345,7 +345,7 @@ export default function PreparationEntretienPage() {
     // Logo
     const logoImg = new Image();
     logoImg.crossOrigin = 'anonymous';
-    logoImg.src = '/lovable-uploads/0e780794-5928-479b-8f6e-f7d18795f2c8.png';
+    logoImg.src = `${window.location.origin}/lovable-uploads/0e780794-5928-479b-8f6e-f7d18795f2c8.png`;
     
     const generatePDFContent = () => {
       // Titre du rapport centré
