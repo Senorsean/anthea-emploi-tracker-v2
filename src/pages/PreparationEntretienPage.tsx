@@ -645,7 +645,7 @@ export default function PreparationEntretienPage() {
     // Charger le logo puis générer le PDF
     logoImg.onload = () => {
       try {
-        doc.addImage(logoImg, 'PNG', margin, 8, 30, 20);
+        doc.addImage(logoImg, 'PNG', margin, 8, 10, 7);
       } catch (error) {
         console.error('Erreur lors du chargement du logo:', error);
       }
