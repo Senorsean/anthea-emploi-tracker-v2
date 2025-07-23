@@ -342,12 +342,14 @@ export default function PreparationEntretienPage() {
       doc.rect(i, 0, 2, 45, 'F');
     }
     
-    // Logo
-    const logoImg = new Image();
-    logoImg.crossOrigin = 'anonymous';
-    logoImg.src = `${window.location.origin}/lovable-uploads/0e780794-5928-479b-8f6e-f7d18795f2c8.png`;
     
     const generatePDFContent = () => {
+      // Logo texte en haut à gauche
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.text("Anthea", margin, 20);
+      
       // Titre du rapport centré
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(16);
@@ -378,288 +380,237 @@ export default function PreparationEntretienPage() {
       doc.setLineWidth(0.5);
       doc.rect(margin, currentY - 5, maxWidth, 60, 'S');
       
-      // Titre avec meilleure typographie (sans emoji)
+      // Titre de la section avec design moderne
+      doc.setTextColor(71, 85, 105); // text-slate-600
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Score de Preparation", margin + 10, currentY + 8);
+      
+      // Score principal avec couleur gradient
+      doc.setFontSize(32);
+      doc.setFont("helvetica", "bold");
+      if (readiness.score >= 80) {
+        doc.setTextColor(34, 197, 94); // text-green-500 (vert)
+      } else if (readiness.score >= 60) {
+        doc.setTextColor(249, 115, 22); // text-orange-500 (orange)
+      } else {
+        doc.setTextColor(239, 68, 68); // text-red-500 (rouge)
+      }
+      doc.text(`${readiness.score}%`, margin + 10, currentY + 35);
+      
+      // Description du niveau
+      doc.setTextColor(100, 116, 139); // text-slate-500
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      let levelText = "";
+      if (readiness.score >= 80) {
+        levelText = "Excellent niveau de preparation";
+      } else if (readiness.score >= 60) {
+        levelText = "Bonne preparation, quelques ameliorations possibles";
+      } else {
+        levelText = "Preparation insuffisante, travail necessaire";
+      }
+      doc.text(levelText, margin + 80, currentY + 20);
+      
+      // Détails de la préparation
+      doc.setFontSize(10);
+      doc.setTextColor(71, 85, 105);
+      doc.text(`Questions completees: ${completedQuestions.size}/${interviewQuestions.length}`, margin + 80, currentY + 35);
+      doc.text(`Score qualite: ${readiness.score}/100`, margin + 80, currentY + 45);
+      
+      currentY += 85;
+      
+      // Section Réponses aux questions avec un design plus moderne
+      doc.setFillColor(248, 250, 252); // bg-slate-50
+      doc.rect(margin, currentY - 5, maxWidth, 25, 'F');
+      doc.setDrawColor(226, 232, 240); // border-slate-200
+      doc.setLineWidth(0.5);
+      doc.rect(margin, currentY - 5, maxWidth, 25, 'S');
+      
+      doc.setTextColor(30, 41, 59); // text-slate-800
       doc.setFontSize(16);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(31, 41, 55); // text-gray-800
-      doc.text("Resultats de votre preparation", margin + 10, currentY + 8);
+      doc.text("Reponses aux Questions d'Entretien", margin + 10, currentY + 10);
       
-      // Badge niveau avec design amélioré
-      let badgeBgColor, badgeTextColor;
-      if (readiness.level === "Excellent") {
-        badgeBgColor = [34, 197, 94]; // bg-green-500
-        badgeTextColor = [255, 255, 255]; // text-white
-      } else if (readiness.level === "Très bien") {
-        badgeBgColor = [59, 130, 246]; // bg-blue-500
-        badgeTextColor = [255, 255, 255]; // text-white
-      } else if (readiness.level === "Bien") {
-        badgeBgColor = [249, 115, 22]; // bg-orange-500
-        badgeTextColor = [255, 255, 255]; // text-white
-      } else if (readiness.level === "Correct") {
-        badgeBgColor = [251, 191, 36]; // bg-yellow-400
-        badgeTextColor = [31, 41, 55]; // text-gray-800
-      } else {
-        badgeBgColor = [239, 68, 68]; // bg-red-500
-        badgeTextColor = [255, 255, 255]; // text-white
-      }
-      
-      // Badge avec design moderne centré
-      const badgeText = `Niveau : ${readiness.level} (${readiness.score}/100)`;
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "bold");
-      const badgeWidth = doc.getTextWidth(badgeText) + 20;
-      const badgeX = (pageWidth - badgeWidth) / 2; // Centrer le badge
-      
-      // Ombre du badge
-      doc.setFillColor(0, 0, 0, 0.15);
-      doc.roundedRect(badgeX + 1, currentY + 19 + 1, badgeWidth, 14, 7, 7, 'F');
-      
-      // Badge principal centré
-      doc.setFillColor(badgeBgColor[0], badgeBgColor[1], badgeBgColor[2]);
-      doc.roundedRect(badgeX, currentY + 19, badgeWidth, 14, 7, 7, 'F');
-      
-      doc.setTextColor(badgeTextColor[0], badgeTextColor[1], badgeTextColor[2]);
-      doc.text(badgeText, badgeX + 10, currentY + 28);
-      
-      // Message avec meilleure typographie
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(107, 114, 128); // text-gray-500
-      doc.text(readiness.message, margin + 10, currentY + 42);
-      
-      // Texte de progression dans le cadre (sans barre)
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(156, 163, 175); // text-gray-400
-      const progressText = `${completedQuestions.size}/${interviewQuestions.length} questions completees`;
-      const progressTextWidth = doc.getTextWidth(progressText);
-      doc.text(progressText, (pageWidth - progressTextWidth) / 2, currentY + 52);
-      
-      currentY += 70;
-      
-      // Section Mes Réponses
-      doc.setFontSize(18);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(15, 23, 42);
-      doc.text("Mes Reponses", margin, currentY);
-      currentY += 15;
+      currentY += 35;
       
       interviewQuestions.forEach((question, index) => {
-        if (currentY > pageHeight - 60) {
+        const response = responses[question.id] || "";
+        
+        // Vérifier si on a besoin d'une nouvelle page
+        if (currentY + 60 > pageHeight - 30) {
           doc.addPage();
-          currentY = 25;
+          currentY = 30;
         }
         
-        // Analyser la sévérité pour cette question spécifique
-        const response = responses[question.id];
-        let badgeSeverity = "low"; // Par défaut vert
-        
-        if (question.category === "Présentation" || question.category === "Travail d'équipe") {
-          badgeSeverity = "medium"; // Orange pour ces catégories
+        // En-tête de question avec couleur selon la difficulté
+        let difficultyColor;
+        switch(question.difficulty) {
+          case "Facile":
+            difficultyColor = [34, 197, 94]; // green
+            break;
+          case "Moyen":
+            difficultyColor = [249, 115, 22]; // orange
+            break;
+          case "Difficile":
+            difficultyColor = [239, 68, 68]; // red
+            break;
+          default:
+            difficultyColor = [100, 116, 139]; // slate
         }
         
-        if (!response || response.trim().length < 50) {
-          badgeSeverity = "high"; // Rouge si pas de réponse
-        } else if (response) {
-          const responseText = response.toLowerCase();
-          
-          // Vérifications spécifiques selon la catégorie
-          if (question.category === "Présentation" && !responseText.includes("expérience") && !responseText.includes("parcours")) {
-            badgeSeverity = "medium"; // Orange
-          } else if (question.category === "Travail d'équipe" && !responseText.includes("écoute") && !responseText.includes("communication")) {
-            badgeSeverity = "medium"; // Orange
-          } else if (question.category === "Motivation" && !responseText.includes("entreprise") && !responseText.includes("mission")) {
-            badgeSeverity = "high"; // Rouge
-          }
-        }
+        // Encadré pour la question
+        doc.setFillColor(255, 255, 255);
+        doc.rect(margin, currentY - 5, maxWidth, 15, 'F');
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.5);
+        doc.rect(margin, currentY - 5, maxWidth, 15, 'S');
         
-        // Encadré pour chaque question
-        doc.setFillColor(249, 250, 251); // bg-gray-50
-        
+        // Numéro et titre de la question
+        doc.setTextColor(30, 41, 59);
         doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
-        doc.setTextColor(15, 23, 42);
-        const questionText = doc.splitTextToSize(`${index + 1}. ${question.question}`, maxWidth - 10);
-        doc.text(questionText, margin + 5, currentY + 8);
+        doc.text(`Question ${index + 1}: ${question.category}`, margin + 5, currentY + 5);
         
-        // Badge de catégorie avec couleur selon la sévérité
+        // Badge difficulté
+        doc.setFillColor(difficultyColor[0], difficultyColor[1], difficultyColor[2]);
+        doc.rect(pageWidth - 60, currentY - 3, 35, 10, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "bold");
+        const difficultyWidth = doc.getTextWidth(question.difficulty);
+        doc.text(question.difficulty, pageWidth - 60 + (35 - difficultyWidth) / 2, currentY + 3);
+        
+        currentY += 20;
+        
+        // Question
+        doc.setTextColor(71, 85, 105);
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "bold");
+        const questionLines = doc.splitTextToSize(question.question, maxWidth - 10);
+        doc.text(questionLines, margin + 5, currentY);
+        currentY += questionLines.length * 5 + 5;
+        
+        // Conseils
+        doc.setTextColor(100, 116, 139);
         doc.setFontSize(9);
+        doc.setFont("helvetica", "italic");
+        const tipsLines = doc.splitTextToSize(`Conseil: ${question.tips}`, maxWidth - 10);
+        doc.text(tipsLines, margin + 5, currentY);
+        currentY += tipsLines.length * 4 + 8;
+        
+        // Réponse avec encadré
+        doc.setFillColor(249, 250, 251); // bg-gray-50
+        const responseHeight = response ? Math.max(30, Math.ceil(response.length / 80) * 5) : 20;
+        doc.rect(margin, currentY - 5, maxWidth, responseHeight, 'F');
+        doc.setDrawColor(229, 231, 235);
+        doc.setLineWidth(0.5);
+        doc.rect(margin, currentY - 5, maxWidth, responseHeight, 'S');
+        
+        doc.setTextColor(response ? 30 : 156, response ? 41 : 163, response ? 59 : 175);
+        doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
         
-        // Couleurs selon la sévérité
-        if (badgeSeverity === "high") {
-          doc.setFillColor(254, 226, 226); // bg-red-100
-          doc.setTextColor(153, 27, 27); // text-red-800
-        } else if (badgeSeverity === "medium") {
-          doc.setFillColor(254, 243, 199); // bg-orange-100
-          doc.setTextColor(154, 52, 18); // text-orange-800
+        if (response) {
+          const responseLines = doc.splitTextToSize(response, maxWidth - 15);
+          doc.text(responseLines, margin + 7, currentY + 5);
         } else {
-          doc.setFillColor(220, 252, 231); // bg-green-100
-          doc.setTextColor(21, 128, 61); // text-green-800
+          doc.text("Aucune reponse fournie", margin + 7, currentY + 8);
         }
         
-        const badgeWidth = Math.min(doc.getTextWidth(question.category) + 8, maxWidth - 10);
-        doc.rect(margin + 5, currentY + 12, badgeWidth, 8, 'F');
-        doc.text(question.category, margin + 9, currentY + 17);
-        
-        currentY += 25;
-        
-        const questionResponse = responses[question.id];
-        if (questionResponse) {
-          // Nettoyer le texte de la réponse pour éviter les problèmes d'affichage
-          const cleanResponse = questionResponse.replace(/\s+/g, ' ').trim();
-          doc.setFontSize(10);
-          doc.setFont("helvetica", "normal");
-          doc.setTextColor(55, 65, 81); // text-gray-700
-          const splitResponse = doc.splitTextToSize(cleanResponse, maxWidth - 40);
-          doc.text(splitResponse, margin + 10, currentY);
-          currentY += splitResponse.length * 5 + 15;
-        } else {
-          doc.setFontSize(10);
-          doc.setFont("helvetica", "normal");
-          doc.setTextColor(156, 163, 175); // text-gray-400
-          doc.text("Pas de reponse fournie", margin + 10, currentY);
-          currentY += 20;
-        }
-        
-        // Ligne de séparation
-        doc.setDrawColor(229, 231, 235); // border-gray-200
-        doc.line(margin, currentY - 5, pageWidth - margin, currentY - 5);
+        currentY += responseHeight + 15;
       });
       
-      // Section Conseils personnalisés
-      const advice = analyzeResponses();
-      if (currentY > pageHeight - 40) {
+      // Section Conseils d'amélioration
+      if (currentY + 40 > pageHeight - 30) {
         doc.addPage();
-        currentY = 25;
+        currentY = 30;
       }
       
-      currentY += 15;
-      doc.setFontSize(18);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(15, 23, 42);
-      doc.text("Conseils Personnalises", margin, currentY);
-      currentY += 15;
+      const advice = analyzeResponses();
       
-      if (advice.length === 0) {
-        doc.setFillColor(240, 253, 244); // bg-green-50
+      if (advice.length > 0) {
+        doc.setFillColor(254, 242, 242); // bg-red-50
         doc.rect(margin, currentY - 5, maxWidth, 25, 'F');
-        doc.setDrawColor(34, 197, 94); // border-green-500
+        doc.setDrawColor(254, 202, 202); // border-red-200
+        doc.setLineWidth(0.5);
         doc.rect(margin, currentY - 5, maxWidth, 25, 'S');
         
+        doc.setTextColor(153, 27, 27); // text-red-800
         doc.setFontSize(14);
         doc.setFont("helvetica", "bold");
-        doc.setTextColor(21, 128, 61); // text-green-700
-        doc.text("Excellente preparation !", margin + 5, currentY + 5);
+        doc.text("Conseils d'Amelioration", margin + 10, currentY + 10);
         
-        doc.setFontSize(11);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(21, 128, 61);
-        doc.text("Vos reponses sont bien structurees et completes.", margin + 5, currentY + 15);
         currentY += 35;
-      } else {
-        advice.slice(0, 8).forEach((item, index) => {
-          if (currentY > pageHeight - 50) {
+        
+        advice.forEach((item, index) => {
+          if (currentY + 40 > pageHeight - 30) {
             doc.addPage();
-            currentY = 25;
+            currentY = 30;
           }
           
-          // Couleurs selon la gravité
-          let bgColor, borderColor, textColor;
-          if (item.severity === "high") {
-            // Rouge pour les problèmes graves
-            bgColor = [254, 226, 226]; // bg-red-100
-            borderColor = [239, 68, 68]; // border-red-500
-            textColor = [153, 27, 27]; // text-red-800
-          } else if (item.severity === "medium") {
-            // Orange pour les problèmes moyens
-            bgColor = [254, 243, 199]; // bg-orange-100
-            borderColor = [249, 115, 22]; // border-orange-500
-            textColor = [154, 52, 18]; // text-orange-800
-          } else {
-            // Vert pour les bonnes pratiques
-            bgColor = [220, 252, 231]; // bg-green-100
-            borderColor = [34, 197, 94]; // border-green-500
-            textColor = [21, 128, 61]; // text-green-800
+          // Couleur selon la sévérité
+          let severityColor;
+          switch(item.severity) {
+            case "high":
+              severityColor = [239, 68, 68]; // red
+              break;
+            case "medium":
+              severityColor = [249, 115, 22]; // orange
+              break;
+            case "low":
+              severityColor = [34, 197, 94]; // green
+              break;
+            default:
+              severityColor = [100, 116, 139]; // slate
           }
           
-          // Encadré conseil avec couleur appropriée
-          const estimatedHeight = 40;
-          doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
-          doc.rect(margin, currentY - 3, maxWidth, estimatedHeight, 'F');
-          doc.setDrawColor(borderColor[0], borderColor[1], borderColor[2]);
-          doc.rect(margin, currentY - 3, maxWidth, estimatedHeight, 'S');
+          // Encadré pour le conseil
+          doc.setFillColor(255, 255, 255);
+          doc.rect(margin, currentY - 5, maxWidth, 35, 'F');
+          doc.setDrawColor(226, 232, 240);
+          doc.setLineWidth(0.5);
+          doc.rect(margin, currentY - 5, maxWidth, 35, 'S');
           
+          // Badge sévérité
+          doc.setFillColor(severityColor[0], severityColor[1], severityColor[2]);
+          doc.rect(margin + 5, currentY - 2, 8, 8, 'F');
+          
+          // Catégorie et problème
+          doc.setTextColor(30, 41, 59);
           doc.setFontSize(11);
           doc.setFont("helvetica", "bold");
-          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-          doc.text(`${index + 1}. ${item.category}`, margin + 5, currentY + 5);
+          doc.text(`${item.category} - ${item.issue}`, margin + 18, currentY + 3);
           
+          // Recommandation
+          doc.setTextColor(71, 85, 105);
           doc.setFontSize(9);
           doc.setFont("helvetica", "normal");
-          doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-          const issueText = doc.splitTextToSize(`Probleme : ${item.issue}`, maxWidth - 15);
-          doc.text(issueText, margin + 10, currentY + 13);
+          const recommendationLines = doc.splitTextToSize(item.recommendation, maxWidth - 25);
+          doc.text(recommendationLines, margin + 18, currentY + 12);
           
-          const recoText = doc.splitTextToSize(`Conseil : ${item.recommendation}`, maxWidth - 15);
-          doc.text(recoText, margin + 10, currentY + 23);
           currentY += 45;
         });
       }
       
-      // Pied de page avec conseils généraux
-      if (currentY > pageHeight - 60) {
-        doc.addPage();
-        currentY = 25;
+      // Pied de page avec design moderne
+      const totalPages = doc.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFillColor(248, 250, 252); // bg-slate-50
+        doc.rect(0, pageHeight - 20, pageWidth, 20, 'F');
+        doc.setTextColor(100, 116, 139); // text-slate-500
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Page ${i} sur ${totalPages}`, pageWidth / 2 - 15, pageHeight - 8);
+        doc.text("Genere par Anthea Emploi Tracker", margin, pageHeight - 8);
       }
-      
-      currentY += 15;
-      doc.setFillColor(239, 246, 255); // bg-blue-50
-      doc.rect(margin, currentY - 5, maxWidth, 50, 'F');
-      doc.setDrawColor(147, 197, 253); // border-blue-300
-      doc.rect(margin, currentY - 5, maxWidth, 50, 'S');
-      
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(30, 64, 175); // text-blue-800
-      doc.text("Conseils generaux pour reussir", margin + 5, currentY + 8);
-      
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(30, 58, 138); // text-blue-900
-      const generalTips = [
-        "• Entrainez-vous a voix haute devant un miroir",
-        "• Preparez des questions a poser au recruteur", 
-        "• Recherchez l'entreprise et ses valeurs",
-        "• Arrivez 10 minutes en avance le jour J"
-      ];
-      
-      generalTips.forEach((tip, index) => {
-        const tipText = doc.splitTextToSize(tip, maxWidth - 15);
-        doc.text(tipText, margin + 10, currentY + 18 + (index * 8));
-      });
       
       doc.save('preparation-entretien.pdf');
     };
     
-    // Charger le logo puis générer le PDF
-    logoImg.onload = () => {
-      try {
-        doc.addImage(logoImg, 'PNG', margin, 8, 10, 7);
-      } catch (error) {
-        console.error('Erreur lors du chargement du logo:', error);
-      }
-      generatePDFContent();
-    };
-    
-    logoImg.onerror = () => {
-      // Fallback avec texte si le logo ne se charge pas
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(16);
-      doc.setFont("helvetica", "bold");
-      doc.text("Anthea", margin, 20);
-      generatePDFContent();
-    };
+    // Générer directement le PDF sans attendre le logo
+    generatePDFContent();
   };
 
   const resetTraining = () => {
