@@ -82,6 +82,23 @@ export const useInterviewPreparation = () => {
     localStorage.setItem('interview-completed', JSON.stringify(Array.from(completedQuestions)));
   }, [completedQuestions]);
 
+  const checkRelevance = (responseText: string, category: string): boolean => {
+    // Mots-clés requis pour chaque catégorie
+    const requiredKeywords: Record<string, string[]> = {
+      "Présentation": ["parcours", "expérience", "formation", "compétence", "diplôme", "travail", "poste", "carrière"],
+      "Motivation": ["entreprise", "poste", "mission", "valeurs", "projet", "équipe", "développer", "contribuer"],
+      "Compétences": ["situation", "défi", "problème", "solution", "action", "résultat", "exemple", "projet"],
+      "Faiblesses": ["faiblesse", "défaut", "améliorer", "développer", "travailler", "point", "difficulté", "progrès"],
+      "Ambition": ["objectif", "avenir", "développement", "évolution", "carrière", "apprendre", "grandir", "projets"],
+      "Gestion du stress": ["stress", "pression", "gestion", "technique", "calme", "organisation", "priorité", "méthode"],
+      "Travail d'équipe": ["équipe", "collègue", "conflit", "communication", "collaboration", "résolution", "écoute", "groupe"],
+      "Leadership": ["initiative", "direction", "équipe", "projet", "décision", "responsabilité", "encadrer", "motiver"]
+    };
+
+    const keywords = requiredKeywords[category] || [];
+    return keywords.some(keyword => responseText.includes(keyword));
+  };
+
   const analyzeResponses = () => {
     const advice = [];
     
@@ -124,6 +141,19 @@ export const useInterviewPreparation = () => {
       }
 
       const responseText = response.toLowerCase();
+      
+      // Vérification de la pertinence de la réponse
+      const isRelevantResponse = checkRelevance(responseText, question.category);
+      if (!isRelevantResponse) {
+        advice.push({
+          category: question.category,
+          question: question.question,
+          issue: "Réponse non pertinente",
+          recommendation: `Votre réponse ne semble pas être en rapport avec la question "${question.question}". Répondez spécifiquement à ce qui est demandé.`,
+          severity: "high" // Rouge
+        });
+        return;
+      }
       
       // Analyse spécifique par catégorie
       switch(question.category) {
