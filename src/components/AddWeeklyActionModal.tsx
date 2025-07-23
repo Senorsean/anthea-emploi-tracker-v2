@@ -94,6 +94,17 @@ export const AddWeeklyActionModal: React.FC<AddWeeklyActionModalProps> = ({ isOp
           </div>
 
           <div>
+            <Label htmlFor="completed">Complété</Label>
+            <Input
+              id="completed"
+              type="number"
+              min="0"
+              value={formData.completed}
+              onChange={e => setFormData(prev => ({ ...prev, completed: parseInt(e.target.value) || 0 }))}
+            />
+          </div>
+
+          <div>
             <Label htmlFor="status">Statut</Label>
             <Select value={formData.status} onValueChange={val => setFormData(prev => ({ ...prev, status: val as any }))}>
               <SelectTrigger>
