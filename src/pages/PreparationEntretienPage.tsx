@@ -343,6 +343,16 @@ export default function PreparationEntretienPage() {
     }
     
     const generatePDFContent = () => {
+      // Logo texte en haut à gauche
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(24);
+      doc.setFont("helvetica", "bold");
+      doc.text("anthéa", margin, 20);
+      
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.text("emploi Tracker", margin, 32);
+      
       // Titre du rapport centré
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(16);
