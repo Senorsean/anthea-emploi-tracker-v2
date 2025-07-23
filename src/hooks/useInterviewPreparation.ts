@@ -87,15 +87,40 @@ export const useInterviewPreparation = () => {
     
     interviewQuestions.forEach((question) => {
       const response = responses[question.id];
-      if (!response || response.trim().length < 50) {
+      
+      // Validation par nombre de mots
+      if (!response || response.trim().length === 0) {
         advice.push({
           category: question.category,
           question: question.question,
-          issue: "Réponse trop courte ou manquante",
+          issue: "Réponse manquante",
+          recommendation: "Veuillez répondre à cette question.",
+          severity: "high" // Rouge
+        });
+        return;
+      }
+
+      const wordCount = response.trim().split(/\s+/).length;
+      
+      if (wordCount <= 10) {
+        advice.push({
+          category: question.category,
+          question: question.question,
+          issue: `Réponse trop courte (${wordCount} mots)`,
           recommendation: "Développez davantage votre réponse en donnant des exemples concrets.",
           severity: "high" // Rouge
         });
         return;
+      }
+      
+      if (wordCount <= 35) {
+        advice.push({
+          category: question.category,
+          question: question.question,
+          issue: `Réponse courte (${wordCount} mots)`,
+          recommendation: "Ajoutez plus de détails et d'exemples pour enrichir votre réponse.",
+          severity: "medium" // Orange
+        });
       }
 
       const responseText = response.toLowerCase();
@@ -237,23 +262,13 @@ export const useInterviewPreparation = () => {
           break;
       }
       
-      // Vérifications générales pour la longueur
-      if (response.length < 100) {
+      // Vérification pour les réponses trop longues
+      if (wordCount > 150) {
         advice.push({
           category: question.category,
           question: question.question,
-          issue: "Réponse trop courte",
-          recommendation: "Développez votre réponse avec plus de détails et d'exemples.",
-          severity: "medium" // Orange
-        });
-      }
-      
-      if (response.length > 500) {
-        advice.push({
-          category: question.category,
-          question: question.question,
-          issue: "Réponse trop longue",
-          recommendation: "Soyez plus concis, l'idéal est entre 100-300 mots.",
+          issue: `Réponse trop longue (${wordCount} mots)`,
+          recommendation: "Soyez plus concis, l'idéal est entre 50-100 mots.",
           severity: "medium" // Orange
         });
       }
