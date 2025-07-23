@@ -41,5 +41,6 @@ export const actionTemplates: string[] = [
   'Postuler à 10 nouveaux postes',
   'Contacter 5 personnes de mon réseau',
   'Mettre à jour mon CV',
-  'Envoyer un email de suivi'
+  'Envoyer un email de suivi',
+  'Préparer mes entretiens de la semaine'
 ];
