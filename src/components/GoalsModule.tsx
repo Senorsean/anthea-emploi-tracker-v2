@@ -84,6 +84,17 @@ export const GoalsModule = () => {
     await uploadJson('data-emploi-tracker', 'weekly-actions.json', weeklyActions);
   };
 
+  const updateActionPlan = () => {
+    const newActions: WeeklyAction[] = selectedGoal.recommendations.map((rec, index) => ({
+      id: `auto-${Date.now()}-${index}`,
+      action: rec,
+      completed: 0,
+      target: 1,
+      status: 'pending' as const
+    }));
+    setWeeklyActions(prev => [...prev, ...newActions]);
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed': return <CheckCircle className="h-4 w-4 text-green-600" />;
@@ -250,7 +261,7 @@ export const GoalsModule = () => {
             </div>
             
             <div className="flex gap-2 mt-4">
-              <Button className="flex-1 bg-[#a4007c] hover:bg-[#a4007c]/90">
+              <Button onClick={updateActionPlan} className="flex-1 bg-[#a4007c] hover:bg-[#a4007c]/90">
                 Mettre à jour mon plan d'action
               </Button>
               <Button variant="outline" onClick={exportWeeklyActions} className="flex items-center gap-1">
