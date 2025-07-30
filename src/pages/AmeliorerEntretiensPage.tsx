@@ -1,7 +1,23 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import { Header } from "@/components/Header";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function AmeliorerEntretiensPage() {
+  const [notes, setNotes] = useState<{
+    dailyActions: string;
+    postInterview: string;
+    cvStrategy: string;
+    jobIdeas: string;
+  }>({
+    dailyActions: '',
+    postInterview: '',
+    cvStrategy: '',
+    jobIdeas: ''
+  });
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Header />
@@ -61,6 +77,70 @@ export default function AmeliorerEntretiensPage() {
             Commencer l'entraînement →
           </Link>
         </section>
+
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>📝 Mes notes personnelles</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="dailyActions" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="dailyActions">📅 Actions</TabsTrigger>
+                <TabsTrigger value="postInterview">💭 Post-entretien</TabsTrigger>
+                <TabsTrigger value="cvStrategy">📄 CV/Stratégie</TabsTrigger>
+                <TabsTrigger value="jobIdeas">💡 Idées postes</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="dailyActions" className="space-y-4">
+                <div>
+                  <h4 className="font-medium mb-2">Suivi quotidien des actions</h4>
+                  <Textarea
+                    placeholder="Notez vos actions quotidiennes : candidatures envoyées, contacts pris, relances effectuées, formations suivies..."
+                    value={notes.dailyActions}
+                    onChange={(e) => setNotes(prev => ({...prev, dailyActions: e.target.value}))}
+                    className="min-h-[120px]"
+                  />
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="postInterview" className="space-y-4">
+                <div>
+                  <h4 className="font-medium mb-2">Réflexions post-entretien</h4>
+                  <Textarea
+                    placeholder="Analysez vos entretiens : points forts, axes d'amélioration, questions posées, ressentis, feedbacks reçus..."
+                    value={notes.postInterview}
+                    onChange={(e) => setNotes(prev => ({...prev, postInterview: e.target.value}))}
+                    className="min-h-[120px]"
+                  />
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="cvStrategy" className="space-y-4">
+                <div>
+                  <h4 className="font-medium mb-2">Évolutions du CV ou de la stratégie</h4>
+                  <Textarea
+                    placeholder="Notez les améliorations à apporter à votre CV, votre présentation, votre stratégie de recherche d'emploi..."
+                    value={notes.cvStrategy}
+                    onChange={(e) => setNotes(prev => ({...prev, cvStrategy: e.target.value}))}
+                    className="min-h-[120px]"
+                  />
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="jobIdeas" className="space-y-4">
+                <div>
+                  <h4 className="font-medium mb-2">Idées de postes à creuser</h4>
+                  <Textarea
+                    placeholder="Listez les entreprises intéressantes, postes à explorer, secteurs d'activité prometteurs, contacts à développer..."
+                    value={notes.jobIdeas}
+                    onChange={(e) => setNotes(prev => ({...prev, jobIdeas: e.target.value}))}
+                    className="min-h-[120px]"
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
 
         <div className="mt-8">
           <Link to="/" className="text-sm text-gray-600 hover:underline">
