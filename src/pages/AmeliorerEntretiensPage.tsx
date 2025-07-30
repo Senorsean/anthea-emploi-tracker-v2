@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +17,18 @@ export default function AmeliorerEntretiensPage() {
     cvStrategy: '',
     jobIdeas: ''
   });
+
+  // Gérer le scroll vers l'ancre
+  useEffect(() => {
+    if (window.location.hash === '#notes') {
+      setTimeout(() => {
+        const element = document.getElementById('notes');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100); // Petit délai pour s'assurer que la page est chargée
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
