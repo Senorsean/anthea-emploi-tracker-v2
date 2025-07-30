@@ -1,9 +1,10 @@
 
 import React from 'react';
 import jsPDF from 'jspdf';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Users, Target, CheckCircle } from 'lucide-react';
+import { TrendingUp, Users, Target, CheckCircle, NotebookPen } from 'lucide-react';
 import { useStats } from '@/hooks/useStats';
 import { Button } from '@/components/ui/button';
 
@@ -394,7 +395,13 @@ export const StatsOverview = () => {
 
   return (
     <div>
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end gap-2 mb-4">
+        <Link to="/ameliorer-entretiens">
+          <Button variant="outline" className="flex items-center gap-2">
+            <NotebookPen className="h-4 w-4" />
+            Notes
+          </Button>
+        </Link>
         <Button onClick={handleExport} className="bg-[#a4007c] hover:bg-[#a4007c]/90">
           Exporter
         </Button>
