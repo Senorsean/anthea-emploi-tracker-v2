@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -73,7 +74,17 @@ export default function PreparationEntretienPage() {
   const [responses, setResponses] = useState<Record<number, string>>({});
   const [completedQuestions, setCompletedQuestions] = useState<Set<number>>(new Set());
   const [showResults, setShowResults] = useState(false);
-  const [notes, setNotes] = useState<string>('');
+  const [notes, setNotes] = useState<{
+    dailyActions: string;
+    postInterview: string;
+    cvStrategy: string;
+    jobIdeas: string;
+  }>({
+    dailyActions: '',
+    postInterview: '',
+    cvStrategy: '',
+    jobIdeas: ''
+  });
 
   const currentQuestion = interviewQuestions[currentQuestionIndex];
   const progress = (completedQuestions.size / interviewQuestions.length) * 100;
@@ -523,7 +534,9 @@ export default function PreparationEntretienPage() {
       });
       
       // Section Notes personnelles
-      if (notes && notes.trim()) {
+      const hasNotes = notes.dailyActions.trim() || notes.postInterview.trim() || notes.cvStrategy.trim() || notes.jobIdeas.trim();
+      
+      if (hasNotes) {
         if (currentY + 40 > pageHeight - 30) {
           doc.addPage();
           currentY = 30;
@@ -542,21 +555,46 @@ export default function PreparationEntretienPage() {
         
         currentY += 35;
         
-        // Encadré pour les notes
-        const notesHeight = Math.max(30, Math.ceil(notes.length / 80) * 5);
-        doc.setFillColor(255, 255, 255);
-        doc.rect(margin, currentY - 5, maxWidth, notesHeight, 'F');
-        doc.setDrawColor(226, 232, 240);
-        doc.setLineWidth(0.5);
-        doc.rect(margin, currentY - 5, maxWidth, notesHeight, 'S');
+        // Chaque catégorie de notes
+        const noteCategories = [
+          { title: "Suivi quotidien des actions", content: notes.dailyActions },
+          { title: "Reflexions post-entretien", content: notes.postInterview },
+          { title: "Evolutions du CV ou de la strategie", content: notes.cvStrategy },
+          { title: "Idees de postes a creuser", content: notes.jobIdeas }
+        ];
         
-        doc.setTextColor(30, 41, 59);
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-        const notesLines = doc.splitTextToSize(notes, maxWidth - 15);
-        doc.text(notesLines, margin + 7, currentY + 5);
-        
-        currentY += notesHeight + 20;
+        noteCategories.forEach(category => {
+          if (category.content.trim()) {
+            // Vérifier si on a besoin d'une nouvelle page
+            if (currentY + 40 > pageHeight - 30) {
+              doc.addPage();
+              currentY = 30;
+            }
+            
+            // Titre de la catégorie
+            doc.setTextColor(71, 85, 105);
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text(category.title, margin, currentY);
+            currentY += 10;
+            
+            // Encadré pour le contenu
+            const contentHeight = Math.max(25, Math.ceil(category.content.length / 80) * 5);
+            doc.setFillColor(255, 255, 255);
+            doc.rect(margin, currentY - 5, maxWidth, contentHeight, 'F');
+            doc.setDrawColor(226, 232, 240);
+            doc.setLineWidth(0.5);
+            doc.rect(margin, currentY - 5, maxWidth, contentHeight, 'S');
+            
+            doc.setTextColor(30, 41, 59);
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            const contentLines = doc.splitTextToSize(category.content, maxWidth - 15);
+            doc.text(contentLines, margin + 7, currentY + 5);
+            
+            currentY += contentHeight + 15;
+          }
+        });
       }
       
       // Section Conseils d'amélioration
@@ -656,7 +694,12 @@ export default function PreparationEntretienPage() {
     setResponses({});
     setCompletedQuestions(new Set());
     setShowResults(false);
-    setNotes('');
+    setNotes({
+      dailyActions: '',
+      postInterview: '',
+      cvStrategy: '',
+      jobIdeas: ''
+    });
   };
 
   if (showResults) {
@@ -706,17 +749,62 @@ export default function PreparationEntretienPage() {
                 <CardTitle>📝 Mes notes personnelles</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <Textarea
-                    placeholder="Ajoutez ici vos remarques personnelles, constats, points à retenir, questions spécifiques à l'entreprise..."
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    className="min-h-[120px]"
-                  />
-                  <div className="text-xs text-gray-500">
-                    💡 Utilisez cette section pour noter vos observations, questions à poser, informations sur l'entreprise, ou tout autre point important pour votre entretien.
-                  </div>
-                </div>
+                <Tabs defaultValue="dailyActions" className="w-full">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="dailyActions">📅 Actions</TabsTrigger>
+                    <TabsTrigger value="postInterview">💭 Post-entretien</TabsTrigger>
+                    <TabsTrigger value="cvStrategy">📄 CV/Stratégie</TabsTrigger>
+                    <TabsTrigger value="jobIdeas">💡 Idées postes</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="dailyActions" className="space-y-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Suivi quotidien des actions</h4>
+                      <Textarea
+                        placeholder="Notez vos actions quotidiennes : candidatures envoyées, contacts pris, relances effectuées, formations suivies..."
+                        value={notes.dailyActions}
+                        onChange={(e) => setNotes(prev => ({...prev, dailyActions: e.target.value}))}
+                        className="min-h-[120px]"
+                      />
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="postInterview" className="space-y-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Réflexions post-entretien</h4>
+                      <Textarea
+                        placeholder="Analysez vos entretiens : points forts, axes d'amélioration, questions posées, ressentis, feedbacks reçus..."
+                        value={notes.postInterview}
+                        onChange={(e) => setNotes(prev => ({...prev, postInterview: e.target.value}))}
+                        className="min-h-[120px]"
+                      />
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="cvStrategy" className="space-y-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Évolutions du CV ou de la stratégie</h4>
+                      <Textarea
+                        placeholder="Notez les améliorations à apporter à votre CV, votre présentation, votre stratégie de recherche d'emploi..."
+                        value={notes.cvStrategy}
+                        onChange={(e) => setNotes(prev => ({...prev, cvStrategy: e.target.value}))}
+                        className="min-h-[120px]"
+                      />
+                    </div>
+                  </TabsContent>
+                  
+                  <TabsContent value="jobIdeas" className="space-y-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Idées de postes à creuser</h4>
+                      <Textarea
+                        placeholder="Listez les entreprises intéressantes, postes à explorer, secteurs d'activité prometteurs, contacts à développer..."
+                        value={notes.jobIdeas}
+                        onChange={(e) => setNotes(prev => ({...prev, jobIdeas: e.target.value}))}
+                        className="min-h-[120px]"
+                      />
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
 
