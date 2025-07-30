@@ -14,6 +14,7 @@ import RenforcezVotreReseauPage from "./pages/RenforcezVotreReseauPage";
 import ProgressionEntretiensPage from "./pages/ProgressionEntretiensPage";
 import ProgressionCandidaturesPage from "./pages/ProgressionCandidaturesPage";
 import ProgressionReseauPage from "./pages/ProgressionReseauPage";
+import ProgressionCarrierePage from "./pages/ProgressionCarrierePage";
 import TauxReponsePage from "./pages/TauxReponsePage";
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
@@ -107,6 +108,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <NegociationOffrePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/progression-carriere"
+            element={
+              <RequireAuth>
+                <ProgressionCarrierePage />
               </RequireAuth>
             }
           />

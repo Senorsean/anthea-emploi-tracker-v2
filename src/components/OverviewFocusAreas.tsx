@@ -47,6 +47,13 @@ export const OverviewFocusAreas = () => {
       link: '/negociation-offre',
       external: false,
     },
+    {
+      title: 'Progression de Carrière',
+      description:
+        'Préparez les prochaines étapes de votre parcours professionnel',
+      link: '/progression-carriere',
+      external: false,
+    },
   ];
 
   return (
