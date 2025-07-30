@@ -15,6 +15,7 @@ import ProgressionEntretiensPage from "./pages/ProgressionEntretiensPage";
 import ProgressionCandidaturesPage from "./pages/ProgressionCandidaturesPage";
 import ProgressionReseauPage from "./pages/ProgressionReseauPage";
 import ProgressionCarrierePage from "./pages/ProgressionCarrierePage";
+import ReferentielsSalairesPage from "./pages/ReferentielsSalairesPage";
 import TauxReponsePage from "./pages/TauxReponsePage";
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
@@ -116,6 +117,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <ProgressionCarrierePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/referentiels-salaires"
+            element={
+              <RequireAuth>
+                <ReferentielsSalairesPage />
               </RequireAuth>
             }
           />
