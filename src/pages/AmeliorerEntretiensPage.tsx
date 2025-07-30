@@ -78,7 +78,7 @@ export default function AmeliorerEntretiensPage() {
           </Link>
         </section>
 
-        <Card className="mb-6">
+        <Card className="mb-6" id="notes">
           <CardHeader>
             <CardTitle>📝 Mes notes personnelles</CardTitle>
           </CardHeader>

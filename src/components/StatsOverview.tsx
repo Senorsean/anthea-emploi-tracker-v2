@@ -396,7 +396,7 @@ export const StatsOverview = () => {
   return (
     <div>
       <div className="flex justify-end gap-2 mb-4">
-        <Link to="/ameliorer-entretiens">
+        <Link to="/ameliorer-entretiens#notes">
           <Button variant="outline" className="flex items-center gap-2">
             <NotebookPen className="h-4 w-4" />
             Notes
