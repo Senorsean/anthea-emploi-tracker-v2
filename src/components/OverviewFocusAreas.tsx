@@ -40,10 +40,17 @@ export const OverviewFocusAreas = () => {
       link: '/ameliorer-entretiens',
       external: false,
     },
+    {
+      title: 'Négociation d\'offre',
+      description:
+        'Comment négocier sa rémunération (salaire + avantages) en entretien suite à une candidature.',
+      link: '/negociation-offre',
+      external: false,
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
       {areas.map((area, idx) => (
         <Card key={idx} className="h-full">
           <CardHeader>
