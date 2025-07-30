@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 
 const ReferentielsSalairesPage = () => {
   const [showResults, setShowResults] = useState(false);
+  const [salaryData, setSalaryData] = useState<any>(null);
   const [formData, setFormData] = useState({
     jobTitle: '',
     experience: '',
@@ -26,8 +27,121 @@ const ReferentielsSalairesPage = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const calculateSalary = () => {
+    // Base salaries by job title (rough estimates)
+    const baseSalaries: { [key: string]: number } = {
+      'dsi': 90000,
+      'directeur': 85000,
+      'manager': 65000,
+      'développeur': 45000,
+      'chef de projet': 55000,
+      'commercial': 40000,
+      'marketing': 45000,
+      'rh': 50000,
+      'comptable': 40000,
+      'consultant': 55000,
+      'ingénieur': 50000,
+      'architecte': 70000,
+      'data': 65000,
+      'product': 60000,
+      'designer': 45000,
+    };
+
+    // Find base salary based on job title
+    const jobKey = Object.keys(baseSalaries).find(key => 
+      formData.jobTitle.toLowerCase().includes(key)
+    );
+    let baseSalary = jobKey ? baseSalaries[jobKey] : 50000;
+
+    // Experience multiplier
+    const experience = parseInt(formData.experience) || 0;
+    const experienceMultiplier = 1 + (experience * 0.05); // 5% per year
+
+    // Team size multiplier
+    const teamMultipliers: { [key: string]: number } = {
+      'no': 1,
+      '1-4': 1.1,
+      '5-10': 1.25,
+      '10+': 1.4
+    };
+    const teamMultiplier = teamMultipliers[formData.teamSize] || 1;
+
+    // Scope multiplier
+    const scopeMultipliers: { [key: string]: number } = {
+      'national': 1,
+      'regional': 1.1,
+      'global': 1.3
+    };
+    const scopeMultiplier = scopeMultipliers[formData.scope] || 1;
+
+    // Industry multiplier
+    const industryMultipliers: { [key: string]: number } = {
+      'services-professionnels': 1,
+      'technologie': 1.2,
+      'finance': 1.3,
+      'sante': 1.1,
+      'education': 0.9,
+      'retail': 0.85,
+      'manufacturing': 0.95,
+      'consulting': 1.15
+    };
+    const industryMultiplier = industryMultipliers[formData.industry] || 1;
+
+    // Location multiplier
+    const locationMultipliers: { [key: string]: number } = {
+      'paris': 1.2,
+      'lyon': 1.05,
+      'marseille': 0.95,
+      'toulouse': 0.98,
+      'lille': 0.92,
+      'bordeaux': 1.0,
+      'nantes': 0.98,
+      'strasbourg': 1.02
+    };
+    const cityKey = formData.city.toLowerCase();
+    const locationMultiplier = locationMultipliers[cityKey] || 1;
+
+    // Remote work adjustment
+    const workModeMultipliers: { [key: string]: number } = {
+      'onsite': 1,
+      'hybrid': 1.05,
+      'remote': 1.1
+    };
+    const workModeMultiplier = workModeMultipliers[formData.workMode] || 1;
+
+    // Calculate final salary
+    const finalSalary = Math.round(
+      baseSalary * 
+      experienceMultiplier * 
+      teamMultiplier * 
+      scopeMultiplier * 
+      industryMultiplier * 
+      locationMultiplier * 
+      workModeMultiplier
+    );
+
+    // Calculate range (±20% from median)
+    const minSalary = Math.round(finalSalary * 0.8);
+    const maxSalary = Math.round(finalSalary * 1.2);
+
+    // Calculate projected growth (3-8% per year based on experience and industry)
+    const growthRate = experience > 10 ? 0.03 : 0.06;
+    const projectedSalary = Math.round(finalSalary * (1 + growthRate * 2));
+    const growthPercentage = Math.round(((projectedSalary - finalSalary) / finalSalary) * 100);
+
+    return {
+      min: minSalary,
+      median: finalSalary,
+      max: maxSalary,
+      projected: projectedSalary,
+      growth: growthPercentage
+    };
+  };
+
   const generateReport = () => {
     console.log('Generating salary report...', formData);
+    const calculatedSalary = calculateSalary();
+    setSalaryData(calculatedSalary);
     setShowResults(true);
   };
 
@@ -272,14 +386,14 @@ const ReferentielsSalairesPage = () => {
           </div>
 
           {/* Results Section */}
-          {showResults && (
+          {showResults && salaryData && (
             <div className="mt-8 space-y-6">
               <div className="text-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">
                   Rapport Salarial - {formData.jobTitle}
                 </h2>
                 <p className="text-gray-600">
-                  Basé sur {formData.experience} d'expérience à {formData.city}, {formData.country}
+                  Basé sur {formData.experience} années d'expérience à {formData.city}, {formData.country}
                 </p>
               </div>
 
@@ -297,21 +411,21 @@ const ReferentielsSalairesPage = () => {
                       <div>
                         <div className="flex justify-between mb-2">
                           <span className="text-sm text-gray-600">Minimum</span>
-                          <span className="font-semibold">65 000 €</span>
+                          <span className="font-semibold">{salaryData.min.toLocaleString()} €</span>
                         </div>
                         <Progress value={30} className="h-2" />
                       </div>
                       <div>
                         <div className="flex justify-between mb-2">
                           <span className="text-sm text-gray-600">Médiane</span>
-                          <span className="font-semibold text-[#a4007c]">85 000 €</span>
+                          <span className="font-semibold text-[#a4007c]">{salaryData.median.toLocaleString()} €</span>
                         </div>
                         <Progress value={60} className="h-2" />
                       </div>
                       <div>
                         <div className="flex justify-between mb-2">
                           <span className="text-sm text-gray-600">Maximum</span>
-                          <span className="font-semibold">120 000 €</span>
+                          <span className="font-semibold">{salaryData.max.toLocaleString()} €</span>
                         </div>
                         <Progress value={100} className="h-2" />
                       </div>
@@ -330,11 +444,11 @@ const ReferentielsSalairesPage = () => {
                   <CardContent>
                     <div className="space-y-4">
                       <div className="text-center p-4 bg-[#a4007c]/10 rounded-lg">
-                        <div className="text-2xl font-bold text-[#a4007c]">+15%</div>
+                        <div className="text-2xl font-bold text-[#a4007c]">+{salaryData.growth}%</div>
                         <div className="text-sm text-gray-600">Croissance sur 2 ans</div>
                       </div>
                       <div className="text-center p-4 bg-gray-50 rounded-lg">
-                        <div className="text-2xl font-bold text-gray-900">98 000 €</div>
+                        <div className="text-2xl font-bold text-gray-900">{salaryData.projected.toLocaleString()} €</div>
                         <div className="text-sm text-gray-600">Salaire projeté en 2027</div>
                       </div>
                     </div>
@@ -379,19 +493,27 @@ const ReferentielsSalairesPage = () => {
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span>Paris:</span>
-                        <span className="font-medium text-[#a4007c]">85 000 €</span>
+                        <span className={`font-medium ${formData.city.toLowerCase() === 'paris' ? 'text-[#a4007c]' : ''}`}>
+                          {Math.round(salaryData.median * 1.2).toLocaleString()} €
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Lyon:</span>
-                        <span className="font-medium">78 000 €</span>
+                        <span className={`font-medium ${formData.city.toLowerCase() === 'lyon' ? 'text-[#a4007c]' : ''}`}>
+                          {Math.round(salaryData.median * 1.05).toLocaleString()} €
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Toulouse:</span>
-                        <span className="font-medium">75 000 €</span>
+                        <span className={`font-medium ${formData.city.toLowerCase() === 'toulouse' ? 'text-[#a4007c]' : ''}`}>
+                          {Math.round(salaryData.median * 0.98).toLocaleString()} €
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span>Lille:</span>
-                        <span className="font-medium">72 000 €</span>
+                        <span className={`font-medium ${formData.city.toLowerCase() === 'lille' ? 'text-[#a4007c]' : ''}`}>
+                          {Math.round(salaryData.median * 0.92).toLocaleString()} €
+                        </span>
                       </div>
                     </div>
                   </CardContent>
@@ -402,7 +524,10 @@ const ReferentielsSalairesPage = () => {
               <div className="text-center pt-6">
                 <Button 
                   variant="outline"
-                  onClick={() => setShowResults(false)}
+                  onClick={() => {
+                    setShowResults(false);
+                    setSalaryData(null);
+                  }}
                   className="px-8"
                 >
                   Nouvelle Recherche
