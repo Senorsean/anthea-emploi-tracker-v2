@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import AmeliorerEntretiensPage from "./pages/AmeliorerEntretiensPage";
+import NegociationOffrePage from "./pages/NegociationOffrePage";
 import PreparationEntretienPage from "./pages/PreparationEntretienPage";
 import MethodeStarPage from "./pages/MethodeStarPage";
 import RenforcezVotreReseauPage from "./pages/RenforcezVotreReseauPage";
@@ -98,6 +99,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <RenforcezVotreReseauPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/negociation-offre"
+            element={
+              <RequireAuth>
+                <NegociationOffrePage />
               </RequireAuth>
             }
           />
