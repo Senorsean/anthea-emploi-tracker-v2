@@ -23,90 +23,380 @@ const ParcoursCarriereResultatsPage = () => {
     return <div>Chargement...</div>;
   }
 
-  // Simuler des données de progression de carrière
-  const careerSteps = [
-    {
-      title: `${careerData.jobTitle} Senior`,
-      timeframe: '6-12 mois',
-      description: 'Évolution naturelle avec plus de responsabilités',
-      requirements: ['Leadership renforcé', 'Expertise technique approfondie'],
-      salaryIncrease: '+15-25%',
-      details: {
-        responsibilities: [
-          'Encadrement de 2-3 junior',
-          'Participation aux décisions stratégiques',
-          'Formation et mentorat',
-          'Gestion de projets complexes'
-        ],
-        skills: [
-          'Communication avancée',
-          'Gestion de conflit',
-          'Planification stratégique',
-          'Technologies émergentes'
-        ],
-        opportunities: [
-          'Certification en management',
-          'Formation leadership',
-          'Participation à des conférences',
-          'Projets transversaux'
-        ]
-      }
-    },
-    {
-      title: `Directeur ${careerData.jobTitle}`,
-      timeframe: '1-2 ans',
-      description: 'Prise de responsabilités managériales étendues',
-      requirements: ['Management d\'équipe', 'Vision stratégique'],
-      salaryIncrease: '+35-50%',
-      details: {
-        responsibilities: [
-          'Management de 5-15 personnes',
-          'Définition de la stratégie départementale',
-          'Budget et ressources',
-          'Relation avec les parties prenantes'
-        ],
-        skills: [
-          'Management stratégique',
-          'Gestion budgétaire',
-          'Négociation avancée',
-          'Intelligence émotionnelle'
-        ],
-        opportunities: [
-          'MBA ou Executive Education',
-          'Coaching exécutif',
-          'Réseau de dirigeants',
-          'Projets de transformation'
-        ]
-      }
-    },
-    {
-      title: 'VP/Directeur Général',
-      timeframe: '3-5 ans',
-      description: 'Leadership exécutif et vision d\'entreprise',
-      requirements: ['Leadership exécutif', 'Business development'],
-      salaryIncrease: '+70-100%',
-      details: {
-        responsibilities: [
-          'Vision et stratégie globale',
-          'P&L de division',
-          'Transformation organisationnelle',
-          'Relations investisseurs/board'
-        ],
-        skills: [
-          'Vision stratégique',
-          'Leadership transformationnel',
-          'Gestion du changement',
-          'Acumen business'
-        ],
-        opportunities: [
-          'Conseil d\'administration externe',
-          'Speaking à des conférences',
-          'Mentorat de dirigeants',
-          'Acquisitions et partenariats'
-        ]
+  // Fonction pour générer des parcours personnalisés
+  const generateCareerPath = () => {
+    const experience = parseInt(careerData.experience) || 0;
+    const jobTitle = careerData.jobTitle;
+    const teamSize = careerData.teamSize;
+    const scope = careerData.scope;
+    
+    // Déterminer le niveau actuel
+    let currentLevel = 'junior';
+    if (experience >= 8 && (teamSize === '5-10' || teamSize === '10+')) {
+      currentLevel = 'senior-manager';
+    } else if (experience >= 5 || teamSize === '1-4' || teamSize === '5-10') {
+      currentLevel = 'senior';
+    } else if (experience >= 3) {
+      currentLevel = 'confirmed';
+    }
+
+    // Générer les étapes selon le niveau actuel et le profil
+    const steps = [];
+
+    if (currentLevel === 'junior') {
+      steps.push({
+        title: `${jobTitle} Confirmé(e)`,
+        timeframe: '1-2 ans',
+        description: 'Montée en compétences et prise d\'autonomie',
+        requirements: ['Maîtrise technique', 'Autonomie opérationnelle'],
+        salaryIncrease: '+10-20%',
+        details: {
+          responsibilities: [
+            'Gestion de projets en autonomie',
+            'Formation des nouveaux arrivants',
+            'Participation aux décisions techniques',
+            'Interface avec les clients'
+          ],
+          skills: [
+            'Expertise métier approfondie',
+            'Communication client',
+            'Gestion de projet',
+            'Analyse et résolution de problèmes'
+          ],
+          opportunities: [
+            'Certifications professionnelles',
+            'Formation en gestion de projet',
+            'Participation à des conférences',
+            'Projets transversaux'
+          ]
+        }
+      });
+
+      steps.push({
+        title: `${jobTitle} Senior`,
+        timeframe: '2-4 ans',
+        description: 'Leadership technique et encadrement',
+        requirements: ['Leadership technique', 'Mentoring'],
+        salaryIncrease: '+25-35%',
+        details: {
+          responsibilities: [
+            'Encadrement de 2-4 personnes',
+            'Définition des standards techniques',
+            'Pilotage de projets complexes',
+            'Relation avec les parties prenantes'
+          ],
+          skills: [
+            'Leadership technique',
+            'Management d\'équipe',
+            'Vision stratégique',
+            'Négociation'
+          ],
+          opportunities: [
+            'Formation en management',
+            'MBA ou formation executive',
+            'Réseau professionnel',
+            'Projets d\'innovation'
+          ]
+        }
+      });
+
+      if (scope === 'global' || careerData.industry?.includes('Finance') || careerData.industry?.includes('Technologie')) {
+        steps.push({
+          title: `Directeur ${jobTitle.replace(/(Responsable|Manager|Chef)/i, '')}`,
+          timeframe: '4-6 ans',
+          description: 'Responsabilités managériales étendues',
+          requirements: ['Management stratégique', 'Business acumen'],
+          salaryIncrease: '+50-70%',
+          details: {
+            responsibilities: [
+              'Management de 10-20 personnes',
+              'P&L département',
+              'Stratégie business unit',
+              'Développement commercial'
+            ],
+            skills: [
+              'Leadership stratégique',
+              'Gestion budgétaire',
+              'Vision business',
+              'Intelligence émotionnelle'
+            ],
+            opportunities: [
+              'Executive MBA',
+              'Coaching de dirigeant',
+              'Conseil d\'administration',
+              'Acquisitions et partenariats'
+            ]
+          }
+        });
       }
     }
-  ];
+
+    else if (currentLevel === 'confirmed') {
+      steps.push({
+        title: `${jobTitle} Senior`,
+        timeframe: '1-3 ans',
+        description: 'Expertise technique et leadership',
+        requirements: ['Expertise avancée', 'Leadership d\'équipe'],
+        salaryIncrease: '+15-25%',
+        details: {
+          responsibilities: [
+            'Encadrement technique d\'équipe',
+            'Architecture et conception',
+            'Interface clients stratégiques',
+            'Innovation et R&D'
+          ],
+          skills: [
+            'Expertise technique poussée',
+            'Leadership technique',
+            'Communication stratégique',
+            'Innovation'
+          ],
+          opportunities: [
+            'Spécialisations techniques',
+            'Formation en leadership',
+            'Conférences et publications',
+            'Projets innovants'
+          ]
+        }
+      });
+
+      if (teamSize !== 'no') {
+        steps.push({
+          title: `Manager ${jobTitle.replace(/(Senior|Confirmé)/i, '')}`,
+          timeframe: '2-4 ans',
+          description: 'Transition vers le management',
+          requirements: ['Management d\'équipe', 'Vision produit'],
+          salaryIncrease: '+30-45%',
+          details: {
+            responsibilities: [
+              'Management de 5-15 personnes',
+              'Définition de roadmap',
+              'Budget et ressources',
+              'Développement d\'équipe'
+            ],
+            skills: [
+              'Management opérationnel',
+              'Gestion budgétaire',
+              'Développement des talents',
+              'Communication executive'
+            ],
+            opportunities: [
+              'Formation management',
+              'Coaching professionnel',
+              'Réseaux de managers',
+              'Projets de transformation'
+            ]
+          }
+        });
+
+        steps.push({
+          title: `Directeur ${jobTitle.replace(/(Senior|Confirmé|Manager)/i, '')}`,
+          timeframe: '3-5 ans',
+          description: 'Leadership départemental',
+          requirements: ['Vision stratégique', 'Business development'],
+          salaryIncrease: '+60-80%',
+          details: {
+            responsibilities: [
+              'Management multi-équipes',
+              'Stratégie départementale',
+              'P&L responsability',
+              'Partenariats stratégiques'
+            ],
+            skills: [
+              'Leadership stratégique',
+              'Business acumen',
+              'Négociation complexe',
+              'Change management'
+            ],
+            opportunities: [
+              'Executive MBA',
+              'Mandats externes',
+              'Speaking international',
+              'Board participation'
+            ]
+          }
+        });
+      }
+    }
+
+    else if (currentLevel === 'senior') {
+      if (teamSize === 'no' || teamSize === '1-4') {
+        steps.push({
+          title: `Lead ${jobTitle}`,
+          timeframe: '6-18 mois',
+          description: 'Leadership technique avancé',
+          requirements: ['Expertise reconnue', 'Influence technique'],
+          salaryIncrease: '+10-20%',
+          details: {
+            responsibilities: [
+              'Architecture technique globale',
+              'Mentoring d\'experts',
+              'Standards et best practices',
+              'Innovation technologique'
+            ],
+            skills: [
+              'Expertise technique reconnue',
+              'Leadership d\'influence',
+              'Vision technologique',
+              'Communication executive'
+            ],
+            opportunities: [
+              'Conférences internationales',
+              'Publications techniques',
+              'Comités techniques',
+              'Innovation labs'
+            ]
+          }
+        });
+      }
+
+      steps.push({
+        title: `Manager ${jobTitle.replace(/Senior|Lead/i, '')}`,
+        timeframe: '1-2 ans',
+        description: 'Management d\'équipe élargie',
+        requirements: ['Management avancé', 'Vision business'],
+        salaryIncrease: '+25-40%',
+        details: {
+          responsibilities: [
+            'Management de 8-20 personnes',
+            'Budget et ROI',
+            'Stratégie opérationnelle',
+            'Développement business'
+          ],
+          skills: [
+            'Management stratégique',
+            'Business analysis',
+            'Leadership transformationnel',
+            'Gestion du changement'
+          ],
+          opportunities: [
+            'Executive education',
+            'Board advisory',
+            'Industry leadership',
+            'Strategic partnerships'
+          ]
+        }
+      });
+
+      steps.push({
+        title: scope === 'global' ? 'VP/Directeur Régional' : 'Directeur',
+        timeframe: '2-4 ans',
+        description: 'Leadership exécutif',
+        requirements: ['Vision stratégique', 'Leadership exécutif'],
+        salaryIncrease: '+50-80%',
+        details: {
+          responsibilities: [
+            'P&L multi-millions',
+            'Stratégie corporate',
+            'M&A et partenariats',
+            'Board reporting'
+          ],
+          skills: [
+            'Strategic thinking',
+            'Executive presence',
+            'Financial acumen',
+            'Stakeholder management'
+          ],
+          opportunities: [
+            'CEO track',
+            'Board positions',
+            'Industry thought leadership',
+            'Global assignments'
+          ]
+        }
+      });
+    }
+
+    else if (currentLevel === 'senior-manager') {
+      steps.push({
+        title: 'Directeur Senior',
+        timeframe: '1-2 ans',
+        description: 'Leadership multi-départements',
+        requirements: ['Leadership matrix', 'Transformation'],
+        salaryIncrease: '+20-35%',
+        details: {
+          responsibilities: [
+            'Management transversal',
+            'Transformation digitale',
+            'Stratégie corporate',
+            'Gouvernance'
+          ],
+          skills: [
+            'Matrix leadership',
+            'Digital transformation',
+            'Corporate strategy',
+            'Governance'
+          ],
+          opportunities: [
+            'C-level transition',
+            'Board mandates',
+            'Industry transformation',
+            'Global leadership'
+          ]
+        }
+      });
+
+      steps.push({
+        title: scope === 'global' ? 'VP Global' : 'Directeur Général',
+        timeframe: '2-3 ans',
+        description: 'Leadership exécutif global',
+        requirements: ['Vision globale', 'Transformation business'],
+        salaryIncrease: '+40-70%',
+        details: {
+          responsibilities: [
+            'P&L global',
+            'Vision et stratégie',
+            'Transformation organisationnelle',
+            'Stakeholder management'
+          ],
+          skills: [
+            'Global leadership',
+            'Strategic visioning',
+            'Organizational transformation',
+            'Investor relations'
+          ],
+          opportunities: [
+            'CEO succession',
+            'Multiple board seats',
+            'Industry spokesperson',
+            'Thought leadership'
+          ]
+        }
+      });
+
+      steps.push({
+        title: 'CEO/Président',
+        timeframe: '3-5 ans',
+        description: 'Direction générale',
+        requirements: ['Leadership visionnaire', 'Création de valeur'],
+        salaryIncrease: '+70-150%',
+        details: {
+          responsibilities: [
+            'Vision entreprise',
+            'Création de valeur',
+            'Écosystème stratégique',
+            'Legacy building'
+          ],
+          skills: [
+            'Visionary leadership',
+            'Value creation',
+            'Ecosystem thinking',
+            'Legacy mindset'
+          ],
+          opportunities: [
+            'Industry transformation',
+            'Multiple board mandates',
+            'Thought leadership global',
+            'Entrepreneurship'
+          ]
+        }
+      });
+    }
+
+    return steps;
+  };
+
+  const careerSteps = generateCareerPath();
 
   const recommendations = [
     {
