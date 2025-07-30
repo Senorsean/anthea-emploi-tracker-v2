@@ -3,10 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, MapPin } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { ArrowLeft, MapPin, TrendingUp, DollarSign, Users, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const ReferentielsSalairesPage = () => {
+  const [showResults, setShowResults] = useState(false);
   const [formData, setFormData] = useState({
     jobTitle: '',
     experience: '',
@@ -21,6 +24,11 @@ const ReferentielsSalairesPage = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const generateReport = () => {
+    console.log('Generating salary report...', formData);
+    setShowResults(true);
   };
 
   const teamSizeOptions = [
@@ -256,15 +264,152 @@ const ReferentielsSalairesPage = () => {
             <div className="pt-6">
               <Button 
                 className="w-full h-14 bg-gray-900 hover:bg-gray-800 text-white text-base font-medium rounded-full"
-                onClick={() => {
-                  // Handle form submission
-                  console.log('Generating salary report...', formData);
-                }}
+                onClick={generateReport}
               >
                 Générer le rapport salarial →
               </Button>
             </div>
           </div>
+
+          {/* Results Section */}
+          {showResults && (
+            <div className="mt-8 space-y-6">
+              <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  Rapport Salarial - {formData.jobTitle}
+                </h2>
+                <p className="text-gray-600">
+                  Basé sur {formData.experience} d'expérience à {formData.city}, {formData.country}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Salary Range */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <DollarSign className="h-5 w-5 text-[#a4007c]" />
+                      Fourchette Salariale
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-sm text-gray-600">Minimum</span>
+                          <span className="font-semibold">65 000 €</span>
+                        </div>
+                        <Progress value={30} className="h-2" />
+                      </div>
+                      <div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-sm text-gray-600">Médiane</span>
+                          <span className="font-semibold text-[#a4007c]">85 000 €</span>
+                        </div>
+                        <Progress value={60} className="h-2" />
+                      </div>
+                      <div>
+                        <div className="flex justify-between mb-2">
+                          <span className="text-sm text-gray-600">Maximum</span>
+                          <span className="font-semibold">120 000 €</span>
+                        </div>
+                        <Progress value={100} className="h-2" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Growth Projection */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="h-5 w-5 text-[#a4007c]" />
+                      Croissance Projetée
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="text-center p-4 bg-[#a4007c]/10 rounded-lg">
+                        <div className="text-2xl font-bold text-[#a4007c]">+15%</div>
+                        <div className="text-sm text-gray-600">Croissance sur 2 ans</div>
+                      </div>
+                      <div className="text-center p-4 bg-gray-50 rounded-lg">
+                        <div className="text-2xl font-bold text-gray-900">98 000 €</div>
+                        <div className="text-sm text-gray-600">Salaire projeté en 2027</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Market Position */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5 text-[#a4007c]" />
+                      Position Marché
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span>Secteur:</span>
+                        <span className="font-medium">{formData.industry}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Équipe:</span>
+                        <span className="font-medium">{formData.teamSize} personnes</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Mode:</span>
+                        <span className="font-medium">{formData.workMode}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Regional Comparison */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Globe className="h-5 w-5 text-[#a4007c]" />
+                      Comparaison Régionale
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span>Paris:</span>
+                        <span className="font-medium text-[#a4007c]">85 000 €</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Lyon:</span>
+                        <span className="font-medium">78 000 €</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Toulouse:</span>
+                        <span className="font-medium">75 000 €</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Lille:</span>
+                        <span className="font-medium">72 000 €</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Reset Button */}
+              <div className="text-center pt-6">
+                <Button 
+                  variant="outline"
+                  onClick={() => setShowResults(false)}
+                  className="px-8"
+                >
+                  Nouvelle Recherche
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>
