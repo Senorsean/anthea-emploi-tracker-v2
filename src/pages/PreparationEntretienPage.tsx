@@ -73,6 +73,7 @@ export default function PreparationEntretienPage() {
   const [responses, setResponses] = useState<Record<number, string>>({});
   const [completedQuestions, setCompletedQuestions] = useState<Set<number>>(new Set());
   const [showResults, setShowResults] = useState(false);
+  const [notes, setNotes] = useState<string>('');
 
   const currentQuestion = interviewQuestions[currentQuestionIndex];
   const progress = (completedQuestions.size / interviewQuestions.length) * 100;
@@ -521,6 +522,43 @@ export default function PreparationEntretienPage() {
         currentY += responseHeight + 15;
       });
       
+      // Section Notes personnelles
+      if (notes && notes.trim()) {
+        if (currentY + 40 > pageHeight - 30) {
+          doc.addPage();
+          currentY = 30;
+        }
+        
+        doc.setFillColor(240, 249, 255); // bg-blue-50
+        doc.rect(margin, currentY - 5, maxWidth, 25, 'F');
+        doc.setDrawColor(191, 219, 254); // border-blue-200
+        doc.setLineWidth(0.5);
+        doc.rect(margin, currentY - 5, maxWidth, 25, 'S');
+        
+        doc.setTextColor(30, 58, 138); // text-blue-800
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("Notes Personnelles", margin + 10, currentY + 10);
+        
+        currentY += 35;
+        
+        // Encadré pour les notes
+        const notesHeight = Math.max(30, Math.ceil(notes.length / 80) * 5);
+        doc.setFillColor(255, 255, 255);
+        doc.rect(margin, currentY - 5, maxWidth, notesHeight, 'F');
+        doc.setDrawColor(226, 232, 240);
+        doc.setLineWidth(0.5);
+        doc.rect(margin, currentY - 5, maxWidth, notesHeight, 'S');
+        
+        doc.setTextColor(30, 41, 59);
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        const notesLines = doc.splitTextToSize(notes, maxWidth - 15);
+        doc.text(notesLines, margin + 7, currentY + 5);
+        
+        currentY += notesHeight + 20;
+      }
+      
       // Section Conseils d'amélioration
       if (currentY + 40 > pageHeight - 30) {
         doc.addPage();
@@ -618,6 +656,7 @@ export default function PreparationEntretienPage() {
     setResponses({});
     setCompletedQuestions(new Set());
     setShowResults(false);
+    setNotes('');
   };
 
   if (showResults) {
@@ -658,6 +697,25 @@ export default function PreparationEntretienPage() {
                       )}
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>📝 Mes notes personnelles</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <Textarea
+                    placeholder="Ajoutez ici vos remarques personnelles, constats, points à retenir, questions spécifiques à l'entreprise..."
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    className="min-h-[120px]"
+                  />
+                  <div className="text-xs text-gray-500">
+                    💡 Utilisez cette section pour noter vos observations, questions à poser, informations sur l'entreprise, ou tout autre point important pour votre entretien.
+                  </div>
                 </div>
               </CardContent>
             </Card>
