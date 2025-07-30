@@ -79,11 +79,43 @@ const ReferentielsSalairesPage = () => {
       'services-professionnels': 1,
       'technologie': 1.2,
       'finance': 1.3,
+      'assurance': 1.25,
       'sante': 1.1,
       'education': 0.9,
       'retail': 0.85,
       'manufacturing': 0.95,
-      'consulting': 1.15
+      'consulting': 1.15,
+      'automobile': 1.0,
+      'aeronautique': 1.2,
+      'energie': 1.15,
+      'telecommunications': 1.1,
+      'medias': 0.95,
+      'publicite': 1.05,
+      'immobilier': 1.0,
+      'construction': 0.9,
+      'transport': 0.88,
+      'hotellerie': 0.8,
+      'luxe': 1.1,
+      'agroalimentaire': 0.9,
+      'agriculture': 0.85,
+      'chimie': 1.05,
+      'environnement': 0.95,
+      'recherche': 1.1,
+      'juridique': 1.2,
+      'public': 0.85,
+      'ong': 0.75,
+      'sport': 0.9,
+      'culture': 0.85,
+      'gaming': 1.15,
+      'ecommerce': 1.1,
+      'fintech': 1.35,
+      'startup': 1.0,
+      'securite': 0.95,
+      'maritime': 1.0,
+      'spatial': 1.25,
+      'biotechnologie': 1.2,
+      'intelligence-artificielle': 1.4,
+      'blockchain': 1.3
     };
     const industryMultiplier = industryMultipliers[formData.industry] || 1;
 
@@ -292,13 +324,45 @@ const ReferentielsSalairesPage = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="services-professionnels">Services professionnels</SelectItem>
-                  <SelectItem value="technologie">Technologie</SelectItem>
-                  <SelectItem value="finance">Finance</SelectItem>
-                  <SelectItem value="sante">Santé</SelectItem>
-                  <SelectItem value="education">Éducation</SelectItem>
+                  <SelectItem value="technologie">Technologie & IT</SelectItem>
+                  <SelectItem value="finance">Finance & Banque</SelectItem>
+                  <SelectItem value="assurance">Assurance</SelectItem>
+                  <SelectItem value="sante">Santé & Pharmaceutique</SelectItem>
+                  <SelectItem value="education">Éducation & Formation</SelectItem>
                   <SelectItem value="retail">Commerce de détail</SelectItem>
-                  <SelectItem value="manufacturing">Fabrication</SelectItem>
-                  <SelectItem value="consulting">Conseil</SelectItem>
+                  <SelectItem value="manufacturing">Fabrication & Industrie</SelectItem>
+                  <SelectItem value="consulting">Conseil & Audit</SelectItem>
+                  <SelectItem value="automobile">Automobile</SelectItem>
+                  <SelectItem value="aeronautique">Aéronautique & Défense</SelectItem>
+                  <SelectItem value="energie">Énergie & Utilities</SelectItem>
+                  <SelectItem value="telecommunications">Télécommunications</SelectItem>
+                  <SelectItem value="medias">Médias & Communication</SelectItem>
+                  <SelectItem value="publicite">Publicité & Marketing</SelectItem>
+                  <SelectItem value="immobilier">Immobilier</SelectItem>
+                  <SelectItem value="construction">Construction & BTP</SelectItem>
+                  <SelectItem value="transport">Transport & Logistique</SelectItem>
+                  <SelectItem value="hotellerie">Hôtellerie & Restauration</SelectItem>
+                  <SelectItem value="luxe">Luxe & Mode</SelectItem>
+                  <SelectItem value="agroalimentaire">Agroalimentaire</SelectItem>
+                  <SelectItem value="agriculture">Agriculture</SelectItem>
+                  <SelectItem value="chimie">Chimie & Pétrochimie</SelectItem>
+                  <SelectItem value="environnement">Environnement & Développement durable</SelectItem>
+                  <SelectItem value="recherche">Recherche & Développement</SelectItem>
+                  <SelectItem value="juridique">Juridique</SelectItem>
+                  <SelectItem value="public">Secteur public</SelectItem>
+                  <SelectItem value="ong">ONG & Associations</SelectItem>
+                  <SelectItem value="sport">Sport & Loisirs</SelectItem>
+                  <SelectItem value="culture">Culture & Arts</SelectItem>
+                  <SelectItem value="gaming">Jeux vidéo & Gaming</SelectItem>
+                  <SelectItem value="ecommerce">E-commerce</SelectItem>
+                  <SelectItem value="fintech">FinTech</SelectItem>
+                  <SelectItem value="startup">Startup & Scale-up</SelectItem>
+                  <SelectItem value="securite">Sécurité & Surveillance</SelectItem>
+                  <SelectItem value="maritime">Maritime & Naval</SelectItem>
+                  <SelectItem value="spatial">Spatial</SelectItem>
+                  <SelectItem value="biotechnologie">Biotechnologie</SelectItem>
+                  <SelectItem value="intelligence-artificielle">Intelligence Artificielle</SelectItem>
+                  <SelectItem value="blockchain">Blockchain & Crypto</SelectItem>
                 </SelectContent>
               </Select>
             </div>
