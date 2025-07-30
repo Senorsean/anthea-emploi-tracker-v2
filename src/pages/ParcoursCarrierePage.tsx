@@ -5,9 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, CheckCircle, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const ParcoursCarrierePage = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     jobTitle: '',
     experience: '',
@@ -26,8 +28,23 @@ const ParcoursCarrierePage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Vérifier les champs requis
+    if (!formData.jobTitle || !formData.experience) {
+      toast.error('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
     console.log('Form submitted:', formData);
-    // TODO: Handle form submission
+    
+    // Simuler la génération du rapport
+    toast.success('Génération du rapport en cours...');
+    
+    setTimeout(() => {
+      // Stocker les données pour la page de résultats
+      localStorage.setItem('careerPathData', JSON.stringify(formData));
+      navigate('/parcours-carriere-resultats');
+    }, 1500);
   };
 
   const teamSizeOptions = [
