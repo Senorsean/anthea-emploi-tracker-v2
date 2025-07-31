@@ -130,7 +130,7 @@ const ApprentissageCompetencesPage = () => {
     };
 
     // Add ANTHEA header with gradient banner
-    let yPosition = addAntheaHeader(pdf, 'Analyse complète de votre CV');
+    let yPosition = addAntheaHeader(pdf, 'Rapport de montée en compétences');
     
     // Title
     yPosition = addText('RAPPORT DE MONTÉE EN COMPÉTENCES', margin, yPosition, 18, true);
