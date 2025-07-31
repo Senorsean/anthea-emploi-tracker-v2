@@ -64,35 +64,77 @@ const IntelligenceMarcheePage = () => {
     pdf.text(`Portée: ${formData.scope}`, 20, 80);
     pdf.text(`Industrie: ${formData.industry}`, 20, 90);
     pdf.text(`Localisation: ${formData.city}, ${formData.country}`, 20, 100);
+    pdf.text(`Mode de travail: ${formData.workMode}`, 20, 110);
     
-    // Market intelligence data
-    if (marketData) {
-      pdf.setFontSize(14);
-      pdf.text('Analyse du Marché:', 20, 120);
-      
-      // Split text to fit page width
-      const splitText = (text: string, maxWidth: number) => {
-        return pdf.splitTextToSize(text, maxWidth);
-      };
-      
-      let yPosition = 130;
-      const pageWidth = 170;
-      
-      if (marketData.marketOverview) {
-        const overviewLines = splitText(marketData.marketOverview, pageWidth);
-        pdf.text(overviewLines, 20, yPosition);
-        yPosition += overviewLines.length * 5 + 10;
+    let yPosition = 130;
+    const pageWidth = 170;
+    const lineHeight = 5;
+    
+    // Helper function to split text and handle page breaks
+    const addSection = (title: string, content: string) => {
+      // Check if we need a new page
+      if (yPosition > 250) {
+        pdf.addPage();
+        yPosition = 20;
       }
       
-      if (marketData.trends && yPosition < 250) {
-        pdf.text('Tendances du marché:', 20, yPosition);
-        yPosition += 10;
-        const trendsLines = splitText(marketData.trends, pageWidth);
-        pdf.text(trendsLines, 20, yPosition);
+      // Add section title
+      pdf.setFontSize(14);
+      pdf.setFont(undefined, 'bold');
+      pdf.text(title, 20, yPosition);
+      yPosition += 10;
+      
+      // Add section content
+      pdf.setFontSize(10);
+      pdf.setFont(undefined, 'normal');
+      const lines = pdf.splitTextToSize(content, pageWidth);
+      
+      for (let i = 0; i < lines.length; i++) {
+        // Check if we need a new page during content
+        if (yPosition > 280) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        pdf.text(lines[i], 20, yPosition);
+        yPosition += lineHeight;
+      }
+      
+      yPosition += 10; // Add space between sections
+    };
+    
+    // Market intelligence sections
+    if (marketData) {
+      if (marketData.marketOverview) {
+        addSection('📊 Vue d\'ensemble du marché', marketData.marketOverview);
+      }
+      
+      if (marketData.trends) {
+        addSection('📈 Tendances du marché', marketData.trends);
+      }
+      
+      if (marketData.opportunities) {
+        addSection('🎯 Opportunités et recommandations', marketData.opportunities);
+      }
+      
+      if (marketData.competitiveAnalysis) {
+        addSection('👥 Analyse concurrentielle', marketData.competitiveAnalysis);
+      }
+      
+      if (marketData.skillsInDemand) {
+        addSection('💼 Compétences recherchées', marketData.skillsInDemand);
+      }
+      
+      // Add footer with generation date
+      const pageCount = (pdf as any).internal.getNumberOfPages();
+      for (let i = 1; i <= pageCount; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setTextColor(128);
+        pdf.text(`Généré le ${new Date().toLocaleDateString('fr-FR')} - Page ${i}/${pageCount}`, 20, 290);
       }
     }
     
-    pdf.save('rapport-intelligence-marche.pdf');
+    pdf.save(`rapport-intelligence-marche-${formData.jobTitle.replace(/\s+/g, '-').toLowerCase()}.pdf`);
   };
 
   const industries = [
