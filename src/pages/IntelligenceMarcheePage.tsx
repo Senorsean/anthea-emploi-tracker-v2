@@ -105,23 +105,23 @@ const IntelligenceMarcheePage = () => {
     // Market intelligence sections
     if (marketData) {
       if (marketData.marketOverview) {
-        addSection('📊 Vue d\'ensemble du marché', marketData.marketOverview);
+        addSection('Vue d\'ensemble du marché', marketData.marketOverview);
       }
       
       if (marketData.trends) {
-        addSection('📈 Tendances du marché', marketData.trends);
+        addSection('Tendances du marché', marketData.trends);
       }
       
       if (marketData.opportunities) {
-        addSection('🎯 Opportunités et recommandations', marketData.opportunities);
+        addSection('Opportunités et recommandations', marketData.opportunities);
       }
       
       if (marketData.competitiveAnalysis) {
-        addSection('👥 Analyse concurrentielle', marketData.competitiveAnalysis);
+        addSection('Analyse concurrentielle', marketData.competitiveAnalysis);
       }
       
       if (marketData.skillsInDemand) {
-        addSection('💼 Compétences recherchées', marketData.skillsInDemand);
+        addSection('Compétences recherchées', marketData.skillsInDemand);
       }
       
       // Add footer with generation date
