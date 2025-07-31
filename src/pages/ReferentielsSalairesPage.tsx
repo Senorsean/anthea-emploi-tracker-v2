@@ -5,12 +5,14 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, MapPin, TrendingUp, DollarSign, Users, Globe } from 'lucide-react';
+import { ArrowLeft, MapPin, TrendingUp, DollarSign, Users, Globe, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 const ReferentielsSalairesPage = () => {
   const [showResults, setShowResults] = useState(false);
   const [salaryData, setSalaryData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     jobTitle: '',
     experience: '',
@@ -170,11 +172,48 @@ const ReferentielsSalairesPage = () => {
     };
   };
 
-  const generateReport = () => {
-    console.log('Generating salary report...', formData);
-    const calculatedSalary = calculateSalary();
-    setSalaryData(calculatedSalary);
-    setShowResults(true);
+  const generateReport = async () => {
+    setIsLoading(true);
+    setShowResults(false);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-salary-report', {
+        body: { formData }
+      });
+
+      if (error) {
+        console.error('Error calling edge function:', error);
+        throw error;
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Transform AI response to match existing interface
+      const transformedData = {
+        min: data.salaryRange.min,
+        median: data.salaryRange.median,
+        max: data.salaryRange.max,
+        projected: data.projectedGrowth.projected,
+        growth: data.projectedGrowth.percentage,
+        marketPosition: data.marketPosition,
+        regionalComparison: data.regionalComparison,
+        factors: data.factors,
+        recommendations: data.recommendations
+      };
+
+      setSalaryData(transformedData);
+      setShowResults(true);
+    } catch (error) {
+      console.error('Error generating salary report:', error);
+      // Fallback to local calculation
+      const calculatedSalary = calculateSalary();
+      setSalaryData(calculatedSalary);
+      setShowResults(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const teamSizeOptions = [
@@ -443,8 +482,16 @@ const ReferentielsSalairesPage = () => {
               <Button 
                 className="w-full h-14 bg-gray-900 hover:bg-gray-800 text-white text-base font-medium rounded-full"
                 onClick={generateReport}
+                disabled={isLoading}
               >
-                Générer le rapport salarial →
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Génération en cours...
+                  </>
+                ) : (
+                  'Générer le rapport salarial →'
+                )}
               </Button>
             </div>
           </div>
