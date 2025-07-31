@@ -26,6 +26,12 @@ export const addAntheaHeader = (pdf: jsPDF, title: string) => {
   pdf.setFont('helvetica', 'bold');
   pdf.text('ANTHEA', 20, 20);
   
+  // Ajouter la date du rapport en blanc
+  const currentDate = new Date().toLocaleDateString('fr-FR');
+  pdf.setFontSize(10);
+  pdf.setFont('helvetica', 'normal');
+  pdf.text(`Date: ${currentDate}`, 20, 32);
+  
   // Ajouter le titre du rapport en blanc
   pdf.setFontSize(16);
   pdf.setFont('helvetica', 'normal');
