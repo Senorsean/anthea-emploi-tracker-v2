@@ -40,6 +40,8 @@ const ApprentissageCompetencesPage = () => {
     currentJobTitle: '',
     experience: '',
     education: '',
+    trainingCertifications: '',
+    technicalSkillsInput: '',
     teamSize: '',
     scope: '',
     currentIndustry: '',
@@ -606,6 +608,34 @@ const ApprentissageCompetencesPage = () => {
                 placeholder="p. ex. Master en marketing"
                 value={formData.education}
                 onChange={(e) => handleInputChange('education', e.target.value)}
+                className="h-12"
+              />
+            </div>
+
+            {/* Formations ou Certifications supplémentaires */}
+            <div className="space-y-3">
+              <Label htmlFor="trainingCertifications" className="text-base font-medium text-gray-900">
+                Formations / Certifications supplémentaires:
+              </Label>
+              <Input
+                id="trainingCertifications"
+                placeholder="p. ex. Certification Google Ads, Formation gestion de projet"
+                value={formData.trainingCertifications}
+                onChange={(e) => handleInputChange('trainingCertifications', e.target.value)}
+                className="h-12"
+              />
+            </div>
+
+            {/* Compétences techniques actuelles */}
+            <div className="space-y-3">
+              <Label htmlFor="technicalSkillsInput" className="text-base font-medium text-gray-900">
+                Compétences techniques actuelles:
+              </Label>
+              <Input
+                id="technicalSkillsInput"
+                placeholder="p. ex. React, SQL, Figma"
+                value={formData.technicalSkillsInput}
+                onChange={(e) => handleInputChange('technicalSkillsInput', e.target.value)}
                 className="h-12"
               />
             </div>
