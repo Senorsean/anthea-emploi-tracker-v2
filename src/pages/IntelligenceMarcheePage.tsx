@@ -54,7 +54,7 @@ const IntelligenceMarcheePage = () => {
     const pdf = new jsPDF();
     
     // Add ANTHEA header with gradient banner
-    let yPosition = addAntheaHeader(pdf, 'Analyse complète de votre CV');
+    let yPosition = addAntheaHeader(pdf, 'Rapport : Intelligence de Marché');
     
     // Form data summary
     pdf.setFontSize(12);
