@@ -89,7 +89,12 @@ Réponds uniquement en JSON valide avec cette structure :
     }
 
     const data = await response.json();
-    const careerPath = JSON.parse(data.choices[0].message.content);
+    let content = data.choices[0].message.content;
+    
+    // Remove markdown code blocks if present
+    content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    
+    const careerPath = JSON.parse(content);
 
     return new Response(JSON.stringify(careerPath), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
