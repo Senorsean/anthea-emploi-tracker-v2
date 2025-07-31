@@ -243,7 +243,7 @@ const ReferentielsSalairesPage = () => {
     };
 
     // Add ANTHEA header with gradient banner
-    let yPosition = addAntheaHeader(pdf, 'Analyse complète de votre CV');
+    let yPosition = addAntheaHeader(pdf, 'Rapport Salarial');
     
     // Title
     yPosition = addText('RAPPORT SALARIAL', margin, yPosition, 18, true);
