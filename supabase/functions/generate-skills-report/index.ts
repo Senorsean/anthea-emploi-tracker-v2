@@ -26,6 +26,7 @@ serve(async (req) => {
 Profil actuel:
 - Titre de poste actuel: ${formData.currentJobTitle}
 - Années d'expérience: ${formData.experience}
+- Diplôme/Formation: ${formData.education}
 - Gestion d'équipe: ${formData.teamSize}
 - Portée du rôle: ${formData.scope}
 - Industrie actuelle: ${formData.currentIndustry}

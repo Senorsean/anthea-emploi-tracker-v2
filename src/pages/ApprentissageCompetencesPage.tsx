@@ -39,6 +39,7 @@ const ApprentissageCompetencesPage = () => {
   const [formData, setFormData] = useState({
     currentJobTitle: '',
     experience: '',
+    education: '',
     teamSize: '',
     scope: '',
     currentIndustry: '',
@@ -592,6 +593,20 @@ const ApprentissageCompetencesPage = () => {
                 className="h-12"
                 min="0"
                 type="number"
+              />
+            </div>
+
+            {/* Diplôme / Formation */}
+            <div className="space-y-3">
+              <Label htmlFor="education" className="text-base font-medium text-gray-900">
+                Diplôme / Formation:
+              </Label>
+              <Input
+                id="education"
+                placeholder="p. ex. Master en marketing"
+                value={formData.education}
+                onChange={(e) => handleInputChange('education', e.target.value)}
+                className="h-12"
               />
             </div>
 
