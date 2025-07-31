@@ -21,12 +21,14 @@ serve(async (req) => {
 
     const { formData } = await req.json();
 
-    const prompt = `En tant qu'expert en développement de carrière et en formation professionnelle, analysez les informations suivantes et générez un rapport détaillé de montée en compétences :
+  const prompt = `En tant qu'expert en développement de carrière et en formation professionnelle, analysez les informations suivantes et générez un rapport détaillé de montée en compétences :
 
 Profil actuel:
 - Titre de poste actuel: ${formData.currentJobTitle}
 - Années d'expérience: ${formData.experience}
 - Diplôme/Formation: ${formData.education}
+- Formations/Certifications supplémentaires: ${formData.trainingCertifications}
+- Compétences techniques actuelles: ${formData.technicalSkillsInput}
 - Gestion d'équipe: ${formData.teamSize}
 - Portée du rôle: ${formData.scope}
 - Industrie actuelle: ${formData.currentIndustry}
