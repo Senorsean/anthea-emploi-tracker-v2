@@ -5,9 +5,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, MapPin, TrendingUp, DollarSign, Users, Globe, Loader2 } from 'lucide-react';
+import { ArrowLeft, MapPin, TrendingUp, DollarSign, Users, Globe, Loader2, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import jsPDF from 'jspdf';
 
 const ReferentielsSalairesPage = () => {
   const [showResults, setShowResults] = useState(false);
@@ -214,6 +215,112 @@ const ReferentielsSalairesPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const downloadPDF = () => {
+    if (!salaryData) return;
+
+    const pdf = new jsPDF();
+    const pageWidth = 210;
+    const pageHeight = 297;
+    const margin = 20;
+    const maxWidth = pageWidth - 2 * margin;
+
+    // Helper function to add text with word wrapping
+    const addText = (text: string, x: number, y: number, fontSize: number = 10, isBold: boolean = false, textMaxWidth: number = maxWidth) => {
+      pdf.setFontSize(fontSize);
+      if (isBold) {
+        pdf.setFont('helvetica', 'bold');
+      } else {
+        pdf.setFont('helvetica', 'normal');
+      }
+      
+      const lines = pdf.splitTextToSize(text, textMaxWidth);
+      pdf.text(lines, x, y);
+      return y + lines.length * (fontSize * 0.5);
+    };
+
+    // Title
+    let yPosition = 30;
+    yPosition = addText('RAPPORT SALARIAL', margin, yPosition, 18, true);
+    yPosition = addText(`${formData.jobTitle}`, margin, yPosition + 10, 14, true);
+    yPosition = addText(`${formData.experience} années d'expérience • ${formData.city}, ${formData.country}`, margin, yPosition + 5, 10);
+
+    // Salary Range Section
+    yPosition += 20;
+    yPosition = addText('FOURCHETTE SALARIALE', margin, yPosition, 14, true);
+    yPosition += 5;
+    yPosition = addText(`Minimum: ${salaryData.min.toLocaleString()} €`, margin, yPosition + 8, 10);
+    yPosition = addText(`Médiane: ${salaryData.median.toLocaleString()} €`, margin, yPosition + 6, 10, true);
+    yPosition = addText(`Maximum: ${salaryData.max.toLocaleString()} €`, margin, yPosition + 6, 10);
+
+    // Growth Projection Section
+    yPosition += 15;
+    yPosition = addText('CROISSANCE PROJETÉE', margin, yPosition, 14, true);
+    yPosition += 5;
+    yPosition = addText(`Croissance sur 2 ans: +${salaryData.growth}%`, margin, yPosition + 8, 10);
+    yPosition = addText(`Salaire projeté en 2027: ${salaryData.projected.toLocaleString()} €`, margin, yPosition + 6, 10, true);
+
+    // Market Position Section
+    yPosition += 15;
+    yPosition = addText('POSITION MARCHÉ', margin, yPosition, 14, true);
+    yPosition += 5;
+    yPosition = addText(`Secteur: ${formData.industry}`, margin, yPosition + 8, 10);
+    yPosition = addText(`Équipe: ${formData.teamSize} personnes`, margin, yPosition + 6, 10);
+    yPosition = addText(`Mode de travail: ${formData.workMode}`, margin, yPosition + 6, 10);
+
+    // Regional Comparison Section
+    yPosition += 15;
+    yPosition = addText('COMPARAISON RÉGIONALE', margin, yPosition, 14, true);
+    yPosition += 5;
+    yPosition = addText(`Paris: ${Math.round(salaryData.median * 1.2).toLocaleString()} €`, margin, yPosition + 8, 10);
+    yPosition = addText(`Lyon: ${Math.round(salaryData.median * 1.05).toLocaleString()} €`, margin, yPosition + 6, 10);
+    yPosition = addText(`Toulouse: ${Math.round(salaryData.median * 0.98).toLocaleString()} €`, margin, yPosition + 6, 10);
+    yPosition = addText(`Lille: ${Math.round(salaryData.median * 0.92).toLocaleString()} €`, margin, yPosition + 6, 10);
+
+    // Add AI insights if available
+    if (salaryData.factors) {
+      yPosition += 15;
+      if (yPosition > pageHeight - 50) {
+        pdf.addPage();
+        yPosition = 30;
+      }
+      yPosition = addText('FACTEURS INFLUENÇANT LE SALAIRE', margin, yPosition, 14, true);
+      yPosition += 5;
+      salaryData.factors.forEach((factor: string) => {
+        if (yPosition > pageHeight - 30) {
+          pdf.addPage();
+          yPosition = 30;
+        }
+        yPosition = addText(`• ${factor}`, margin, yPosition + 6, 10);
+      });
+    }
+
+    if (salaryData.recommendations) {
+      yPosition += 15;
+      if (yPosition > pageHeight - 50) {
+        pdf.addPage();
+        yPosition = 30;
+      }
+      yPosition = addText('RECOMMANDATIONS', margin, yPosition, 14, true);
+      yPosition += 5;
+      salaryData.recommendations.forEach((rec: string) => {
+        if (yPosition > pageHeight - 30) {
+          pdf.addPage();
+          yPosition = 30;
+        }
+        yPosition = addText(`• ${rec}`, margin, yPosition + 6, 10);
+      });
+    }
+
+    // Footer
+    const currentDate = new Date().toLocaleDateString('fr-FR');
+    pdf.setFontSize(8);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(`Généré le ${currentDate}`, margin, pageHeight - 10);
+
+    // Save the PDF
+    pdf.save(`rapport-salarial-${formData.jobTitle.replace(/\s+/g, '-').toLowerCase()}.pdf`);
   };
 
   const teamSizeOptions = [
@@ -631,8 +738,15 @@ const ReferentielsSalairesPage = () => {
                 </Card>
               </div>
 
-              {/* Reset Button */}
-              <div className="text-center pt-6">
+              {/* Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
+                <Button 
+                  onClick={downloadPDF}
+                  className="flex items-center gap-2 bg-[#a4007c] hover:bg-[#8a0067] text-white px-8"
+                >
+                  <Download className="h-4 w-4" />
+                  Télécharger le rapport PDF
+                </Button>
                 <Button 
                   variant="outline"
                   onClick={() => {
