@@ -154,30 +154,161 @@ const ParcoursCarriereResultatsPage = () => {
 
   const downloadPDF = () => {
     const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 20;
+    const maxWidth = pageWidth - (margin * 2);
     
-    // Titre
-    pdf.setFontSize(20);
-    pdf.text('Parcours de Carrière Personnalisé', 20, 30);
+    let yPosition = margin;
+    
+    // Fonction pour ajouter une nouvelle page si nécessaire
+    const checkPageBreak = (neededSpace = 20) => {
+      if (yPosition + neededSpace > pageHeight - margin) {
+        pdf.addPage();
+        yPosition = margin;
+      }
+    };
+    
+    // Fonction pour ajouter du texte avec retour à la ligne automatique
+    const addWrappedText = (text, x, y, maxWidth, fontSize = 10) => {
+      pdf.setFontSize(fontSize);
+      const lines = pdf.splitTextToSize(text, maxWidth);
+      pdf.text(lines, x, y);
+      return lines.length * (fontSize * 0.5); // Approximation de la hauteur
+    };
+    
+    // Titre principal
+    pdf.setFontSize(22);
+    pdf.setFont(undefined, 'bold');
+    pdf.text('Parcours de Carrière Personnalisé', margin, yPosition);
+    yPosition += 20;
     
     // Profil actuel
-    pdf.setFontSize(14);
-    pdf.text(`Profil: ${careerData.jobTitle} - ${careerData.experience} ans d'expérience`, 20, 50);
+    pdf.setFont(undefined, 'bold');
+    pdf.setFontSize(16);
+    pdf.text('Profil Actuel', margin, yPosition);
+    yPosition += 10;
     
-    let yPosition = 70;
+    pdf.setFont(undefined, 'normal');
+    pdf.setFontSize(12);
+    pdf.text(`Poste: ${careerData.jobTitle}`, margin, yPosition);
+    yPosition += 8;
+    pdf.text(`Expérience: ${careerData.experience} ans`, margin, yPosition);
+    yPosition += 8;
+    pdf.text(`Taille d'équipe: ${careerData.teamSize}`, margin, yPosition);
+    yPosition += 8;
+    pdf.text(`Portée: ${careerData.scope}`, margin, yPosition);
+    yPosition += 20;
     
     // Étapes de carrière
+    pdf.setFont(undefined, 'bold');
+    pdf.setFontSize(16);
+    pdf.text('Évolutions Possibles', margin, yPosition);
+    yPosition += 15;
+    
     careerSteps.forEach((step, index) => {
-      pdf.setFontSize(12);
-      pdf.text(`${index + 1}. ${step.title}`, 20, yPosition);
-      pdf.setFontSize(10);
-      pdf.text(`Délai: ${step.timeframe} | Augmentation: ${step.salaryIncrease}`, 20, yPosition + 10);
-      pdf.text(step.description, 20, yPosition + 20);
-      yPosition += 40;
+      checkPageBreak(60);
       
-      if (yPosition > 250) {
-        pdf.addPage();
-        yPosition = 30;
+      // Titre de l'étape
+      pdf.setFont(undefined, 'bold');
+      pdf.setFontSize(14);
+      pdf.text(`${index + 1}. ${step.title}`, margin, yPosition);
+      yPosition += 8;
+      
+      // Informations de base
+      pdf.setFont(undefined, 'normal');
+      pdf.setFontSize(10);
+      pdf.text(`Délai: ${step.timeframe} | Augmentation salariale: ${step.salaryIncrease}`, margin, yPosition);
+      yPosition += 8;
+      
+      // Description
+      const descHeight = addWrappedText(step.description, margin, yPosition, maxWidth, 10);
+      yPosition += descHeight + 5;
+      
+      // Détails si disponibles
+      if (step.details) {
+        checkPageBreak(50);
+        
+        // Responsabilités
+        if (step.details.responsibilities && step.details.responsibilities.length > 0) {
+          pdf.setFont(undefined, 'bold');
+          pdf.setFontSize(11);
+          pdf.text('Responsabilités:', margin, yPosition);
+          yPosition += 6;
+          
+          pdf.setFont(undefined, 'normal');
+          pdf.setFontSize(9);
+          step.details.responsibilities.forEach((resp) => {
+            checkPageBreak(8);
+            const respHeight = addWrappedText(`• ${resp}`, margin + 5, yPosition, maxWidth - 5, 9);
+            yPosition += respHeight + 2;
+          });
+          yPosition += 3;
+        }
+        
+        // Compétences
+        if (step.details.skills && step.details.skills.length > 0) {
+          checkPageBreak(20);
+          pdf.setFont(undefined, 'bold');
+          pdf.setFontSize(11);
+          pdf.text('Compétences:', margin, yPosition);
+          yPosition += 6;
+          
+          pdf.setFont(undefined, 'normal');
+          pdf.setFontSize(9);
+          step.details.skills.forEach((skill) => {
+            checkPageBreak(8);
+            const skillHeight = addWrappedText(`• ${skill}`, margin + 5, yPosition, maxWidth - 5, 9);
+            yPosition += skillHeight + 2;
+          });
+          yPosition += 3;
+        }
+        
+        // Opportunités
+        if (step.details.opportunities && step.details.opportunities.length > 0) {
+          checkPageBreak(20);
+          pdf.setFont(undefined, 'bold');
+          pdf.setFontSize(11);
+          pdf.text('Opportunités:', margin, yPosition);
+          yPosition += 6;
+          
+          pdf.setFont(undefined, 'normal');
+          pdf.setFontSize(9);
+          step.details.opportunities.forEach((opp) => {
+            checkPageBreak(8);
+            const oppHeight = addWrappedText(`• ${opp}`, margin + 5, yPosition, maxWidth - 5, 9);
+            yPosition += oppHeight + 2;
+          });
+          yPosition += 3;
+        }
       }
+      
+      yPosition += 10;
+    });
+    
+    // Recommandations
+    checkPageBreak(40);
+    pdf.setFont(undefined, 'bold');
+    pdf.setFontSize(16);
+    pdf.text('Recommandations', margin, yPosition);
+    yPosition += 15;
+    
+    recommendations.forEach((rec) => {
+      checkPageBreak(30);
+      
+      pdf.setFont(undefined, 'bold');
+      pdf.setFontSize(12);
+      pdf.text(rec.category, margin, yPosition);
+      yPosition += 8;
+      
+      pdf.setFont(undefined, 'normal');
+      pdf.setFontSize(9);
+      rec.items.forEach((item) => {
+        checkPageBreak(8);
+        const itemHeight = addWrappedText(`• ${item}`, margin + 5, yPosition, maxWidth - 5, 9);
+        yPosition += itemHeight + 2;
+      });
+      yPosition += 5;
     });
     
     pdf.save('parcours-carriere.pdf');
