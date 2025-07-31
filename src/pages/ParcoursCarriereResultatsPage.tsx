@@ -161,7 +161,7 @@ const ParcoursCarriereResultatsPage = () => {
     const maxWidth = pageWidth - (margin * 2);
     
     // Add ANTHEA header with gradient banner
-    let yPosition = addAntheaHeader(pdf, 'Analyse complète de votre CV');
+    let yPosition = addAntheaHeader(pdf, 'Rapport : Votre Parcours de Carrière Personnalisé');
     
     // Fonction pour ajouter une nouvelle page si nécessaire
     const checkPageBreak = (neededSpace = 20) => {
