@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import jsPDF from 'jspdf';
 import { frenchRegions } from '@/data/regions';
+import { addAntheaHeader } from '@/lib/pdf-utils';
 
 const IntelligenceMarcheePage = () => {
   const [showResults, setShowResults] = useState(false);
@@ -52,21 +53,26 @@ const IntelligenceMarcheePage = () => {
   const downloadPDF = () => {
     const pdf = new jsPDF();
     
-    // Title
-    pdf.setFontSize(20);
-    pdf.text('Rapport Intelligence de Marché', 20, 30);
+    // Add ANTHEA header with gradient banner
+    let yPosition = addAntheaHeader(pdf, 'Analyse complète de votre CV');
     
     // Form data summary
     pdf.setFontSize(12);
-    pdf.text(`Poste: ${formData.jobTitle}`, 20, 50);
-    pdf.text(`Expérience: ${formData.experience} ans`, 20, 60);
-    pdf.text(`Gestion d'équipe: ${formData.teamSize}`, 20, 70);
-    pdf.text(`Portée: ${formData.scope}`, 20, 80);
-    pdf.text(`Industrie: ${formData.industry}`, 20, 90);
-    pdf.text(`Localisation: ${formData.city}, ${formData.country}`, 20, 100);
-    pdf.text(`Mode de travail: ${formData.workMode}`, 20, 110);
+    pdf.text(`Poste: ${formData.jobTitle}`, 20, yPosition);
+    yPosition += 10;
+    pdf.text(`Expérience: ${formData.experience} ans`, 20, yPosition);
+    yPosition += 10;
+    pdf.text(`Gestion d'équipe: ${formData.teamSize}`, 20, yPosition);
+    yPosition += 10;
+    pdf.text(`Portée: ${formData.scope}`, 20, yPosition);
+    yPosition += 10;
+    pdf.text(`Industrie: ${formData.industry}`, 20, yPosition);
+    yPosition += 10;
+    pdf.text(`Localisation: ${formData.city}, ${formData.country}`, 20, yPosition);
+    yPosition += 10;
+    pdf.text(`Mode de travail: ${formData.workMode}`, 20, yPosition);
     
-    let yPosition = 130;
+    yPosition += 20;
     const pageWidth = 170;
     const lineHeight = 5;
     

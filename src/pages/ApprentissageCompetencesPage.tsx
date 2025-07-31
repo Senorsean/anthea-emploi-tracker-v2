@@ -9,6 +9,7 @@ import { ArrowLeft, Target, BookOpen, Award, Clock, TrendingUp, Loader2, Downloa
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import jsPDF from 'jspdf';
+import { addAntheaHeader } from '@/lib/pdf-utils';
 
 interface SkillsReportData {
   skillsGap: string[];
@@ -128,8 +129,10 @@ const ApprentissageCompetencesPage = () => {
       return y + lines.length * (fontSize * 0.5);
     };
 
+    // Add ANTHEA header with gradient banner
+    let yPosition = addAntheaHeader(pdf, 'Analyse complète de votre CV');
+    
     // Title
-    let yPosition = 30;
     yPosition = addText('RAPPORT DE MONTÉE EN COMPÉTENCES', margin, yPosition, 18, true);
     yPosition = addText(`De: ${formData.currentJobTitle} vers: ${formData.targetJobTitle}`, margin, yPosition + 10, 12, true);
 

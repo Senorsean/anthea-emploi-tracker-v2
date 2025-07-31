@@ -10,6 +10,8 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import jsPDF from 'jspdf';
 
+import { addAntheaHeader } from '@/lib/pdf-utils';
+
 const ReferentielsSalairesPage = () => {
   const [showResults, setShowResults] = useState(false);
   const [salaryData, setSalaryData] = useState<any>(null);
@@ -240,8 +242,10 @@ const ReferentielsSalairesPage = () => {
       return y + lines.length * (fontSize * 0.5);
     };
 
+    // Add ANTHEA header with gradient banner
+    let yPosition = addAntheaHeader(pdf, 'Analyse complète de votre CV');
+    
     // Title
-    let yPosition = 30;
     yPosition = addText('RAPPORT SALARIAL', margin, yPosition, 18, true);
     yPosition = addText(`${formData.jobTitle}`, margin, yPosition + 10, 14, true);
     yPosition = addText(`${formData.experience} années d'expérience • ${formData.city}, ${formData.country}`, margin, yPosition + 5, 10);

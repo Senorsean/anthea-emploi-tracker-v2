@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import { supabase } from '@/integrations/supabase/client';
+import { addAntheaHeader } from '@/lib/pdf-utils';
 
 const ParcoursCarriereResultatsPage = () => {
   const navigate = useNavigate();
@@ -159,7 +160,8 @@ const ParcoursCarriereResultatsPage = () => {
     const margin = 20;
     const maxWidth = pageWidth - (margin * 2);
     
-    let yPosition = margin;
+    // Add ANTHEA header with gradient banner
+    let yPosition = addAntheaHeader(pdf, 'Analyse complète de votre CV');
     
     // Fonction pour ajouter une nouvelle page si nécessaire
     const checkPageBreak = (neededSpace = 20) => {
