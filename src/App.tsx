@@ -19,6 +19,7 @@ import ReferentielsSalairesPage from "./pages/ReferentielsSalairesPage";
 import ParcoursCarrierePage from "./pages/ParcoursCarrierePage";
 import ParcoursCarriereResultatsPage from "./pages/ParcoursCarriereResultatsPage";
 import TauxReponsePage from "./pages/TauxReponsePage";
+import ApprentissageCompetencesPage from "./pages/ApprentissageCompetencesPage";
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 import { JobsProvider } from "@/hooks/useJobs";
@@ -143,6 +144,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <ParcoursCarriereResultatsPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/apprentissage-competences"
+            element={
+              <RequireAuth>
+                <ApprentissageCompetencesPage />
               </RequireAuth>
             }
           />
