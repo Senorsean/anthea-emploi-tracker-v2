@@ -214,6 +214,7 @@ const ParcoursCarrierePage = () => {
                     onChange={(e) => handleInputChange('experience', e.target.value)}
                     placeholder="p. ex. 5"
                     type="number"
+                    min="0"
                     className="text-base"
                   />
                 </div>
