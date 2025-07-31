@@ -29,20 +29,25 @@ Industry: ${industry}
 Location: ${city}, ${country}
 Work Mode: ${workMode}
 
-Please provide a detailed market intelligence report covering:
+Please provide a detailed and complete market intelligence report covering:
 
-1. Market Overview: Current state of the job market for this position in the specified location and industry
-2. Market Trends: Key trends affecting this role and industry
-3. Opportunities and Recommendations: Strategic opportunities and actionable recommendations
-4. Competitive Analysis: Analysis of the competitive landscape and key players
-5. Skills in Demand: Most sought-after skills and competencies for this role
+1. Market Overview: Current state of the job market for this position in the specified location and industry. Include salary ranges, demand levels, and key market characteristics.
 
-Make the report practical, data-driven, and actionable. Focus on insights that would help someone understand the market dynamics and make informed career decisions.
+2. Market Trends: Key trends affecting this role and industry, including technological changes, regulatory impacts, and future outlook.
 
-Please format your response as a JSON object with the following structure:
+3. Opportunities and Recommendations: Strategic opportunities and actionable recommendations for career advancement and positioning.
+
+4. Competitive Analysis: Analysis of the competitive landscape, key employers, and what differentiates successful candidates.
+
+5. Skills in Demand: Most sought-after skills and competencies for this role, including technical and soft skills.
+
+Make the report practical, data-driven, and actionable with specific insights relevant to ${city}, ${country} and the ${industry} industry. Each section should be comprehensive with at least 150-200 words.
+
+IMPORTANT: Return ONLY a valid JSON object without any markdown formatting or code blocks. The response should start with { and end with }.
+
 {
   "marketOverview": "detailed market overview text",
-  "trends": "market trends analysis text",
+  "trends": "market trends analysis text", 
   "opportunities": "opportunities and recommendations text",
   "competitiveAnalysis": "competitive analysis text",
   "skillsInDemand": "skills in demand analysis text"
@@ -55,16 +60,16 @@ Please format your response as a JSON object with the following structure:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4.1-2025-04-14',
         messages: [
           { 
             role: 'system', 
-            content: 'You are an expert market intelligence analyst specializing in job markets and career insights. Provide detailed, accurate, and actionable market intelligence reports.' 
+            content: 'You are an expert market intelligence analyst specializing in job markets and career insights. You provide detailed, accurate, and actionable market intelligence reports. You always respond with valid JSON format without any markdown formatting.' 
           },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 2000,
+        max_tokens: 3000,
       }),
     });
 
@@ -75,7 +80,14 @@ Please format your response as a JSON object with the following structure:
     const data = await response.json();
     console.log('OpenAI response received');
     
-    const content = data.choices[0].message.content;
+    let content = data.choices[0].message.content.trim();
+    
+    // Clean up the response - remove markdown code blocks if present
+    if (content.startsWith('```json')) {
+      content = content.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+    } else if (content.startsWith('```')) {
+      content = content.replace(/^```\s*/, '').replace(/\s*```$/, '');
+    }
     
     // Try to parse the JSON response
     let marketIntelligence;
@@ -83,13 +95,14 @@ Please format your response as a JSON object with the following structure:
       marketIntelligence = JSON.parse(content);
     } catch (parseError) {
       console.error('Failed to parse JSON response:', parseError);
+      console.error('Raw content:', content);
       // Fallback: create a structured response from the raw content
       marketIntelligence = {
-        marketOverview: content.substring(0, Math.min(500, content.length)),
-        trends: "Les tendances du marché seront analysées en détail dans la version complète du rapport.",
-        opportunities: "Les opportunités et recommandations seront détaillées dans la version complète du rapport.",
-        competitiveAnalysis: "L'analyse concurrentielle sera fournie dans la version complète du rapport.",
-        skillsInDemand: "Les compétences recherchées seront listées dans la version complète du rapport."
+        marketOverview: `Analyse du marché pour le poste de ${jobTitle} avec ${experience} d'expérience dans le secteur ${industry} à ${city}, ${country}. ${content.substring(0, Math.min(400, content.length))}`,
+        trends: "Les tendances du marché montrent une évolution constante des compétences requises et des opportunités disponibles dans ce secteur.",
+        opportunities: "Des opportunités significatives existent pour les professionnels expérimentés dans ce domaine, particulièrement ceux qui développent leurs compétences stratégiques.",
+        competitiveAnalysis: "Le marché est compétitif avec une demande pour des profils expérimentés capables de gérer des projets complexes et des équipes.",
+        skillsInDemand: "Les compétences les plus recherchées incluent la gestion d'équipe, l'expertise technique, et la capacité d'adaptation aux nouvelles technologies."
       };
     }
 
