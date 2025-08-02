@@ -7,7 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle, Clock, Star, ArrowRight, Download } from "lucide-react";
+import { CheckCircle, Clock, Star, ArrowRight, Download, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
 
 const interviewQuestions = [
@@ -74,6 +78,14 @@ export default function PreparationEntretienPage() {
   const [responses, setResponses] = useState<Record<number, string>>({});
   const [completedQuestions, setCompletedQuestions] = useState<Set<number>>(new Set());
   const [showResults, setShowResults] = useState(false);
+  const [usePersonalizedQuestions, setUsePersonalizedQuestions] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [personalizedQuestions, setPersonalizedQuestions] = useState<typeof interviewQuestions>([]);
+  const [customizationData, setCustomizationData] = useState({
+    jobOffer: '',
+    companyInfo: '',
+    cvInfo: ''
+  });
   const [notes, setNotes] = useState<{
     dailyActions: string;
     postInterview: string;
@@ -86,18 +98,66 @@ export default function PreparationEntretienPage() {
     jobIdeas: ''
   });
 
-  const currentQuestion = interviewQuestions[currentQuestionIndex];
-  const progress = (completedQuestions.size / interviewQuestions.length) * 100;
+  const activeQuestions = usePersonalizedQuestions ? personalizedQuestions : interviewQuestions;
+  const currentQuestion = activeQuestions[currentQuestionIndex];
+  const progress = (completedQuestions.size / activeQuestions.length) * 100;
 
   const handleResponseChange = (questionId: number, response: string) => {
     setResponses(prev => ({ ...prev, [questionId]: response }));
+  };
+
+  const generatePersonalizedQuestions = async () => {
+    if (!customizationData.jobOffer.trim() && !customizationData.companyInfo.trim()) {
+      toast({
+        title: "Informations manquantes",
+        description: "Veuillez saisir au moins l'offre d'emploi ou les informations sur l'entreprise.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-interview-questions', {
+        body: {
+          jobOffer: customizationData.jobOffer,
+          companyInfo: customizationData.companyInfo,
+          cvInfo: customizationData.cvInfo
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.questions && Array.isArray(data.questions)) {
+        setPersonalizedQuestions(data.questions);
+        setUsePersonalizedQuestions(true);
+        setCurrentQuestionIndex(0);
+        setResponses({});
+        setCompletedQuestions(new Set());
+        toast({
+          title: "Questions générées avec succès !",
+          description: `${data.questions.length} questions personnalisées ont été créées pour votre entretien.`
+        });
+      } else {
+        throw new Error("Format de réponse invalide");
+      }
+    } catch (error: any) {
+      console.error('Erreur lors de la génération des questions:', error);
+      toast({
+        title: "Erreur de génération",
+        description: "Impossible de générer les questions personnalisées. Veuillez réessayer.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const markQuestionComplete = () => {
     const response = responses[currentQuestion.id];
     if (response && response.trim().length > 50) {
       setCompletedQuestions(prev => new Set([...prev, currentQuestion.id]));
-      if (currentQuestionIndex < interviewQuestions.length - 1) {
+      if (currentQuestionIndex < activeQuestions.length - 1) {
         setCurrentQuestionIndex(prev => prev + 1);
       } else {
         setShowResults(true);
@@ -106,7 +166,7 @@ export default function PreparationEntretienPage() {
   };
 
   const getReadinessScore = () => {
-    const totalQuestions = interviewQuestions.length;
+    const totalQuestions = activeQuestions.length;
     const completedCount = completedQuestions.size;
     const completionRate = (completedCount / totalQuestions) * 100;
     
@@ -159,7 +219,7 @@ export default function PreparationEntretienPage() {
   const analyzeResponses = () => {
     const advice = [];
     
-    interviewQuestions.forEach((question) => {
+    activeQuestions.forEach((question) => {
       const response = responses[question.id];
       if (!response || response.trim().length < 50) {
         advice.push({
@@ -427,7 +487,7 @@ export default function PreparationEntretienPage() {
       // Détails de la préparation
       doc.setFontSize(10);
       doc.setTextColor(71, 85, 105);
-      doc.text(`Questions completees: ${completedQuestions.size}/${interviewQuestions.length}`, margin + 80, currentY + 35);
+      doc.text(`Questions completees: ${completedQuestions.size}/${activeQuestions.length}`, margin + 80, currentY + 35);
       doc.text(`Score qualite: ${readiness.score}/100`, margin + 80, currentY + 45);
       
       currentY += 85;
@@ -446,7 +506,7 @@ export default function PreparationEntretienPage() {
       
       currentY += 35;
       
-      interviewQuestions.forEach((question, index) => {
+      activeQuestions.forEach((question, index) => {
         const response = responses[question.id] || "";
         
         // Vérifier si on a besoin d'une nouvelle page
@@ -905,6 +965,91 @@ export default function PreparationEntretienPage() {
           </div>
         </div>
 
+        {/* Section de personnalisation */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>🎯 Personnaliser vos questions d'entretien</CardTitle>
+            <p className="text-sm text-gray-600">
+              Saisissez l'offre d'emploi et les informations sur l'entreprise pour générer des questions personnalisées avec l'IA
+            </p>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="jobOffer">Offre d'emploi</Label>
+                <Textarea
+                  id="jobOffer"
+                  placeholder="Collez ici l'offre d'emploi complète..."
+                  value={customizationData.jobOffer}
+                  onChange={(e) => setCustomizationData(prev => ({...prev, jobOffer: e.target.value}))}
+                  className="min-h-[100px]"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="companyInfo">Présentation de l'entreprise</Label>
+                <Textarea
+                  id="companyInfo"
+                  placeholder="Informations sur l'entreprise, sa culture, ses valeurs..."
+                  value={customizationData.companyInfo}
+                  onChange={(e) => setCustomizationData(prev => ({...prev, companyInfo: e.target.value}))}
+                  className="min-h-[100px]"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="cvInfo">Informations de votre CV (optionnel)</Label>
+                <Textarea
+                  id="cvInfo"
+                  placeholder="Résumé de votre parcours, compétences principales..."
+                  value={customizationData.cvInfo}
+                  onChange={(e) => setCustomizationData(prev => ({...prev, cvInfo: e.target.value}))}
+                  className="min-h-[80px]"
+                />
+              </div>
+              
+              <div className="flex gap-3">
+                <Button 
+                  onClick={generatePersonalizedQuestions} 
+                  disabled={isGenerating}
+                  className="flex-1"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Génération en cours...
+                    </>
+                  ) : (
+                    'Générer des questions personnalisées'
+                  )}
+                </Button>
+                
+                {usePersonalizedQuestions && (
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setUsePersonalizedQuestions(false);
+                      setCurrentQuestionIndex(0);
+                      setResponses({});
+                      setCompletedQuestions(new Set());
+                    }}
+                  >
+                    Questions standards
+                  </Button>
+                )}
+              </div>
+              
+              {usePersonalizedQuestions && (
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <p className="text-green-800 text-sm font-medium">
+                    ✅ Questions personnalisées générées ! Vous utilisez maintenant {personalizedQuestions.length} questions adaptées à votre poste.
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="grid lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -959,7 +1104,7 @@ export default function PreparationEntretienPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => setCurrentQuestionIndex(Math.min(interviewQuestions.length - 1, currentQuestionIndex + 1))}
-                    disabled={currentQuestionIndex === interviewQuestions.length - 1}
+                    disabled={currentQuestionIndex === activeQuestions.length - 1}
                   >
                     Suivant
                   </Button>
