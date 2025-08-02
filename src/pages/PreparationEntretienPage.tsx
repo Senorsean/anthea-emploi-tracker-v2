@@ -216,6 +216,44 @@ export default function PreparationEntretienPage() {
     };
   };
 
+  const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const analyzeResponsesWithAI = async () => {
+    if (!usePersonalizedQuestions || !personalizedQuestions.length) {
+      return analyzeResponses();
+    }
+
+    setIsAnalyzing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('analyze-interview-responses', {
+        body: {
+          questions: personalizedQuestions,
+          responses,
+          jobOffer: customizationData.jobOffer,
+          companyInfo: customizationData.companyInfo,
+          cvInfo: customizationData.cvInfo
+        }
+      });
+
+      if (error) throw error;
+      
+      setAiAnalysis(data);
+      return data.questionAnalyses.map((qa: any) => ({
+        category: personalizedQuestions.find((q: any) => q.id === qa.questionId)?.category || 'Général',
+        question: personalizedQuestions.find((q: any) => q.id === qa.questionId)?.question || '',
+        issue: qa.strengths.join(', '),
+        recommendation: qa.specificAdvice,
+        severity: qa.score >= 80 ? 'low' : qa.score >= 60 ? 'medium' : 'high'
+      }));
+    } catch (error) {
+      console.error('Erreur lors de l\'analyse IA:', error);
+      return analyzeResponses();
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   const analyzeResponses = () => {
     const advice = [];
     
@@ -873,14 +911,74 @@ export default function PreparationEntretienPage() {
                 <CardTitle>🎯 Conseils personnalisés</CardTitle>
               </CardHeader>
               <CardContent>
+                {isAnalyzing && (
+                  <div className="text-center p-4">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                    <p className="text-sm text-gray-600">Analyse IA en cours...</p>
+                  </div>
+                )}
+                
+                {!isAnalyzing && aiAnalysis && usePersonalizedQuestions && (
+                  <div className="space-y-4 mb-6">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <h4 className="font-medium text-blue-800 mb-2">🤖 Analyse IA personnalisée</h4>
+                      <p className="text-sm text-blue-600 mb-3">{aiAnalysis.globalFeedback}</p>
+                      <p className="text-lg font-bold text-blue-800">Score global : {aiAnalysis.globalScore}/100</p>
+                    </div>
+                    
+                    {aiAnalysis.interviewTips && aiAnalysis.interviewTips.length > 0 && (
+                      <div className="bg-green-50 p-4 rounded-lg">
+                        <h4 className="font-medium text-green-800 mb-2">💡 Conseils pour l'entretien</h4>
+                        <ul className="text-sm text-green-600 space-y-1">
+                          {aiAnalysis.interviewTips.map((tip: string, index: number) => (
+                            <li key={index}>• {tip}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {aiAnalysis.companyFocus && aiAnalysis.companyFocus.length > 0 && (
+                      <div className="bg-purple-50 p-4 rounded-lg">
+                        <h4 className="font-medium text-purple-800 mb-2">🏢 Points clés sur l'entreprise</h4>
+                        <ul className="text-sm text-purple-600 space-y-1">
+                          {aiAnalysis.companyFocus.map((point: string, index: number) => (
+                            <li key={index}>• {point}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {aiAnalysis.questionsToAsk && aiAnalysis.questionsToAsk.length > 0 && (
+                      <div className="bg-orange-50 p-4 rounded-lg">
+                        <h4 className="font-medium text-orange-800 mb-2">❓ Questions à poser au recruteur</h4>
+                        <ul className="text-sm text-orange-600 space-y-1">
+                          {aiAnalysis.questionsToAsk.map((question: string, index: number) => (
+                            <li key={index}>• {question}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
                 <div className="space-y-4">
-                  {analyzeResponses().length === 0 ? (
+                  {(usePersonalizedQuestions ? (aiAnalysis?.questionAnalyses || []).map((qa: any) => ({
+                    category: personalizedQuestions.find((q: any) => q.id === qa.questionId)?.category || 'Général',
+                    issue: qa.strengths.join(', '),
+                    recommendation: qa.specificAdvice,
+                    severity: qa.score >= 80 ? 'low' : qa.score >= 60 ? 'medium' : 'high'
+                  })) : analyzeResponses()).length === 0 ? (
                     <div className="bg-green-50 p-4 rounded-lg">
                       <p className="text-green-800 font-medium">🎉 Excellente préparation !</p>
                       <p className="text-green-600 text-sm mt-1">Vos réponses sont bien structurées et complètes.</p>
                     </div>
                   ) : (
-                    analyzeResponses().slice(0, 5).map((advice, index) => {
+                    (usePersonalizedQuestions ? (aiAnalysis?.questionAnalyses || []).map((qa: any) => ({
+                      category: personalizedQuestions.find((q: any) => q.id === qa.questionId)?.category || 'Général',
+                      issue: qa.strengths.join(', '),
+                      recommendation: qa.specificAdvice,
+                      severity: qa.score >= 80 ? 'low' : qa.score >= 60 ? 'medium' : 'high'
+                    })) : analyzeResponses()).slice(0, 5).map((advice: any, index: number) => {
                       let bgColor, borderColor, textColor;
                       if (advice.severity === "high") {
                         bgColor = "bg-red-50";
@@ -1156,8 +1254,12 @@ export default function PreparationEntretienPage() {
               {completedQuestions.size > 0 && (
                 <div className="mt-6 pt-4 border-t">
                   <Button 
-                    onClick={() => setShowResults(true)}
+                    onClick={async () => {
+                      await analyzeResponsesWithAI();
+                      setShowResults(true);
+                    }}
                     className="w-full"
+                    disabled={isAnalyzing}
                   >
                     Voir mes résultats
                     <ArrowRight className="ml-2 h-4 w-4" />
