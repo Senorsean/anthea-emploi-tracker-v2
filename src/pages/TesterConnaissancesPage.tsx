@@ -4,10 +4,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, CheckCircle, XCircle, Trophy, Brain, Clock, Loader2, Play } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { ArrowLeft, CheckCircle, XCircle, Trophy, Brain, Clock, Loader2, Play, FileText, Target, BookOpen, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+
+interface QuizReport {
+  evaluationGlobale: string;
+  pointsForts: string[];
+  axesAmelioration: string[];
+  planAction: string[];
+  ressources: string[];
+  questionsTypes: string[];
+  profession: string;
+  score: number;
+  totalQuestions: number;
+  percentage: string;
+}
 
 interface Question {
   id: number;
@@ -29,6 +43,9 @@ const TesterConnaissancesPage = () => {
   const [userAnswers, setUserAnswers] = useState<(number | null)[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
+  const [quizReport, setQuizReport] = useState<QuizReport | null>(null);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+  const [showReport, setShowReport] = useState(false);
 
   const generateQuiz = async () => {
     if (!profession.trim()) {
@@ -99,6 +116,45 @@ const TesterConnaissancesPage = () => {
     }
   };
 
+  const generateReport = async () => {
+    setIsGeneratingReport(true);
+    try {
+      // Préparer les questions incorrectes
+      const incorrectQuestions = questions.filter((question, index) => {
+        const userAnswer = userAnswers[index];
+        return userAnswer !== null && userAnswer !== question.correctAnswer;
+      }).map(q => ({
+        question: q.question,
+        category: q.category,
+        correctAnswer: q.options[q.correctAnswer],
+        userAnswer: q.options[userAnswers[questions.indexOf(q)] || 0]
+      }));
+
+      const { data, error } = await supabase.functions.invoke('generate-quiz-report', {
+        body: { 
+          profession: profession,
+          score: score,
+          totalQuestions: questions.length,
+          incorrectQuestions: incorrectQuestions
+        }
+      });
+
+      if (error) {
+        console.error('Erreur lors de la génération du rapport:', error);
+        throw error;
+      }
+
+      setQuizReport(data);
+      setShowReport(true);
+      toast.success('Compte-rendu personnalisé généré !');
+    } catch (error: any) {
+      console.error('Erreur:', error);
+      toast.error(error.message || 'Erreur lors de la génération du compte-rendu');
+    } finally {
+      setIsGeneratingReport(false);
+    }
+  };
+
   const restartQuiz = () => {
     setQuizStarted(false);
     setProfession('');
@@ -109,6 +165,8 @@ const TesterConnaissancesPage = () => {
     setScore(0);
     setQuizCompleted(false);
     setUserAnswers([]);
+    setQuizReport(null);
+    setShowReport(false);
   };
 
   const getScoreMessage = () => {
@@ -194,6 +252,165 @@ const TesterConnaissancesPage = () => {
     );
   }
 
+  // Page de compte-rendu
+  if (showReport && quizReport) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+        <div className="max-w-4xl mx-auto">
+          <Link to="/" className="inline-flex items-center text-[#a4007c] hover:underline mb-6">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Retour au tableau de bord
+          </Link>
+
+          <div className="space-y-6">
+            {/* En-tête du rapport */}
+            <Card>
+              <CardHeader className="text-center">
+                <div className="mx-auto mb-4">
+                  <FileText className="h-16 w-16 text-[#a4007c]" />
+                </div>
+                <CardTitle className="text-2xl">Compte-rendu personnalisé</CardTitle>
+                <p className="text-gray-600">
+                  Métier : <span className="font-semibold">{quizReport.profession}</span> • 
+                  Score : <span className={`font-semibold ${getScoreColor()}`}>{quizReport.score}/{quizReport.totalQuestions} ({quizReport.percentage}%)</span>
+                </p>
+              </CardHeader>
+            </Card>
+
+            {/* Évaluation globale */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Target className="mr-2 h-5 w-5 text-[#a4007c]" />
+                  Évaluation globale
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 leading-relaxed">{quizReport.evaluationGlobale}</p>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Points forts */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-green-700">
+                    <CheckCircle className="mr-2 h-5 w-5" />
+                    Points forts
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {quizReport.pointsForts.map((point, index) => (
+                      <li key={index} className="flex items-start">
+                        <div className="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <span className="text-gray-700">{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+
+              {/* Axes d'amélioration */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-orange-700">
+                    <XCircle className="mr-2 h-5 w-5" />
+                    Axes d&apos;amélioration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {quizReport.axesAmelioration.map((axe, index) => (
+                      <li key={index} className="flex items-start">
+                        <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                        <span className="text-gray-700">{axe}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Plan d'action */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Trophy className="mr-2 h-5 w-5 text-[#a4007c]" />
+                  Plan d&apos;action pour l&apos;entretien
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {quizReport.planAction.map((action, index) => (
+                    <div key={index} className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="flex items-start">
+                        <span className="bg-[#a4007c] text-white text-sm font-semibold rounded-full w-6 h-6 flex items-center justify-center mr-3 mt-0.5">
+                          {index + 1}
+                        </span>
+                        <p className="text-gray-700">{action}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Ressources recommandées */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <BookOpen className="mr-2 h-5 w-5 text-[#a4007c]" />
+                  Ressources recommandées
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-2">
+                  {quizReport.ressources.map((ressource, index) => (
+                    <li key={index} className="flex items-start">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></div>
+                      <span className="text-gray-700">{ressource}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+
+            {/* Questions types d'entretien */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <MessageSquare className="mr-2 h-5 w-5 text-[#a4007c]" />
+                  Questions d&apos;entretien probables
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {quizReport.questionsTypes.map((question, index) => (
+                    <div key={index} className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <p className="font-medium text-gray-800 mb-2">Question {index + 1} :</p>
+                      <p className="text-gray-700 italic">&quot;{question}&quot;</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Actions */}
+            <div className="flex justify-center space-x-4 pb-8">
+              <Button onClick={() => setShowReport(false)} variant="outline">
+                Retour aux résultats
+              </Button>
+              <Button onClick={restartQuiz} className="bg-[#a4007c] hover:bg-[#8a0066]">
+                Nouveau test
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Page de résultats
   if (quizCompleted) {
     return (
@@ -238,20 +455,49 @@ const TesterConnaissancesPage = () => {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <Button onClick={restartQuiz} className="bg-[#a4007c] hover:bg-[#8a0066] mr-3">
-                  Nouveau test
-                </Button>
-                <Button variant="outline" onClick={() => {
-                  setQuizCompleted(false);
-                  setCurrentQuestion(0);
-                  setSelectedAnswer(null);
-                  setShowAnswer(false);
-                  setScore(0);
-                  setUserAnswers(new Array(questions.length).fill(null));
-                }}>
-                  Refaire ce test
-                </Button>
+              <Separator />
+
+              {/* Bouton pour générer le compte-rendu */}
+              <div className="space-y-4">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <h4 className="font-semibold text-blue-900 mb-2">🎯 Préparez votre entretien !</h4>
+                  <p className="text-blue-800 text-sm mb-3">
+                    Obtenez un compte-rendu personnalisé avec vos points forts, axes d&apos;amélioration et un plan d&apos;action pour réussir votre entretien.
+                  </p>
+                  <Button
+                    onClick={generateReport}
+                    disabled={isGeneratingReport}
+                    className="bg-blue-600 hover:bg-blue-700 w-full"
+                  >
+                    {isGeneratingReport ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Génération du compte-rendu...
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="mr-2 h-4 w-4" />
+                        Générer mon compte-rendu personnalisé
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                <div className="space-y-3">
+                  <Button onClick={restartQuiz} className="bg-[#a4007c] hover:bg-[#8a0066] mr-3">
+                    Nouveau test
+                  </Button>
+                  <Button variant="outline" onClick={() => {
+                    setQuizCompleted(false);
+                    setCurrentQuestion(0);
+                    setSelectedAnswer(null);
+                    setShowAnswer(false);
+                    setScore(0);
+                    setUserAnswers(new Array(questions.length).fill(null));
+                  }}>
+                    Refaire ce test
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
