@@ -21,6 +21,7 @@ import ParcoursCarriereResultatsPage from "./pages/ParcoursCarriereResultatsPage
 import TauxReponsePage from "./pages/TauxReponsePage";
 import ApprentissageCompetencesPage from "./pages/ApprentissageCompetencesPage";
 import IntelligenceMarcheePage from "./pages/IntelligenceMarcheePage";
+import TesterConnaissancesPage from "./pages/TesterConnaissancesPage";
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 import { JobsProvider } from "@/hooks/useJobs";
@@ -161,6 +162,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <IntelligenceMarcheePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/tester-connaissances"
+            element={
+              <RequireAuth>
+                <TesterConnaissancesPage />
               </RequireAuth>
             }
           />

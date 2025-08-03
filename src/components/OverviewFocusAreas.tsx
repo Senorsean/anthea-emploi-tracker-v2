@@ -54,6 +54,13 @@ export const OverviewFocusAreas = () => {
       link: '/progression-carriere',
       external: false,
     },
+    {
+      title: 'Tester vos connaissances sur votre métier',
+      description:
+        'Évaluez vos compétences professionnelles avec un quiz adapté',
+      link: '/tester-connaissances',
+      external: false,
+    },
   ];
 
   return (
