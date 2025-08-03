@@ -2,8 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, CheckCircle, XCircle, Trophy, Brain, Clock } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, CheckCircle, XCircle, Trophy, Brain, Clock, Loader2, Play } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface Question {
   id: number;
@@ -15,85 +19,58 @@ interface Question {
 }
 
 const TesterConnaissancesPage = () => {
+  const [profession, setProfession] = useState('');
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showAnswer, setShowAnswer] = useState(false);
   const [score, setScore] = useState(0);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [userAnswers, setUserAnswers] = useState<(number | null)[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [quizStarted, setQuizStarted] = useState(false);
 
-  // Questions d'exemple (à personnaliser selon le métier)
-  const questions: Question[] = [
-    {
-      id: 1,
-      question: "Quelle est la meilleure pratique pour gérer un projet avec des délais serrés ?",
-      options: [
-        "Travailler plus d'heures sans pause",
-        "Prioriser les tâches critiques et déléguer",
-        "Reporter toutes les réunions",
-        "Ignorer la qualité pour gagner du temps"
-      ],
-      correctAnswer: 1,
-      explanation: "La priorisation et la délégation permettent d'optimiser l'efficacité tout en maintenant la qualité.",
-      category: "Gestion de projet"
-    },
-    {
-      id: 2,
-      question: "Comment réagir face à un conflit avec un collègue ?",
-      options: [
-        "Éviter complètement la personne",
-        "Discuter ouvertement et chercher une solution",
-        "Rapporter immédiatement à la hiérarchie",
-        "Laisser le temps résoudre le problème"
-      ],
-      correctAnswer: 1,
-      explanation: "La communication directe et constructive est la meilleure approche pour résoudre les conflits.",
-      category: "Relations interpersonnelles"
-    },
-    {
-      id: 3,
-      question: "Quelle est l'importance de la formation continue dans votre carrière ?",
-      options: [
-        "Elle n'est pas nécessaire si on maîtrise déjà son poste",
-        "Elle est essentielle pour rester compétitif",
-        "Elle ne sert qu'à obtenir des promotions",
-        "Elle est uniquement utile en début de carrière"
-      ],
-      correctAnswer: 1,
-      explanation: "La formation continue permet de s'adapter aux évolutions du marché et de développer de nouvelles compétences.",
-      category: "Développement professionnel"
-    },
-    {
-      id: 4,
-      question: "Comment gérer efficacement ses priorités au quotidien ?",
-      options: [
-        "Traiter les tâches dans l'ordre d'arrivée",
-        "Utiliser la matrice urgence/importance",
-        "Se concentrer uniquement sur les tâches urgentes",
-        "Faire d'abord les tâches les plus faciles"
-      ],
-      correctAnswer: 1,
-      explanation: "La matrice d'Eisenhower (urgence/importance) est un outil reconnu pour une gestion efficace des priorités.",
-      category: "Organisation"
-    },
-    {
-      id: 5,
-      question: "Quelle attitude adopter lors d'un entretien de feedback ?",
-      options: [
-        "Justifier systématiquement ses actions",
-        "Écouter activement et poser des questions",
-        "Rester silencieux et acquiescer",
-        "Critiquer en retour son manager"
-      ],
-      correctAnswer: 1,
-      explanation: "L'écoute active et les questions constructives montrent votre engagement dans votre développement.",
-      category: "Communication"
+  const generateQuiz = async () => {
+    if (!profession.trim()) {
+      toast.error('Veuillez saisir votre métier');
+      return;
     }
-  ];
 
-  useEffect(() => {
-    setUserAnswers(new Array(questions.length).fill(null));
-  }, []);
+    setIsGenerating(true);
+    try {
+      console.log('Génération du quiz pour:', profession);
+      
+      const { data, error } = await supabase.functions.invoke('generate-profession-quiz', {
+        body: { profession: profession.trim() }
+      });
+
+      if (error) {
+        console.error('Erreur lors de la génération:', error);
+        throw error;
+      }
+
+      if (!data.questions || data.questions.length === 0) {
+        throw new Error('Aucune question générée');
+      }
+
+      console.log('Quiz généré avec succès:', data.questions.length, 'questions');
+      setQuestions(data.questions);
+      setUserAnswers(new Array(data.questions.length).fill(null));
+      setQuizStarted(true);
+      setCurrentQuestion(0);
+      setSelectedAnswer(null);
+      setShowAnswer(false);
+      setScore(0);
+      setQuizCompleted(false);
+      
+      toast.success(`Quiz personnalisé généré avec ${data.questions.length} questions !`);
+    } catch (error: any) {
+      console.error('Erreur:', error);
+      toast.error(error.message || 'Erreur lors de la génération du quiz');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const handleAnswerSelect = (answerIndex: number) => {
     setSelectedAnswer(answerIndex);
@@ -123,22 +100,101 @@ const TesterConnaissancesPage = () => {
   };
 
   const restartQuiz = () => {
+    setQuizStarted(false);
+    setProfession('');
+    setQuestions([]);
     setCurrentQuestion(0);
     setSelectedAnswer(null);
     setShowAnswer(false);
     setScore(0);
     setQuizCompleted(false);
-    setUserAnswers(new Array(questions.length).fill(null));
+    setUserAnswers([]);
   };
 
   const getScoreMessage = () => {
     const percentage = (score / questions.length) * 100;
-    if (percentage >= 80) return "Excellent ! Vos connaissances sont solides.";
-    if (percentage >= 60) return "Bien ! Quelques points à améliorer.";
-    if (percentage >= 40) return "Moyen. Il serait bénéfique d'approfondir certains aspects.";
-    return "À améliorer. Considérez une formation complémentaire.";
+    if (percentage >= 90) return "Exceptionnel ! Vous maîtrisez parfaitement votre métier.";
+    if (percentage >= 80) return "Excellent ! Vos connaissances sont très solides.";
+    if (percentage >= 70) return "Bien ! Vous avez de bonnes bases.";
+    if (percentage >= 60) return "Correct. Quelques points à approfondir.";
+    if (percentage >= 50) return "Moyen. Il serait bénéfique de renforcer vos connaissances.";
+    return "À améliorer. Considérez une formation complémentaire dans votre domaine.";
   };
 
+  const getScoreColor = () => {
+    const percentage = (score / questions.length) * 100;
+    if (percentage >= 80) return "text-green-600";
+    if (percentage >= 60) return "text-yellow-600";
+    return "text-red-600";
+  };
+
+  // Page d'accueil - saisie du métier
+  if (!quizStarted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
+        <div className="max-w-4xl mx-auto">
+          <Link to="/" className="inline-flex items-center text-[#a4007c] hover:underline mb-6">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Retour au tableau de bord
+          </Link>
+
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4">
+                <Brain className="h-16 w-16 text-[#a4007c]" />
+              </div>
+              <CardTitle className="text-2xl">Test de connaissances sur votre métier</CardTitle>
+              <p className="text-gray-600 mt-2">
+                Évaluez vos compétences professionnelles avec un quiz personnalisé de 20 questions généré par IA
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="profession">Votre métier / poste</Label>
+                <Input
+                  id="profession"
+                  value={profession}
+                  onChange={(e) => setProfession(e.target.value)}
+                  placeholder="Ex: Développeur web, Comptable, Marketing digital..."
+                  className="text-lg"
+                />
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h4 className="font-semibold text-blue-900 mb-2">Ce qui vous attend :</h4>
+                <ul className="text-blue-800 space-y-1 text-sm">
+                  <li>• 20 questions personnalisées selon votre métier</li>
+                  <li>• Progression du général au spécifique</li>
+                  <li>• Explications détaillées pour chaque réponse</li>
+                  <li>• Score final avec recommandations</li>
+                </ul>
+              </div>
+
+              <Button 
+                onClick={generateQuiz}
+                disabled={!profession.trim() || isGenerating}
+                className="w-full bg-[#a4007c] hover:bg-[#8a0066] text-lg py-6"
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    Génération du quiz personnalisé...
+                  </>
+                ) : (
+                  <>
+                    <Play className="mr-2 h-5 w-5" />
+                    Commencer le test
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Page de résultats
   if (quizCompleted) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
@@ -154,11 +210,15 @@ const TesterConnaissancesPage = () => {
                 <Trophy className="h-16 w-16 text-yellow-500" />
               </div>
               <CardTitle className="text-2xl">Quiz terminé !</CardTitle>
+              <p className="text-gray-600">Métier testé : <span className="font-semibold">{profession}</span></p>
             </CardHeader>
             <CardContent className="space-y-6">
               <div>
-                <div className="text-4xl font-bold text-[#a4007c] mb-2">
+                <div className={`text-4xl font-bold ${getScoreColor()} mb-2`}>
                   {score}/{questions.length}
+                </div>
+                <div className={`text-lg ${getScoreColor()} mb-2`}>
+                  {((score / questions.length) * 100).toFixed(0)}%
                 </div>
                 <p className="text-gray-600">{getScoreMessage()}</p>
               </div>
@@ -178,9 +238,21 @@ const TesterConnaissancesPage = () => {
                 </div>
               </div>
 
-              <Button onClick={restartQuiz} className="bg-[#a4007c] hover:bg-[#8a0066]">
-                Recommencer le quiz
-              </Button>
+              <div className="space-y-3">
+                <Button onClick={restartQuiz} className="bg-[#a4007c] hover:bg-[#8a0066] mr-3">
+                  Nouveau test
+                </Button>
+                <Button variant="outline" onClick={() => {
+                  setQuizCompleted(false);
+                  setCurrentQuestion(0);
+                  setSelectedAnswer(null);
+                  setShowAnswer(false);
+                  setScore(0);
+                  setUserAnswers(new Array(questions.length).fill(null));
+                }}>
+                  Refaire ce test
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -188,6 +260,7 @@ const TesterConnaissancesPage = () => {
     );
   }
 
+  // Quiz en cours
   const question = questions[currentQuestion];
 
   return (
@@ -202,7 +275,7 @@ const TesterConnaissancesPage = () => {
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-3xl font-bold text-gray-900 flex items-center">
               <Brain className="mr-3 h-8 w-8 text-[#a4007c]" />
-              Test de connaissances
+              Test : {profession}
             </h1>
             <Badge variant="outline">
               Question {currentQuestion + 1} / {questions.length}
