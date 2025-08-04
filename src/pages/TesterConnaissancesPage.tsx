@@ -31,7 +31,9 @@ interface Question {
   id: number;
   question: string;
   options: string[];
-  correctAnswer: number;
+  correctAnswer: number | null;
+  correctAnswers: number[];
+  isMultipleChoice: boolean;
   explanation: string;
   category: string;
 }
@@ -41,10 +43,11 @@ const TesterConnaissancesPage = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [selectedAnswers, setSelectedAnswers] = useState<number[]>([]);
   const [showAnswer, setShowAnswer] = useState(false);
   const [score, setScore] = useState(0);
   const [quizCompleted, setQuizCompleted] = useState(false);
-  const [userAnswers, setUserAnswers] = useState<(number | null)[]>([]);
+  const [userAnswers, setUserAnswers] = useState<(number | number[] | null)[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
   const [quizReport, setQuizReport] = useState<QuizReport | null>(null);
@@ -80,6 +83,7 @@ const TesterConnaissancesPage = () => {
       setQuizStarted(true);
       setCurrentQuestion(0);
       setSelectedAnswer(null);
+      setSelectedAnswers([]);
       setShowAnswer(false);
       setScore(0);
       setQuizCompleted(false);
@@ -94,26 +98,59 @@ const TesterConnaissancesPage = () => {
   };
 
   const handleAnswerSelect = (answerIndex: number) => {
-    setSelectedAnswer(answerIndex);
+    const currentQ = questions[currentQuestion];
+    
+    if (currentQ.isMultipleChoice) {
+      setSelectedAnswers(prev => {
+        if (prev.includes(answerIndex)) {
+          return prev.filter(i => i !== answerIndex);
+        } else {
+          return [...prev, answerIndex];
+        }
+      });
+    } else {
+      setSelectedAnswer(answerIndex);
+    }
   };
 
   const handleConfirmAnswer = () => {
-    if (selectedAnswer === null) return;
+    const currentQ = questions[currentQuestion];
+    
+    if (currentQ.isMultipleChoice) {
+      if (selectedAnswers.length === 0) return;
+    } else {
+      if (selectedAnswer === null) return;
+    }
 
     setShowAnswer(true);
     const newUserAnswers = [...userAnswers];
-    newUserAnswers[currentQuestion] = selectedAnswer;
-    setUserAnswers(newUserAnswers);
-
-    if (selectedAnswer === questions[currentQuestion].correctAnswer) {
-      setScore(score + 1);
+    
+    if (currentQ.isMultipleChoice) {
+      newUserAnswers[currentQuestion] = selectedAnswers;
+      // Vérifier si les réponses sont correctes (même tableau)
+      const correctAnswers = currentQ.correctAnswers.sort();
+      const userAnswersSorted = [...selectedAnswers].sort();
+      const isCorrect = correctAnswers.length === userAnswersSorted.length && 
+        correctAnswers.every((val, index) => val === userAnswersSorted[index]);
+      
+      if (isCorrect) {
+        setScore(score + 1);
+      }
+    } else {
+      newUserAnswers[currentQuestion] = selectedAnswer;
+      if (selectedAnswer === currentQ.correctAnswer) {
+        setScore(score + 1);
+      }
     }
+    
+    setUserAnswers(newUserAnswers);
   };
 
   const handleNextQuestion = () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
+      setSelectedAnswers([]);
       setShowAnswer(false);
     } else {
       setQuizCompleted(true);
@@ -126,20 +163,51 @@ const TesterConnaissancesPage = () => {
       // Préparer les questions incorrectes
       const incorrectQuestions = questions.filter((question, index) => {
         const userAnswer = userAnswers[index];
-        return userAnswer !== null && userAnswer !== question.correctAnswer;
-      }).map(q => ({
-        question: q.question,
-        category: q.category,
-        correctAnswer: q.options[q.correctAnswer],
-        userAnswer: q.options[userAnswers[questions.indexOf(q)] || 0]
-      }));
+        if (question.isMultipleChoice) {
+          const correctAnswers = question.correctAnswers.sort();
+          const userAnswersSorted = Array.isArray(userAnswer) ? [...userAnswer].sort() : [];
+          return !(correctAnswers.length === userAnswersSorted.length && 
+            correctAnswers.every((val, idx) => val === userAnswersSorted[idx]));
+        } else {
+          return userAnswer !== null && userAnswer !== question.correctAnswer;
+        }
+      }).map(q => {
+        const userAnswer = userAnswers[questions.indexOf(q)];
+        if (q.isMultipleChoice) {
+          const correctAnswers = q.correctAnswers.map(idx => q.options[idx]).join(', ');
+          const userAnswersText = Array.isArray(userAnswer) ? 
+            userAnswer.map(idx => q.options[idx]).join(', ') : 'Aucune réponse';
+          return {
+            question: q.question,
+            category: q.category,
+            correctAnswer: correctAnswers,
+            userAnswer: userAnswersText
+          };
+        } else {
+          return {
+            question: q.question,
+            category: q.category,
+            correctAnswer: q.options[q.correctAnswer || 0],
+            userAnswer: q.options[userAnswer as number || 0]
+          };
+        }
+      });
 
       // Analyser les compétences par catégorie
       const competencesByCategory: { [key: string]: number } = {};
       questions.forEach((question, index) => {
         const category = question.category;
         const userAnswer = userAnswers[index];
-        const isCorrect = userAnswer === question.correctAnswer;
+        let isCorrect = false;
+        
+        if (question.isMultipleChoice) {
+          const correctAnswers = question.correctAnswers.sort();
+          const userAnswersSorted = Array.isArray(userAnswer) ? [...userAnswer].sort() : [];
+          isCorrect = correctAnswers.length === userAnswersSorted.length && 
+            correctAnswers.every((val, idx) => val === userAnswersSorted[idx]);
+        } else {
+          isCorrect = userAnswer === question.correctAnswer;
+        }
         
         if (!competencesByCategory[category]) {
           competencesByCategory[category] = 0;
@@ -863,6 +931,7 @@ const TesterConnaissancesPage = () => {
                     setQuizCompleted(false);
                     setCurrentQuestion(0);
                     setSelectedAnswer(null);
+                    setSelectedAnswers([]);
                     setShowAnswer(false);
                     setScore(0);
                     setUserAnswers(new Array(questions.length).fill(null));
@@ -914,41 +983,58 @@ const TesterConnaissancesPage = () => {
               <Badge variant="secondary">{question.category}</Badge>
               <div className="text-sm text-gray-500">Score: {score}/{currentQuestion}</div>
             </div>
-            <CardTitle className="text-xl">{question.question}</CardTitle>
+            <CardTitle className="text-xl">
+              {question.question}
+              {question.isMultipleChoice && (
+                <Badge variant="outline" className="ml-2 text-xs">
+                  Plusieurs réponses possibles
+                </Badge>
+              )}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
-              {question.options.map((option, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleAnswerSelect(index)}
-                  disabled={showAnswer}
-                  className={`w-full p-4 text-left border-2 rounded-lg transition-all ${
-                    selectedAnswer === index
-                      ? showAnswer
-                        ? index === question.correctAnswer
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-red-500 bg-red-50'
-                        : 'border-[#a4007c] bg-purple-50'
-                      : showAnswer && index === question.correctAnswer
-                      ? 'border-green-500 bg-green-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  } ${showAnswer ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                >
-                  <div className="flex items-center">
-                    <span className="font-medium mr-3">
-                      {String.fromCharCode(65 + index)}.
-                    </span>
-                    <span>{option}</span>
-                    {showAnswer && index === question.correctAnswer && (
-                      <CheckCircle className="ml-auto h-5 w-5 text-green-600" />
-                    )}
-                    {showAnswer && selectedAnswer === index && index !== question.correctAnswer && (
-                      <XCircle className="ml-auto h-5 w-5 text-red-600" />
-                    )}
-                  </div>
-                </button>
-              ))}
+              {question.options.map((option, index) => {
+                const isSelected = question.isMultipleChoice 
+                  ? selectedAnswers.includes(index)
+                  : selectedAnswer === index;
+                
+                const isCorrect = question.isMultipleChoice
+                  ? question.correctAnswers.includes(index)
+                  : index === question.correctAnswer;
+
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleAnswerSelect(index)}
+                    disabled={showAnswer}
+                    className={`w-full p-4 text-left border-2 rounded-lg transition-all ${
+                      isSelected
+                        ? showAnswer
+                          ? isCorrect
+                            ? 'border-green-500 bg-green-50'
+                            : 'border-red-500 bg-red-50'
+                          : 'border-[#a4007c] bg-purple-50'
+                        : showAnswer && isCorrect
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    } ${showAnswer ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                  >
+                    <div className="flex items-center">
+                      <span className="font-medium mr-3">
+                        {String.fromCharCode(65 + index)}.
+                      </span>
+                      <span>{option}</span>
+                      {showAnswer && isCorrect && (
+                        <CheckCircle className="ml-auto h-5 w-5 text-green-600" />
+                      )}
+                      {showAnswer && isSelected && !isCorrect && (
+                        <XCircle className="ml-auto h-5 w-5 text-red-600" />
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
 
             {showAnswer && (
@@ -962,10 +1048,10 @@ const TesterConnaissancesPage = () => {
               {!showAnswer ? (
                 <Button 
                   onClick={handleConfirmAnswer}
-                  disabled={selectedAnswer === null}
+                  disabled={question.isMultipleChoice ? selectedAnswers.length === 0 : selectedAnswer === null}
                   className="bg-[#a4007c] hover:bg-[#8a0066] ml-auto"
                 >
-                  Confirmer ma réponse
+                  Confirmer {question.isMultipleChoice ? 'mes réponses' : 'ma réponse'}
                 </Button>
               ) : (
                 <Button 

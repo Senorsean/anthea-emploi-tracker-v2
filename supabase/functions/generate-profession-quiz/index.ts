@@ -34,11 +34,15 @@ Les questions doivent être organisées de la plus généraliste à la plus spé
 - Questions 11-15: Compétences techniques spécifiques
 - Questions 16-20: Situations complexes et expertise avancée
 
+Inclus environ 4-5 questions à choix multiples (plusieurs bonnes réponses possibles) réparties dans les différentes catégories.
+
 Pour chaque question, fournis :
 - La question
 - 4 options de réponse (A, B, C, D)
-- L'index de la bonne réponse (0, 1, 2, ou 3)
-- Une explication détaillée de la bonne réponse
+- Pour une question simple : L'index de la bonne réponse (0, 1, 2, ou 3)
+- Pour une question à choix multiples : Un tableau des indexes des bonnes réponses (ex: [0, 2])
+- Un booléen "isMultipleChoice" (true pour choix multiples, false pour choix simple)
+- Une explication détaillée des bonnes réponses
 - Une catégorie (ex: "Connaissances générales", "Compétences techniques", etc.)
 
 Réponds UNIQUEMENT avec un JSON valide dans ce format exact :
@@ -48,7 +52,18 @@ Réponds UNIQUEMENT avec un JSON valide dans ce format exact :
       "question": "Texte de la question",
       "options": ["Option A", "Option B", "Option C", "Option D"],
       "correctAnswer": 0,
+      "correctAnswers": [0],
+      "isMultipleChoice": false,
       "explanation": "Explication détaillée",
+      "category": "Nom de la catégorie"
+    },
+    {
+      "question": "Question à choix multiples",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctAnswer": null,
+      "correctAnswers": [0, 2],
+      "isMultipleChoice": true,
+      "explanation": "Explication des bonnes réponses",
       "category": "Nom de la catégorie"
     }
   ]
