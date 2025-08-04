@@ -10,6 +10,7 @@ import { ArrowLeft, CheckCircle, XCircle, Trophy, Brain, Clock, Loader2, Play, F
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import jsPDF from 'jspdf';
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 interface QuizReport {
@@ -217,6 +218,180 @@ const TesterConnaissancesPage = () => {
     return "text-red-600";
   };
 
+  const exportToPDF = () => {
+    if (!quizReport) return;
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    
+    // En-tête du rapport
+    doc.setFillColor(164, 0, 124);
+    doc.rect(0, 0, pageWidth, 40, 'F');
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.text('RAPPORT D\'ÉVALUATION PROFESSIONNELLE', pageWidth / 2, 25, { align: 'center' });
+    
+    doc.setFontSize(14);
+    doc.text(`Métier: ${quizReport.profession}`, pageWidth / 2, 35, { align: 'center' });
+    
+    // Retour au noir pour le reste
+    doc.setTextColor(0, 0, 0);
+    
+    let yPosition = 60;
+    
+    // Score principal
+    doc.setFontSize(18);
+    doc.text('RÉSULTATS GLOBAUX', 20, yPosition);
+    yPosition += 15;
+    
+    doc.setFontSize(12);
+    doc.text(`Score obtenu: ${quizReport.score}/${quizReport.totalQuestions} (${quizReport.percentage}%)`, 20, yPosition);
+    yPosition += 20;
+    
+    // Évaluation globale
+    doc.setFontSize(16);
+    doc.text('ÉVALUATION GLOBALE', 20, yPosition);
+    yPosition += 10;
+    
+    doc.setFontSize(10);
+    const evaluationLines = doc.splitTextToSize(quizReport.evaluationGlobale, pageWidth - 40);
+    doc.text(evaluationLines, 20, yPosition);
+    yPosition += evaluationLines.length * 5 + 15;
+    
+    // Points forts
+    if (yPosition > pageHeight - 60) {
+      doc.addPage();
+      yPosition = 20;
+    }
+    
+    doc.setFontSize(14);
+    doc.text('POINTS FORTS', 20, yPosition);
+    yPosition += 10;
+    
+    doc.setFontSize(10);
+    quizReport.pointsForts.forEach((point, index) => {
+      if (yPosition > pageHeight - 20) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      const pointLines = doc.splitTextToSize(`• ${point}`, pageWidth - 40);
+      doc.text(pointLines, 20, yPosition);
+      yPosition += pointLines.length * 5 + 3;
+    });
+    
+    yPosition += 10;
+    
+    // Axes d'amélioration
+    if (yPosition > pageHeight - 60) {
+      doc.addPage();
+      yPosition = 20;
+    }
+    
+    doc.setFontSize(14);
+    doc.text('AXES D\'AMÉLIORATION', 20, yPosition);
+    yPosition += 10;
+    
+    doc.setFontSize(10);
+    quizReport.axesAmelioration.forEach((axe, index) => {
+      if (yPosition > pageHeight - 20) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      const axeLines = doc.splitTextToSize(`• ${axe}`, pageWidth - 40);
+      doc.text(axeLines, 20, yPosition);
+      yPosition += axeLines.length * 5 + 3;
+    });
+    
+    yPosition += 10;
+    
+    // Plan d'action
+    if (yPosition > pageHeight - 60) {
+      doc.addPage();
+      yPosition = 20;
+    }
+    
+    doc.setFontSize(14);
+    doc.text('PLAN D\'ACTION POUR L\'ENTRETIEN', 20, yPosition);
+    yPosition += 10;
+    
+    doc.setFontSize(10);
+    quizReport.planAction.forEach((action, index) => {
+      if (yPosition > pageHeight - 20) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      const actionLines = doc.splitTextToSize(`${index + 1}. ${action}`, pageWidth - 40);
+      doc.text(actionLines, 20, yPosition);
+      yPosition += actionLines.length * 5 + 5;
+    });
+    
+    yPosition += 10;
+    
+    // Ressources recommandées
+    if (yPosition > pageHeight - 60) {
+      doc.addPage();
+      yPosition = 20;
+    }
+    
+    doc.setFontSize(14);
+    doc.text('RESSOURCES RECOMMANDÉES', 20, yPosition);
+    yPosition += 10;
+    
+    doc.setFontSize(10);
+    quizReport.ressources.forEach((ressource, index) => {
+      if (yPosition > pageHeight - 20) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      const ressourceLines = doc.splitTextToSize(`• ${ressource}`, pageWidth - 40);
+      doc.text(ressourceLines, 20, yPosition);
+      yPosition += ressourceLines.length * 5 + 3;
+    });
+    
+    yPosition += 10;
+    
+    // Questions d'entretien probables
+    if (yPosition > pageHeight - 60) {
+      doc.addPage();
+      yPosition = 20;
+    }
+    
+    doc.setFontSize(14);
+    doc.text('QUESTIONS D\'ENTRETIEN PROBABLES', 20, yPosition);
+    yPosition += 10;
+    
+    doc.setFontSize(10);
+    quizReport.questionsTypes.forEach((question, index) => {
+      if (yPosition > pageHeight - 25) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      doc.text(`Question ${index + 1}:`, 20, yPosition);
+      yPosition += 5;
+      const questionLines = doc.splitTextToSize(`"${question}"`, pageWidth - 40);
+      doc.text(questionLines, 20, yPosition);
+      yPosition += questionLines.length * 5 + 8;
+    });
+    
+    // Pied de page sur toutes les pages
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(128, 128, 128);
+      doc.text(`Rapport généré le ${new Date().toLocaleDateString('fr-FR')}`, 20, pageHeight - 10);
+      doc.text(`Page ${i} / ${pageCount}`, pageWidth - 40, pageHeight - 10);
+    }
+    
+    // Télécharger le PDF
+    const fileName = `rapport-evaluation-${quizReport.profession.replace(/[^a-z0-9]/gi, '-').toLowerCase()}-${new Date().toISOString().split('T')[0]}.pdf`;
+    doc.save(fileName);
+    
+    toast.success('Rapport PDF téléchargé avec succès !');
+  };
+
   // Page d'accueil - saisie du métier
   if (!quizStarted) {
     return (
@@ -313,9 +488,9 @@ const TesterConnaissancesPage = () => {
               <ArrowLeft className="mr-2 h-4 w-4" />
               Retour au tableau de bord
             </Link>
-            <Button variant="outline" className="flex items-center">
+            <Button onClick={exportToPDF} className="flex items-center bg-[#a4007c] hover:bg-[#8a0066]">
               <Download className="mr-2 h-4 w-4" />
-              Télécharger le rapport
+              Exporter en PDF
             </Button>
           </div>
 
