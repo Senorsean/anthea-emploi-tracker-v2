@@ -5,10 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, CheckCircle, XCircle, Trophy, Brain, Clock, Loader2, Play, FileText, Target, BookOpen, MessageSquare } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { ArrowLeft, CheckCircle, XCircle, Trophy, Brain, Clock, Loader2, Play, FileText, Target, BookOpen, MessageSquare, TrendingUp, BarChart3, PieChart, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 interface QuizReport {
   evaluationGlobale: string;
@@ -21,6 +23,7 @@ interface QuizReport {
   score: number;
   totalQuestions: number;
   percentage: string;
+  competencesByCategory?: { [key: string]: number };
 }
 
 interface Question {
@@ -130,6 +133,28 @@ const TesterConnaissancesPage = () => {
         userAnswer: q.options[userAnswers[questions.indexOf(q)] || 0]
       }));
 
+      // Analyser les compétences par catégorie
+      const competencesByCategory: { [key: string]: number } = {};
+      questions.forEach((question, index) => {
+        const category = question.category;
+        const userAnswer = userAnswers[index];
+        const isCorrect = userAnswer === question.correctAnswer;
+        
+        if (!competencesByCategory[category]) {
+          competencesByCategory[category] = 0;
+        }
+        
+        if (isCorrect) {
+          competencesByCategory[category] += 1;
+        }
+      });
+
+      // Convertir en pourcentage
+      Object.keys(competencesByCategory).forEach(category => {
+        const totalInCategory = questions.filter(q => q.category === category).length;
+        competencesByCategory[category] = (competencesByCategory[category] / totalInCategory) * 100;
+      });
+
       const { data, error } = await supabase.functions.invoke('generate-quiz-report', {
         body: { 
           profession: profession,
@@ -144,7 +169,13 @@ const TesterConnaissancesPage = () => {
         throw error;
       }
 
-      setQuizReport(data);
+      // Ajouter les données de compétences par catégorie
+      const reportWithCompetences = {
+        ...data,
+        competencesByCategory
+      };
+
+      setQuizReport(reportWithCompetences);
       setShowReport(true);
       toast.success('Compte-rendu personnalisé généré !');
     } catch (error: any) {
@@ -254,28 +285,192 @@ const TesterConnaissancesPage = () => {
 
   // Page de compte-rendu
   if (showReport && quizReport) {
+    // Préparer les données pour les graphiques
+    const radarData = quizReport.competencesByCategory ? 
+      Object.entries(quizReport.competencesByCategory).map(([category, score]) => ({
+        category: category,
+        score: Number(score.toFixed(1)),
+        fullMark: 100
+      })) : [];
+
+    const pieData = [
+      { name: 'Réponses correctes', value: quizReport.score, color: '#10b981' },
+      { name: 'Réponses incorrectes', value: quizReport.totalQuestions - quizReport.score, color: '#ef4444' }
+    ];
+
+    const barData = radarData.map(item => ({
+      category: item.category.length > 15 ? item.category.substring(0, 15) + '...' : item.category,
+      score: item.score
+    }));
+
+    const globalScore = parseFloat(quizReport.percentage);
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4">
-        <div className="max-w-4xl mx-auto">
-          <Link to="/" className="inline-flex items-center text-[#a4007c] hover:underline mb-6">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Retour au tableau de bord
-          </Link>
+        <div className="max-w-6xl mx-auto">
+          <div className="flex justify-between items-center mb-6">
+            <Link to="/" className="inline-flex items-center text-[#a4007c] hover:underline">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Retour au tableau de bord
+            </Link>
+            <Button variant="outline" className="flex items-center">
+              <Download className="mr-2 h-4 w-4" />
+              Télécharger le rapport
+            </Button>
+          </div>
 
           <div className="space-y-6">
-            {/* En-tête du rapport */}
-            <Card>
+            {/* En-tête du rapport professionnel */}
+            <Card className="bg-gradient-to-r from-[#a4007c] to-[#8a0066] text-white">
               <CardHeader className="text-center">
                 <div className="mx-auto mb-4">
-                  <FileText className="h-16 w-16 text-[#a4007c]" />
+                  <FileText className="h-16 w-16 text-white" />
                 </div>
-                <CardTitle className="text-2xl">Compte-rendu personnalisé</CardTitle>
-                <p className="text-gray-600">
-                  Métier : <span className="font-semibold">{quizReport.profession}</span> • 
-                  Score : <span className={`font-semibold ${getScoreColor()}`}>{quizReport.score}/{quizReport.totalQuestions} ({quizReport.percentage}%)</span>
+                <CardTitle className="text-3xl font-bold">Rapport d'Évaluation Professionnelle</CardTitle>
+                <p className="text-lg opacity-90">
+                  Métier : <span className="font-semibold">{quizReport.profession}</span>
                 </p>
+                <div className="mt-4 flex justify-center space-x-8">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold">{quizReport.score}/{quizReport.totalQuestions}</div>
+                    <div className="text-sm opacity-75">Score obtenu</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold">{quizReport.percentage}%</div>
+                    <div className="text-sm opacity-75">Taux de réussite</div>
+                  </div>
+                </div>
               </CardHeader>
             </Card>
+
+            {/* Tableaux de bord analytiques */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Graphique radar des compétences */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <BarChart3 className="mr-2 h-5 w-5 text-[#a4007c]" />
+                    Analyse des compétences par domaine
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RadarChart data={radarData}>
+                        <PolarGrid />
+                        <PolarAngleAxis dataKey="category" tick={{ fontSize: 10 }} />
+                        <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
+                        <Radar
+                          name="Score (%)"
+                          dataKey="score"
+                          stroke="#a4007c"
+                          fill="#a4007c"
+                          fillOpacity={0.3}
+                          strokeWidth={2}
+                        />
+                      </RadarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Répartition des réponses */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <PieChart className="mr-2 h-5 w-5 text-[#a4007c]" />
+                    Répartition des résultats
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-80">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <RechartsPieChart>
+                        <Pie
+                          data={pieData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {pieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </RechartsPieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Graphique en barres détaillé */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <TrendingUp className="mr-2 h-5 w-5 text-[#a4007c]" />
+                  Performance détaillée par catégorie
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={barData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="category" 
+                        tick={{ fontSize: 10 }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={80}
+                      />
+                      <YAxis domain={[0, 100]} />
+                      <Tooltip 
+                        formatter={(value) => [`${value}%`, 'Score']}
+                        labelFormatter={(label) => `Catégorie: ${label}`}
+                      />
+                      <Bar dataKey="score" fill="#a4007c" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Indicateurs de performance */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card className="text-center">
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold text-green-600">{quizReport.score}</div>
+                  <div className="text-sm text-gray-600">Réponses correctes</div>
+                  <Progress value={(quizReport.score / quizReport.totalQuestions) * 100} className="mt-2" />
+                </CardContent>
+              </Card>
+              <Card className="text-center">
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold text-red-600">{quizReport.totalQuestions - quizReport.score}</div>
+                  <div className="text-sm text-gray-600">Réponses incorrectes</div>
+                  <Progress value={((quizReport.totalQuestions - quizReport.score) / quizReport.totalQuestions) * 100} className="mt-2" />
+                </CardContent>
+              </Card>
+              <Card className="text-center">
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold text-blue-600">{globalScore.toFixed(1)}%</div>
+                  <div className="text-sm text-gray-600">Taux de réussite global</div>
+                  <Progress value={globalScore} className="mt-2" />
+                </CardContent>
+              </Card>
+              <Card className="text-center">
+                <CardContent className="pt-6">
+                  <div className="text-2xl font-bold text-purple-600">{radarData.length}</div>
+                  <div className="text-sm text-gray-600">Domaines évalués</div>
+                  <Progress value={100} className="mt-2" />
+                </CardContent>
+              </Card>
+            </div>
 
             {/* Évaluation globale */}
             <Card>
@@ -286,7 +481,9 @@ const TesterConnaissancesPage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 leading-relaxed">{quizReport.evaluationGlobale}</p>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-gray-700 leading-relaxed text-lg">{quizReport.evaluationGlobale}</p>
+                </div>
               </CardContent>
             </Card>
 
