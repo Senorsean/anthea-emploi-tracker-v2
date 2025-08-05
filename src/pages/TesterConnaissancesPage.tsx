@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
+import { Slider } from '@/components/ui/slider';
 import { ArrowLeft, CheckCircle, XCircle, Trophy, Brain, Clock, Loader2, Play, FileText, Target, BookOpen, MessageSquare, TrendingUp, BarChart3, PieChart, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,6 +41,7 @@ interface Question {
 
 const TesterConnaissancesPage = () => {
   const [profession, setProfession] = useState('');
+  const [difficultyLevel, setDifficultyLevel] = useState([3]); // 1-5 scale
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -65,7 +67,10 @@ const TesterConnaissancesPage = () => {
       console.log('Génération du quiz pour:', profession);
       
       const { data, error } = await supabase.functions.invoke('generate-profession-quiz', {
-        body: { profession: profession.trim() }
+        body: { 
+          profession: profession.trim(),
+          difficultyLevel: difficultyLevel[0]
+        }
       });
 
       if (error) {
@@ -693,6 +698,31 @@ const TesterConnaissancesPage = () => {
                   placeholder="Ex: Développeur web, Comptable, Marketing digital..."
                   className="text-lg"
                 />
+              </div>
+
+              <div className="space-y-4">
+                <Label>Niveau de difficulté</Label>
+                <div className="px-4">
+                  <Slider
+                    value={difficultyLevel}
+                    onValueChange={setDifficultyLevel}
+                    max={5}
+                    min={1}
+                    step={1}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-sm text-muted-foreground mt-2">
+                    <span>Connaisseur</span>
+                    <span className="font-medium">
+                      {difficultyLevel[0] === 1 && "Connaisseur"}
+                      {difficultyLevel[0] === 2 && "Confirmé"}
+                      {difficultyLevel[0] === 3 && "Expérimenté"}
+                      {difficultyLevel[0] === 4 && "Avancé"}
+                      {difficultyLevel[0] === 5 && "Expert"}
+                    </span>
+                    <span>Expert</span>
+                  </div>
+                </div>
               </div>
 
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">

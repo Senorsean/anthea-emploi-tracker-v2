@@ -15,7 +15,7 @@ serve(async (req) => {
   }
 
   try {
-    const { profession } = await req.json();
+    const { profession, difficultyLevel = 3 } = await req.json();
 
     if (!profession) {
       return new Response(
@@ -24,15 +24,30 @@ serve(async (req) => {
       );
     }
 
-    console.log(`Génération de quiz pour le métier: ${profession}`);
+    const difficultyLabels = {
+      1: "Connaisseur",
+      2: "Confirmé", 
+      3: "Expérimenté",
+      4: "Avancé",
+      5: "Expert"
+    };
 
-    const prompt = `Tu es un expert en recrutement et formation professionnelle. Génère exactement 20 questions à choix multiples pour tester les connaissances d'une personne sur le métier de "${profession}".
+    console.log(`Génération de quiz pour le métier: ${profession} - Niveau: ${difficultyLabels[difficultyLevel as keyof typeof difficultyLabels]}`);
+
+    const prompt = `Tu es un expert en recrutement et formation professionnelle. Génère exactement 20 questions à choix multiples pour tester les connaissances d'une personne sur le métier de "${profession}" au niveau ${difficultyLabels[difficultyLevel as keyof typeof difficultyLabels]} (${difficultyLevel}/5).
+
+Adapte la complexité des questions selon le niveau demandé :
+- Niveau 1 (Connaisseur) : Questions de base, concepts fondamentaux
+- Niveau 2 (Confirmé) : Questions intermédiaires, applications pratiques courantes
+- Niveau 3 (Expérimenté) : Questions approfondies, cas d'usage variés
+- Niveau 4 (Avancé) : Questions complexes, expertise technique poussée
+- Niveau 5 (Expert) : Questions très spécialisées, situations critiques et innovations
 
 Les questions doivent être organisées de la plus généraliste à la plus spécifique :
-- Questions 1-5: Connaissances générales sur le secteur d'activité
-- Questions 6-10: Compétences de base du métier
-- Questions 11-15: Compétences techniques spécifiques
-- Questions 16-20: Situations complexes et expertise avancée
+- Questions 1-5: Connaissances générales sur le secteur d'activité (adaptées au niveau)
+- Questions 6-10: Compétences de base du métier (adaptées au niveau)
+- Questions 11-15: Compétences techniques spécifiques (adaptées au niveau)
+- Questions 16-20: Situations complexes et expertise (adaptées au niveau)
 
 Inclus environ 4-5 questions à choix multiples (plusieurs bonnes réponses possibles) réparties dans les différentes catégories.
 
