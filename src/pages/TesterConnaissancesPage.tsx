@@ -293,7 +293,7 @@ const TesterConnaissancesPage = () => {
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     
-    // En-tête du rapport
+    // En-tête du rapport avec dégradé
     doc.setFillColor(164, 0, 124);
     doc.rect(0, 0, pageWidth, 40, 'F');
     
@@ -308,7 +308,171 @@ const TesterConnaissancesPage = () => {
     doc.setTextColor(0, 0, 0);
     
     let yPosition = 60;
+
+    // Fonction pour dessiner un graphique radar simplifié
+    const drawRadarChart = (data: any[], centerX: number, centerY: number, radius: number) => {
+      const numCategories = data.length;
+      if (numCategories === 0) return;
+
+      // Dessiner les axes
+      for (let i = 0; i < numCategories; i++) {
+        const angle = (i * 2 * Math.PI) / numCategories - Math.PI / 2;
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+        
+        doc.setDrawColor(200, 200, 200);
+        doc.line(centerX, centerY, x, y);
+        
+        // Ajouter les labels
+        doc.setFontSize(8);
+        doc.setTextColor(0, 0, 0);
+        const labelX = centerX + (radius + 10) * Math.cos(angle);
+        const labelY = centerY + (radius + 10) * Math.sin(angle);
+        const label = data[i].category.length > 10 ? data[i].category.substring(0, 10) + '...' : data[i].category;
+        doc.text(label, labelX, labelY, { align: 'center' });
+      }
+
+      // Dessiner les cercles concentriques
+      for (let r = radius / 4; r <= radius; r += radius / 4) {
+        doc.setDrawColor(230, 230, 230);
+        doc.circle(centerX, centerY, r);
+      }
+
+      // Dessiner la ligne de données
+      doc.setDrawColor(164, 0, 124);
+      doc.setLineWidth(2);
+      for (let i = 0; i < numCategories; i++) {
+        const angle = (i * 2 * Math.PI) / numCategories - Math.PI / 2;
+        const score = data[i].score / 100;
+        const x = centerX + radius * score * Math.cos(angle);
+        const y = centerY + radius * score * Math.sin(angle);
+        
+        if (i === 0) {
+          doc.setFillColor(164, 0, 124);
+          doc.circle(x, y, 2, 'F');
+        } else {
+          const prevAngle = ((i - 1) * 2 * Math.PI) / numCategories - Math.PI / 2;
+          const prevScore = data[i - 1].score / 100;
+          const prevX = centerX + radius * prevScore * Math.cos(prevAngle);
+          const prevY = centerY + radius * prevScore * Math.sin(prevAngle);
+          
+          doc.line(prevX, prevY, x, y);
+          doc.setFillColor(164, 0, 124);
+          doc.circle(x, y, 2, 'F');
+        }
+      }
+      
+      // Fermer la forme
+      if (numCategories > 2) {
+        const firstAngle = -Math.PI / 2;
+        const lastAngle = ((numCategories - 1) * 2 * Math.PI) / numCategories - Math.PI / 2;
+        const firstScore = data[0].score / 100;
+        const lastScore = data[numCategories - 1].score / 100;
+        const firstX = centerX + radius * firstScore * Math.cos(firstAngle);
+        const firstY = centerY + radius * firstScore * Math.sin(firstAngle);
+        const lastX = centerX + radius * lastScore * Math.cos(lastAngle);
+        const lastY = centerY + radius * lastScore * Math.sin(lastAngle);
+        
+        doc.line(lastX, lastY, firstX, firstY);
+      }
+    };
+
+    // Fonction pour dessiner un graphique en secteurs simplifié
+    const drawPieChart = (data: any[], centerX: number, centerY: number, radius: number) => {
+      const total = data.reduce((sum, item) => sum + item.value, 0);
+      let startAngle = 0;
+      
+      data.forEach((item, index) => {
+        const sliceAngle = (item.value / total) * 2 * Math.PI;
+        
+        // Couleur selon l'index
+        if (index === 0) {
+          doc.setFillColor(16, 185, 129); // vert pour correct
+        } else {
+          doc.setFillColor(239, 68, 68); // rouge pour incorrect
+        }
+        
+        // Dessiner un arc simplifié avec des triangles
+        const numSteps = Math.max(3, Math.floor(sliceAngle / (Math.PI / 8)));
+        for (let i = 0; i < numSteps; i++) {
+          const angle1 = startAngle + (i * sliceAngle) / numSteps;
+          const angle2 = startAngle + ((i + 1) * sliceAngle) / numSteps;
+          
+          const x1 = centerX + radius * Math.cos(angle1);
+          const y1 = centerY + radius * Math.sin(angle1);
+          const x2 = centerX + radius * Math.cos(angle2);
+          const y2 = centerY + radius * Math.sin(angle2);
+          
+          // Créer un triangle pour chaque segment
+          doc.triangle(centerX, centerY, x1, y1, x2, y2, 'F');
+        }
+        
+        // Ajouter le label
+        const labelAngle = startAngle + sliceAngle / 2;
+        const labelX = centerX + (radius + 15) * Math.cos(labelAngle);
+        const labelY = centerY + (radius + 15) * Math.sin(labelAngle);
+        
+        doc.setFontSize(8);
+        doc.setTextColor(0, 0, 0);
+        doc.text(`${item.name}: ${item.value}`, labelX, labelY, { align: 'center' });
+        
+        startAngle += sliceAngle;
+      });
+      
+      // Contour du cercle
+      doc.setDrawColor(0, 0, 0);
+      doc.setLineWidth(1);
+      doc.circle(centerX, centerY, radius, 'S');
+    };
+
+    // Fonction pour dessiner un graphique en barres
+    const drawBarChart = (data: any[], startX: number, startY: number, width: number, height: number) => {
+      const barWidth = width / data.length;
+      const maxValue = 100;
+      
+      data.forEach((item, index) => {
+        const barHeight = (item.score / maxValue) * height;
+        const x = startX + index * barWidth;
+        const y = startY + height - barHeight;
+        
+        // Dessiner la barre
+        doc.setFillColor(164, 0, 124);
+        doc.rect(x + 5, y, barWidth - 10, barHeight, 'F');
+        
+        // Label de catégorie
+        doc.setFontSize(6);
+        doc.setTextColor(0, 0, 0);
+        const label = item.category.length > 8 ? item.category.substring(0, 8) + '...' : item.category;
+        doc.text(label, x + barWidth / 2, startY + height + 10, { align: 'center', angle: 45 });
+        
+        // Valeur
+        doc.text(`${item.score.toFixed(0)}%`, x + barWidth / 2, y - 2, { align: 'center' });
+      });
+      
+      // Axes
+      doc.setDrawColor(0, 0, 0);
+      doc.line(startX, startY + height, startX + width, startY + height); // axe X
+      doc.line(startX, startY, startX, startY + height); // axe Y
+    };
     
+    // Préparer les données pour les graphiques
+    const radarData = quizReport.competencesByCategory ? 
+      Object.entries(quizReport.competencesByCategory).map(([category, score]) => ({
+        category: category,
+        score: Number(score.toFixed(1)),
+        fullMark: 100
+      })) : [];
+
+    const pieData = [
+      { name: 'Réponses correctes', value: quizReport.score, color: '#10b981' },
+      { name: 'Réponses incorrectes', value: quizReport.totalQuestions - quizReport.score, color: '#ef4444' }
+    ];
+
+    const barData = radarData.map(item => ({
+      category: item.category.length > 15 ? item.category.substring(0, 15) + '...' : item.category,
+      score: item.score
+    }));
+
     // Score principal
     doc.setFontSize(18);
     doc.text('RÉSULTATS GLOBAUX', 20, yPosition);
@@ -317,6 +481,45 @@ const TesterConnaissancesPage = () => {
     doc.setFontSize(12);
     doc.text(`Score obtenu: ${quizReport.score}/${quizReport.totalQuestions} (${quizReport.percentage}%)`, 20, yPosition);
     yPosition += 20;
+
+    // Ajouter les graphiques
+    if (yPosition > pageHeight - 120) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    // Graphique radar des compétences
+    if (radarData.length > 0) {
+      doc.setFontSize(16);
+      doc.setTextColor(164, 0, 124);
+      doc.text('ANALYSE DES COMPÉTENCES PAR DOMAINE', 20, yPosition);
+      yPosition += 15;
+      
+      drawRadarChart(radarData, pageWidth / 4, yPosition + 40, 30);
+      
+      // Graphique en secteurs
+      doc.text('RÉPARTITION DES RÉSULTATS', pageWidth * 3/4 - 40, yPosition);
+      drawPieChart(pieData, pageWidth * 3/4, yPosition + 40, 25);
+      
+      yPosition += 100;
+
+      // Graphique en barres
+      if (yPosition > pageHeight - 80) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      doc.text('PERFORMANCE DÉTAILLÉE PAR CATÉGORIE', 20, yPosition);
+      yPosition += 15;
+      
+      if (barData.length > 0) {
+        drawBarChart(barData, 20, yPosition, pageWidth - 40, 50);
+        yPosition += 80;
+      }
+    }
+
+    // Retour au noir pour le reste
+    doc.setTextColor(0, 0, 0);
     
     // Évaluation globale
     doc.setFontSize(16);
