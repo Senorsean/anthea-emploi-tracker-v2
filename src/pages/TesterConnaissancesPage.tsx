@@ -444,13 +444,15 @@ const TesterConnaissancesPage = () => {
         doc.setFillColor(164, 0, 124);
         doc.rect(x + 5, y, barWidth - 10, barHeight, 'F');
         
-        // Label de catégorie
+        // Label de catégorie (nom complet)
         doc.setFontSize(6);
         doc.setTextColor(0, 0, 0);
-        const label = item.category.length > 8 ? item.category.substring(0, 8) + '...' : item.category;
-        doc.text(label, x + barWidth / 2, startY + height + 10, { align: 'center', angle: 45 });
+        const label = item.fullCategory || item.category;
+        const shortLabel = label.length > 10 ? label.substring(0, 10) + '...' : label;
+        doc.text(shortLabel, x + barWidth / 2, startY + height + 10, { align: 'center', angle: 45 });
         
-        // Valeur
+        // Valeur avec indication claire
+        doc.setFontSize(7);
         doc.text(`${item.score.toFixed(0)}%`, x + barWidth / 2, y - 2, { align: 'center' });
       });
       
@@ -474,7 +476,8 @@ const TesterConnaissancesPage = () => {
     ];
 
     const barData = radarData.map(item => ({
-      category: item.category.length > 15 ? item.category.substring(0, 15) + '...' : item.category,
+      category: item.category.length > 12 ? item.category.substring(0, 12) + '...' : item.category,
+      fullCategory: item.category, // Nom complet pour le PDF
       score: item.score
     }));
 
@@ -775,7 +778,8 @@ const TesterConnaissancesPage = () => {
     ];
 
     const barData = radarData.map(item => ({
-      category: item.category.length > 15 ? item.category.substring(0, 15) + '...' : item.category,
+      category: item.category.length > 12 ? item.category.substring(0, 12) + '...' : item.category,
+      fullCategory: item.category, // Garder le nom complet pour les tooltips
       score: item.score
     }));
 
@@ -834,15 +838,34 @@ const TesterConnaissancesPage = () => {
                     <ResponsiveContainer width="100%" height="100%">
                       <RadarChart data={radarData}>
                         <PolarGrid />
-                        <PolarAngleAxis dataKey="category" tick={{ fontSize: 10 }} />
-                        <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10 }} />
+                        <PolarAngleAxis 
+                          dataKey="category" 
+                          tick={{ fontSize: 9, fill: '#374151' }}
+                          tickFormatter={(value) => value.length > 12 ? value.substring(0, 12) + '...' : value}
+                        />
+                        <PolarRadiusAxis 
+                          angle={90} 
+                          domain={[0, 100]} 
+                          tick={{ fontSize: 9 }}
+                          tickFormatter={(value) => `${value}%`}
+                        />
                         <Radar
-                          name="Score (%)"
+                          name="Pourcentage de réussite"
                           dataKey="score"
                           stroke="#a4007c"
                           fill="#a4007c"
                           fillOpacity={0.3}
                           strokeWidth={2}
+                        />
+                        <Tooltip 
+                          formatter={(value) => [`${value}%`, 'Taux de réussite']}
+                          labelFormatter={(label) => `Domaine: ${label}`}
+                          contentStyle={{
+                            backgroundColor: '#f8f9fa',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '6px',
+                            fontSize: '11px'
+                          }}
                         />
                       </RadarChart>
                     </ResponsiveContainer>
@@ -899,17 +922,41 @@ const TesterConnaissancesPage = () => {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis 
                         dataKey="category" 
-                        tick={{ fontSize: 10 }}
+                        tick={{ fontSize: 9 }}
                         angle={-45}
                         textAnchor="end"
                         height={80}
+                        interval={0}
                       />
-                      <YAxis domain={[0, 100]} />
+                      <YAxis 
+                        domain={[0, 100]} 
+                        label={{ value: 'Score (%)', angle: -90, position: 'insideLeft' }}
+                      />
                       <Tooltip 
-                        formatter={(value) => [`${value}%`, 'Score']}
-                        labelFormatter={(label) => `Catégorie: ${label}`}
+                        formatter={(value, name, props) => [
+                          `${value}%`, 
+                          'Taux de réussite'
+                        ]}
+                        labelFormatter={(label, payload) => {
+                          const item = payload?.[0]?.payload;
+                          return `Domaine: ${item?.fullCategory || label}`;
+                        }}
+                        contentStyle={{
+                          backgroundColor: '#f8f9fa',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '6px',
+                          fontSize: '12px'
+                        }}
                       />
-                      <Bar dataKey="score" fill="#a4007c" radius={[4, 4, 0, 0]} />
+                      <Bar 
+                        dataKey="score" 
+                        fill="#a4007c" 
+                        radius={[4, 4, 0, 0]}
+                      >
+                        {barData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill="#a4007c" />
+                        ))}
+                      </Bar>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
