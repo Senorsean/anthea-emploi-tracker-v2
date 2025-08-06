@@ -34,6 +34,13 @@ export const OverviewFocusAreas = () => {
       external: false,
     },
     {
+      title: 'Optimiser son profil LinkedIn',
+      description:
+        'Améliorez votre visibilité et attractivité professionnelle sur LinkedIn.',
+      link: '/optimiser-profil-linkedin',
+      external: false,
+    },
+    {
       title: 'Améliorer mes entretiens',
       description:
         'Préparez-vous aux questions d\'entretien et entraînez-vous pour le jour J.',
