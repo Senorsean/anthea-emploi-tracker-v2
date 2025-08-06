@@ -16,6 +16,17 @@ const OptimiserProfilLinkedinPage = () => {
   const [keywords, setKeywords] = useState<string[]>([]);
   const [newKeyword, setNewKeyword] = useState('');
   const [profileScore, setProfileScore] = useState(0);
+  
+  // États pour le générateur de compétences
+  const [jobTitle, setJobTitle] = useState('');
+  const [missions, setMissions] = useState('');
+  const [tools, setTools] = useState('');
+  const [generatedSkills, setGeneratedSkills] = useState<{
+    technical: string[];
+    methodological: string[];
+    relational: string[];
+  } | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleChecklistToggle = (item: string) => {
     if (checkedItems.includes(item)) {
@@ -38,6 +49,42 @@ const OptimiserProfilLinkedinPage = () => {
 
   const removeKeyword = (keyword: string) => {
     setKeywords(keywords.filter(k => k !== keyword));
+  };
+
+  const generateSkills = async () => {
+    if (!jobTitle.trim() || !missions.trim() || !tools.trim()) {
+      alert('Veuillez remplir tous les champs');
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      // Simuler un appel API pour générer les compétences
+      // En production, cela ferait appel à une fonction edge avec OpenAI
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Exemple de compétences générées (à remplacer par un vrai appel API)
+      const mockSkills = {
+        technical: [
+          'Google Ads', 'Meta Business Manager', 'Google Analytics',
+          'SEO/SEM', 'HubSpot'
+        ],
+        methodological: [
+          'Gestion de projet digital', 'Analyse de données marketing',
+          'A/B Testing', 'Optimisation de conversion', 'Marketing automation'
+        ],
+        relational: [
+          'Communication digitale', 'Collaboration équipe', 'Présentation client',
+          'Leadership d\'équipe', 'Négociation commerciale'
+        ]
+      };
+      
+      setGeneratedSkills(mockSkills);
+    } catch (error) {
+      alert('Erreur lors de la génération des compétences');
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const checklistItems = [
@@ -148,10 +195,11 @@ const OptimiserProfilLinkedinPage = () => {
 
           {/* Contenu principal avec onglets */}
           <Tabs defaultValue="checklist" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="checklist">Checklist</TabsTrigger>
               <TabsTrigger value="resume">Résumé</TabsTrigger>
               <TabsTrigger value="keywords">Mots-clés</TabsTrigger>
+              <TabsTrigger value="skills">Compétences</TabsTrigger>
               <TabsTrigger value="strategy">Stratégie</TabsTrigger>
             </TabsList>
 
@@ -340,6 +388,114 @@ const OptimiserProfilLinkedinPage = () => {
                       <li>• Pensez aux certifications et outils métiers</li>
                     </ul>
                   </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Générateur de compétences */}
+            <TabsContent value="skills" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    🎯 Générateur de compétences stratégiques
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <p className="text-gray-600">
+                      Générez une liste de 15 compétences stratégiques personnalisées pour votre profil LinkedIn, 
+                      classées en 3 catégories.
+                    </p>
+                    
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <label className="font-semibold text-sm mb-2 block">
+                          Voici mon métier :
+                        </label>
+                        <Input
+                          placeholder="ex. Responsable Marketing Digital"
+                          value={jobTitle}
+                          onChange={(e) => setJobTitle(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="font-semibold text-sm mb-2 block">
+                          Voici mes missions :
+                        </label>
+                        <Textarea
+                          placeholder="ex. gestion de campagnes SEA/SEO, analyse de données, animation réseaux sociaux"
+                          value={missions}
+                          onChange={(e) => setMissions(e.target.value)}
+                          className="min-h-[80px]"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="font-semibold text-sm mb-2 block">
+                          Voici les outils que j'utilise :
+                        </label>
+                        <Input
+                          placeholder="ex. Google Ads, Meta Business, HubSpot, Semrush"
+                          value={tools}
+                          onChange={(e) => setTools(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <Button 
+                      onClick={generateSkills}
+                      disabled={isGenerating}
+                      className="w-full"
+                    >
+                      {isGenerating ? 'Génération en cours...' : 'Générer mes compétences stratégiques'}
+                    </Button>
+                  </div>
+
+                  {generatedSkills && (
+                    <>
+                      <Separator />
+                      
+                      <div className="space-y-6">
+                        <h3 className="font-semibold text-lg">Vos 15 compétences stratégiques :</h3>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="space-y-3">
+                            <h4 className="font-semibold text-primary">💻 Techniques (Hard Skills)</h4>
+                            <div className="space-y-2">
+                              {generatedSkills.technical.map((skill, idx) => (
+                                <Badge key={idx} variant="default" className="block text-center py-2">
+                                  {skill}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-3">
+                            <h4 className="font-semibold text-blue-600">⚙️ Méthodologiques</h4>
+                            <div className="space-y-2">
+                              {generatedSkills.methodological.map((skill, idx) => (
+                                <Badge key={idx} variant="secondary" className="block text-center py-2">
+                                  {skill}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-3">
+                            <h4 className="font-semibold text-green-600">👥 Relationnelles (Soft Skills)</h4>
+                            <div className="space-y-2">
+                              {generatedSkills.relational.map((skill, idx) => (
+                                <Badge key={idx} variant="outline" className="block text-center py-2">
+                                  {skill}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
