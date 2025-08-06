@@ -28,6 +28,15 @@ const OptimiserProfilLinkedinPage = () => {
   } | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // États pour le générateur "À propos"
+  const [aboutJobTitle, setAboutJobTitle] = useState('');
+  const [aboutExperience, setAboutExperience] = useState('');
+  const [aboutSkills, setAboutSkills] = useState('');
+  const [aboutAchievements, setAboutAchievements] = useState('');
+  const [aboutObjective, setAboutObjective] = useState('');
+  const [generatedAbout, setGeneratedAbout] = useState('');
+  const [isGeneratingAbout, setIsGeneratingAbout] = useState(false);
+
   const handleChecklistToggle = (item: string) => {
     if (checkedItems.includes(item)) {
       setCheckedItems(checkedItems.filter(i => i !== item));
@@ -84,6 +93,35 @@ const OptimiserProfilLinkedinPage = () => {
       alert('Erreur lors de la génération des compétences');
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const generateAboutSection = async () => {
+    if (!aboutJobTitle.trim() || !aboutExperience.trim() || !aboutSkills.trim() || !aboutObjective.trim()) {
+      alert('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    setIsGeneratingAbout(true);
+    try {
+      // Simuler un appel API pour générer la section "À propos"
+      // En production, cela ferait appel à une fonction edge avec OpenAI
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Exemple de section "À propos" générée
+      const mockAbout = `🎯 ${aboutJobTitle} passionné(e) avec ${aboutExperience} dans l'optimisation des systèmes d'information et la transformation digitale des entreprises.
+
+💼 Expert(e) en ${aboutSkills}, j'ai notamment piloté ${aboutAchievements || 'des projets d\'envergure ayant généré des gains significatifs en productivité et sécurité'}.
+
+🚀 ${aboutObjective} pour continuer à accompagner les organisations dans leur évolution technologique et maximiser leur performance opérationnelle.
+
+#IT #Cloud #Cybersécurité #Transformation #Leadership`;
+      
+      setGeneratedAbout(mockAbout);
+    } catch (error) {
+      alert('Erreur lors de la génération de la section À propos');
+    } finally {
+      setIsGeneratingAbout(false);
     }
   };
 
@@ -195,9 +233,10 @@ const OptimiserProfilLinkedinPage = () => {
 
           {/* Contenu principal avec onglets */}
           <Tabs defaultValue="checklist" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="checklist">Checklist</TabsTrigger>
               <TabsTrigger value="resume">Résumé</TabsTrigger>
+              <TabsTrigger value="about">À propos</TabsTrigger>
               <TabsTrigger value="keywords">Mots-clés</TabsTrigger>
               <TabsTrigger value="skills">Compétences</TabsTrigger>
               <TabsTrigger value="strategy">Stratégie</TabsTrigger>
@@ -328,6 +367,132 @@ const OptimiserProfilLinkedinPage = () => {
                       </Button>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Générateur section À propos */}
+            <TabsContent value="about" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    ✍️ Générateur de section "À propos" LinkedIn
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <p className="text-gray-600">
+                      Générez un paragraphe impactant de 5 à 8 lignes pour votre section "À propos", 
+                      structuré et optimisé pour les mots-clés.
+                    </p>
+                    
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <label className="font-semibold text-sm mb-2 block">
+                          Métier : <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          placeholder="ex. Responsable informatique"
+                          value={aboutJobTitle}
+                          onChange={(e) => setAboutJobTitle(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="font-semibold text-sm mb-2 block">
+                          Expérience : <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          placeholder="ex. 12 ans dans les systèmes d'information"
+                          value={aboutExperience}
+                          onChange={(e) => setAboutExperience(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="font-semibold text-sm mb-2 block">
+                          Compétences : <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          placeholder="ex. cloud, cybersécurité, pilotage de projets"
+                          value={aboutSkills}
+                          onChange={(e) => setAboutSkills(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="font-semibold text-sm mb-2 block">
+                          Réalisations marquantes :
+                        </label>
+                        <Input
+                          placeholder="ex. migration vers Microsoft 365 pour 300 utilisateurs"
+                          value={aboutAchievements}
+                          onChange={(e) => setAboutAchievements(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="font-semibold text-sm mb-2 block">
+                          Objectif : <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          placeholder="ex. trouver un poste en remote / développer ma marque personnelle"
+                          value={aboutObjective}
+                          onChange={(e) => setAboutObjective(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <Button 
+                      onClick={generateAboutSection}
+                      disabled={isGeneratingAbout}
+                      className="w-full"
+                    >
+                      {isGeneratingAbout ? 'Génération en cours...' : 'Générer ma section "À propos"'}
+                    </Button>
+                  </div>
+
+                  {generatedAbout && (
+                    <>
+                      <Separator />
+                      
+                      <div className="space-y-4">
+                        <h3 className="font-semibold text-lg">Votre section "À propos" optimisée :</h3>
+                        
+                        <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-primary">
+                          <pre className="whitespace-pre-wrap text-sm text-gray-700 font-medium leading-relaxed">
+                            {generatedAbout}
+                          </pre>
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => navigator.clipboard.writeText(generatedAbout)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            📋 Copier le texte
+                          </Button>
+                          <Button
+                            onClick={() => setGeneratedAbout('')}
+                            variant="outline"
+                            size="sm"
+                          >
+                            ✏️ Générer une nouvelle version
+                          </Button>
+                        </div>
+                        
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <h4 className="font-semibold text-sm mb-2">💡 Structure utilisée :</h4>
+                          <ul className="text-sm text-gray-600 space-y-1">
+                            <li>1. <strong>Qui je suis</strong> : Métier + passion + expérience</li>
+                            <li>2. <strong>Ce que je fais</strong> : Compétences + réalisations chiffrées</li>
+                            <li>3. <strong>Ce que je cherche</strong> : Objectifs + mots-clés sectoriels</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
