@@ -11,6 +11,7 @@ import NegociationOffrePage from "./pages/NegociationOffrePage";
 import PreparationEntretienPage from "./pages/PreparationEntretienPage";
 import MethodeStarPage from "./pages/MethodeStarPage";
 import RenforcezVotreReseauPage from "./pages/RenforcezVotreReseauPage";
+import OptimiserProfilLinkedinPage from "./pages/OptimiserProfilLinkedinPage";
 import ProgressionEntretiensPage from "./pages/ProgressionEntretiensPage";
 import ProgressionCandidaturesPage from "./pages/ProgressionCandidaturesPage";
 import ProgressionReseauPage from "./pages/ProgressionReseauPage";
@@ -106,6 +107,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <RenforcezVotreReseauPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/optimiser-profil-linkedin"
+            element={
+              <RequireAuth>
+                <OptimiserProfilLinkedinPage />
               </RequireAuth>
             }
           />
