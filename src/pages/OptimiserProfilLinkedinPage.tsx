@@ -54,6 +54,13 @@ const OptimiserProfilLinkedinPage = () => {
   const [generatedTitles, setGeneratedTitles] = useState<string[]>([]);
   const [isGeneratingTitles, setIsGeneratingTitles] = useState(false);
 
+  // États pour le générateur d'accroches
+  const [pitchJob, setPitchJob] = useState('');
+  const [pitchAudience, setPitchAudience] = useState('');
+  const [pitchMessage, setPitchMessage] = useState('');
+  const [generatedPitches, setGeneratedPitches] = useState<string[]>([]);
+  const [isGeneratingPitches, setIsGeneratingPitches] = useState(false);
+
   const handleChecklistToggle = (item: string) => {
     if (checkedItems.includes(item)) {
       setCheckedItems(checkedItems.filter(i => i !== item));
@@ -200,6 +207,36 @@ const OptimiserProfilLinkedinPage = () => {
     }
   };
 
+  const generatePitches = async () => {
+    if (!pitchJob.trim() || !pitchAudience.trim() || !pitchMessage.trim()) {
+      alert('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    setIsGeneratingPitches(true);
+    try {
+      // Simuler un appel API pour générer les accroches
+      // En production, cela ferait appel à une fonction edge avec OpenAI
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Exemples d'accroches générées (adaptées selon les inputs)
+      const mockPitches = [
+        `🎯 ${pitchJob} • ${pitchMessage} • Contact-moi pour échanger sur ton parcours !`,
+        `💼 Tu cherches ton futur emploi ? En tant que ${pitchJob.toLowerCase()}, ${pitchMessage.toLowerCase()}. Écrivons ensemble ton succès !`,
+        `🤝 ${pitchJob} spécialisé ${pitchAudience} • ${pitchMessage} • Prêt(e) à faire le premier pas ?`
+      ].map(pitch => {
+        // S'assurer que les pitchs ne dépassent pas 280 caractères
+        return pitch.length > 280 ? pitch.substring(0, 277) + '...' : pitch;
+      });
+      
+      setGeneratedPitches(mockPitches);
+    } catch (error) {
+      alert('Erreur lors de la génération des accroches');
+    } finally {
+      setIsGeneratingPitches(false);
+    }
+  };
+
   const checklistItems = [
     'Photo de profil professionnelle et souriante',
     'Bannière personnalisée reflétant votre secteur',
@@ -308,12 +345,13 @@ const OptimiserProfilLinkedinPage = () => {
 
           {/* Contenu principal avec onglets */}
           <Tabs defaultValue="checklist" className="w-full">
-            <TabsList className="grid w-full grid-cols-8">
+            <TabsList className="grid w-full grid-cols-9">
               <TabsTrigger value="checklist">Checklist</TabsTrigger>
               <TabsTrigger value="resume">Résumé</TabsTrigger>
               <TabsTrigger value="about">À propos</TabsTrigger>
               <TabsTrigger value="titre">Titre</TabsTrigger>
               <TabsTrigger value="experiences">Expériences</TabsTrigger>
+              <TabsTrigger value="accroches">Accroches</TabsTrigger>
               <TabsTrigger value="keywords">Mots-clés</TabsTrigger>
               <TabsTrigger value="skills">Compétences</TabsTrigger>
               <TabsTrigger value="strategy">Stratégie</TabsTrigger>
@@ -823,6 +861,124 @@ const OptimiserProfilLinkedinPage = () => {
                             <li>2. <strong>Missions</strong> : Liste de 3 à 5 missions principales</li>
                             <li>3. <strong>Résultats</strong> : 2 à 3 résultats quantifiables avec chiffres</li>
                           </ul>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Générateur d'accroches courtes */}
+            <TabsContent value="accroches" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    📢 Générateur d'accroches courtes LinkedIn
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <p className="text-gray-600">
+                      Générez 3 pitchs courts et engageants (280 caractères max) pour vos bannières LinkedIn ou messages de contact. 
+                      Clairs, humains, sans jargon.
+                    </p>
+                    
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <label className="font-semibold text-sm mb-2 block">
+                          Voici mon métier : <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          placeholder="ex. Conseiller en insertion professionnelle"
+                          value={pitchJob}
+                          onChange={(e) => setPitchJob(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="font-semibold text-sm mb-2 block">
+                          Mon audience cible : <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          placeholder="ex. demandeurs d'emploi, recruteurs"
+                          value={pitchAudience}
+                          onChange={(e) => setPitchAudience(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="font-semibold text-sm mb-2 block">
+                          Ce que je veux transmettre : <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          placeholder="ex. je peux vous aider à retrouver confiance et emploi"
+                          value={pitchMessage}
+                          onChange={(e) => setPitchMessage(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <Button 
+                      onClick={generatePitches}
+                      disabled={isGeneratingPitches}
+                      className="w-full"
+                    >
+                      {isGeneratingPitches ? 'Génération en cours...' : 'Générer mes 3 accroches courtes'}
+                    </Button>
+                  </div>
+
+                  {generatedPitches.length > 0 && (
+                    <>
+                      <Separator />
+                      
+                      <div className="space-y-4">
+                        <h3 className="font-semibold text-lg">Vos 3 accroches optimisées :</h3>
+                        
+                        <div className="space-y-3">
+                          {generatedPitches.map((pitch, index) => (
+                            <div key={index} className="bg-gray-50 p-4 rounded-lg border-l-4 border-primary">
+                              <div className="flex justify-between items-start mb-2">
+                                <h4 className="font-semibold text-sm text-primary">Accroche #{index + 1}</h4>
+                                <span className={`text-xs px-2 py-1 rounded ${
+                                  pitch.length <= 280 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                }`}>
+                                  {pitch.length}/280 caractères
+                                </span>
+                              </div>
+                              <p className="text-gray-700 font-medium leading-relaxed mb-3">{pitch}</p>
+                              <Button
+                                onClick={() => navigator.clipboard.writeText(pitch)}
+                                variant="outline"
+                                size="sm"
+                              >
+                                📋 Copier cette accroche
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => setGeneratedPitches([])}
+                            variant="outline"
+                            size="sm"
+                          >
+                            ✏️ Générer de nouvelles accroches
+                          </Button>
+                        </div>
+                        
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <h4 className="font-semibold text-sm mb-2">💡 Utilisations suggérées :</h4>
+                          <ul className="text-sm text-gray-600 space-y-1">
+                            <li>• <strong>Bannière LinkedIn</strong> : Ajoutez une accroche sur votre image de bannière</li>
+                            <li>• <strong>Messages de contact</strong> : Utilisez comme accroche dans vos invitations de connexion</li>
+                            <li>• <strong>Bio courte</strong> : Pour les événements networking ou cartes de visite digitales</li>
+                            <li>• <strong>Signatures e-mail</strong> : Ajoutez une touche personnelle à vos mails</li>
+                          </ul>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Ces accroches sont conçues pour être humaines, engageantes et sans jargon professionnel.
+                          </p>
                         </div>
                       </div>
                     </>
