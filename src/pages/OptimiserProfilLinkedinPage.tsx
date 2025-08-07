@@ -46,6 +46,14 @@ const OptimiserProfilLinkedinPage = () => {
   const [generatedExperience, setGeneratedExperience] = useState('');
   const [isGeneratingExperience, setIsGeneratingExperience] = useState(false);
 
+  // États pour le générateur de titre
+  const [titleJob, setTitleJob] = useState('');
+  const [titleSector, setTitleSector] = useState('');
+  const [titleSkills, setTitleSkills] = useState('');
+  const [titleObjective, setTitleObjective] = useState('');
+  const [generatedTitles, setGeneratedTitles] = useState<string[]>([]);
+  const [isGeneratingTitles, setIsGeneratingTitles] = useState(false);
+
   const handleChecklistToggle = (item: string) => {
     if (checkedItems.includes(item)) {
       setCheckedItems(checkedItems.filter(i => i !== item));
@@ -165,6 +173,33 @@ const OptimiserProfilLinkedinPage = () => {
     }
   };
 
+  const generateTitles = async () => {
+    if (!titleJob.trim() || !titleSector.trim() || !titleSkills.trim() || !titleObjective.trim()) {
+      alert('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    setIsGeneratingTitles(true);
+    try {
+      // Simuler un appel API pour générer les titres
+      // En production, cela ferait appel à une fonction edge avec OpenAI
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Exemples de titres générés (adaptés selon les inputs)
+      const mockTitles = [
+        `${titleJob} | ${titleSkills.split(',')[0]?.trim()} & ${titleSkills.split(',')[1]?.trim()} | ${titleSector}`,
+        `Expert(e) ${titleJob} • ${titleSkills.split(',')[0]?.trim()} • ${titleObjective.includes('poste') ? 'Ouvert(e) aux opportunités' : 'Développement expertise'}`,
+        `${titleJob} passionné(e) | ${titleSector} | ${titleSkills.split(',')[0]?.trim()} • ${titleSkills.split(',')[1]?.trim()}`
+      ].map(title => title.length > 120 ? title.substring(0, 117) + '...' : title);
+      
+      setGeneratedTitles(mockTitles);
+    } catch (error) {
+      alert('Erreur lors de la génération des titres');
+    } finally {
+      setIsGeneratingTitles(false);
+    }
+  };
+
   const checklistItems = [
     'Photo de profil professionnelle et souriante',
     'Bannière personnalisée reflétant votre secteur',
@@ -273,10 +308,11 @@ const OptimiserProfilLinkedinPage = () => {
 
           {/* Contenu principal avec onglets */}
           <Tabs defaultValue="checklist" className="w-full">
-            <TabsList className="grid w-full grid-cols-7">
+            <TabsList className="grid w-full grid-cols-8">
               <TabsTrigger value="checklist">Checklist</TabsTrigger>
               <TabsTrigger value="resume">Résumé</TabsTrigger>
               <TabsTrigger value="about">À propos</TabsTrigger>
+              <TabsTrigger value="titre">Titre</TabsTrigger>
               <TabsTrigger value="experiences">Expériences</TabsTrigger>
               <TabsTrigger value="keywords">Mots-clés</TabsTrigger>
               <TabsTrigger value="skills">Compétences</TabsTrigger>
@@ -530,6 +566,136 @@ const OptimiserProfilLinkedinPage = () => {
                             <li>2. <strong>Ce que je fais</strong> : Compétences + réalisations chiffrées</li>
                             <li>3. <strong>Ce que je cherche</strong> : Objectifs + mots-clés sectoriels</li>
                           </ul>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Générateur de titre LinkedIn */}
+            <TabsContent value="titre" className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    🎯 Générateur de titre LinkedIn percutant
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <p className="text-gray-600">
+                      Générez 3 titres LinkedIn professionnels et percutants, optimisés pour les recruteurs 
+                      et les algorithmes de recherche (120 caractères max).
+                    </p>
+                    
+                    <div className="grid grid-cols-1 gap-4">
+                      <div>
+                        <label className="font-semibold text-sm mb-2 block">
+                          Voici mon métier : <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          placeholder="ex. Chargé de recrutement"
+                          value={titleJob}
+                          onChange={(e) => setTitleJob(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="font-semibold text-sm mb-2 block">
+                          Voici mon secteur d'activité : <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          placeholder="ex. IT – Startups"
+                          value={titleSector}
+                          onChange={(e) => setTitleSector(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="font-semibold text-sm mb-2 block">
+                          Voici mes compétences clés : <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          placeholder="ex. sourcing, entretiens, onboarding"
+                          value={titleSkills}
+                          onChange={(e) => setTitleSkills(e.target.value)}
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Séparez vos compétences par des virgules</p>
+                      </div>
+                      
+                      <div>
+                        <label className="font-semibold text-sm mb-2 block">
+                          Voici ce que je recherche actuellement : <span className="text-red-500">*</span>
+                        </label>
+                        <Input
+                          placeholder="ex. un nouveau poste / plus de visibilité"
+                          value={titleObjective}
+                          onChange={(e) => setTitleObjective(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <Button 
+                      onClick={generateTitles}
+                      disabled={isGeneratingTitles}
+                      className="w-full"
+                    >
+                      {isGeneratingTitles ? 'Génération en cours...' : 'Générer mes 3 titres LinkedIn'}
+                    </Button>
+                  </div>
+
+                  {generatedTitles.length > 0 && (
+                    <>
+                      <Separator />
+                      
+                      <div className="space-y-4">
+                        <h3 className="font-semibold text-lg">Vos 3 titres LinkedIn optimisés :</h3>
+                        
+                        <div className="space-y-3">
+                          {generatedTitles.map((title, index) => (
+                            <div key={index} className="bg-gray-50 p-4 rounded-lg border-l-4 border-primary">
+                              <div className="flex justify-between items-start mb-2">
+                                <h4 className="font-semibold text-sm text-primary">Titre #{index + 1}</h4>
+                                <span className={`text-xs px-2 py-1 rounded ${
+                                  title.length <= 120 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                }`}>
+                                  {title.length}/120 caractères
+                                </span>
+                              </div>
+                              <p className="text-gray-700 font-medium leading-relaxed">{title}</p>
+                              <Button
+                                onClick={() => navigator.clipboard.writeText(title)}
+                                variant="outline"
+                                size="sm"
+                                className="mt-2"
+                              >
+                                📋 Copier ce titre
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => setGeneratedTitles([])}
+                            variant="outline"
+                            size="sm"
+                          >
+                            ✏️ Générer de nouveaux titres
+                          </Button>
+                        </div>
+                        
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <h4 className="font-semibold text-sm mb-2">💡 Formules utilisées :</h4>
+                          <ul className="text-sm text-gray-600 space-y-1">
+                            <li>1. <strong>[Métier] | [Compétence 1] & [Compétence 2] | [Secteur]</strong></li>
+                            <li>2. <strong>Expert(e) [Métier] • [Compétence] • [Objectif adapté]</strong></li>
+                            <li>3. <strong>[Métier] passionné(e) | [Secteur] | [Compétences clés]</strong></li>
+                          </ul>
+                          <p className="text-xs text-gray-500 mt-2">
+                            Ces titres sont optimisés pour les mots-clés de recherche des recruteurs et l'algorithme LinkedIn.
+                          </p>
                         </div>
                       </div>
                     </>
