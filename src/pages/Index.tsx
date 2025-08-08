@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { StatsOverview } from "@/components/StatsOverview";
 import { ApplicationStats } from "@/components/ApplicationStats";
@@ -9,9 +9,24 @@ import { OverviewFocusAreas } from "@/components/OverviewFocusAreas";
 import { GoalsModule } from "@/components/GoalsModule";
 import WebzinesAnthea from "@/components/WebzinesAnthea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { testOpenAIKey } from "@/utils/testApiKey";
+import { toast } from "sonner";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("overview");
+
+  useEffect(() => {
+    const runApiTest = async () => {
+      const isWorking = await testOpenAIKey();
+      if (isWorking) {
+        toast.success("✅ Clé API OpenAI configurée et fonctionnelle !");
+      } else {
+        toast.error("❌ Problème avec la clé API OpenAI");
+      }
+    };
+    
+    runApiTest();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
