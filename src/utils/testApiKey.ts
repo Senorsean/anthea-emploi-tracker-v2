@@ -6,10 +6,15 @@ export const testOpenAIKey = async (): Promise<boolean> => {
     
     const { data, error } = await supabase.functions.invoke('generate-career-path', {
       body: {
-        userProfile: "Test de connexion API",
-        targetRole: "Test",
-        experience: "1 an",
-        skills: ["Test"]
+        careerData: {
+          jobTitle: "Test",
+          experience: 1,
+          industry: "Test",
+          teamSize: "1",
+          scope: "Test",
+          education: "Test",
+          location: "Test"
+        }
       }
     });
 
