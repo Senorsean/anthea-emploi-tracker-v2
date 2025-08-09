@@ -208,7 +208,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_shared_resume: {
+        Args: { token: string }
+        Returns: {
+          resume_id: string
+          title: string
+          template_id: number
+          color_scheme_id: number
+          personal_info: Json
+          experiences: Json
+          education: Json
+          skills: Json
+          languages: Json
+          interests: Json
+          custom_sections: Json
+          is_public: boolean
+          qr_code_url: string
+          pdf_url: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
