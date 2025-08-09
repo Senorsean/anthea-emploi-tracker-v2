@@ -68,6 +68,13 @@ export const OverviewFocusAreas = () => {
       link: '/tester-connaissances',
       external: false,
     },
+    {
+      title: 'AIre de mobilité',
+      description:
+        'Identifiez les zones géographiques adaptées à votre profil et vos objectifs.',
+      link: '/aire-mobilite',
+      external: false,
+    },
   ];
 
   return (

@@ -23,10 +23,10 @@ import TauxReponsePage from "./pages/TauxReponsePage";
 import ApprentissageCompetencesPage from "./pages/ApprentissageCompetencesPage";
 import IntelligenceMarcheePage from "./pages/IntelligenceMarcheePage";
 import TesterConnaissancesPage from "./pages/TesterConnaissancesPage";
+import AireMobilitePage from "./pages/AireMobilitePage";
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 import { JobsProvider } from "@/hooks/useJobs";
-
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -179,6 +179,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <TesterConnaissancesPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/aire-mobilite"
+            element={
+              <RequireAuth>
+                <AireMobilitePage />
               </RequireAuth>
             }
           />
