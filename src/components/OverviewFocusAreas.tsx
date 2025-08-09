@@ -16,7 +16,7 @@ export const OverviewFocusAreas = () => {
       title: 'Créer votre CV',
       description:
         'Générez un CV professionnel en quelques minutes avec des modèles adaptés.',
-      link: 'https://cv-compass-generator.lovable.app/',
+      link: 'https://anthea-cv-ready.lovable.app/',
       external: true,
     },
     {
