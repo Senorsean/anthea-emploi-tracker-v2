@@ -110,14 +110,26 @@ const AireMobilitePage: React.FC = () => {
 
   // Related occupations (Edge Function)
   const fetchRelated = async () => {
+    // Fallback: if no explicit selection, use first filtered result
+    const occId = searchProfile.occupation_id || filteredOccupations[0]?.id || null;
+    if (!occId) {
+      toast.error('Sélectionnez un métier cible (ou tapez puis choisissez dans la liste)');
+      return;
+    }
+
+    // If we auto-picked the first match, persist it in state for clarity
+    if (!searchProfile.occupation_id) {
+      setSearchProfile((p) => ({ ...p, occupation_id: occId }));
+    }
+
     setLoading(true);
     try {
       const { data, error } = await (supabase as any).functions.invoke('related-occupations', {
-        body: { occupation_id: searchProfile.occupation_id, tiers: searchProfile.tiers }
+        body: { occupation_id: occId, tiers: searchProfile.tiers }
       });
       if (error) throw error;
       const related = Array.isArray(data?.related) ? data.related : [];
-      const target = searchProfile.occupation_id ? [searchProfile.occupation_id] : [];
+      const target = occId ? [occId] : [];
       const queries = Array.from(new Set([ ...target, ...related.map((r: any) => r.target_id) ]));
       setDerived(prev => ({ ...prev, related_occupations: related, queries }));
       await refreshOffers(queries);
