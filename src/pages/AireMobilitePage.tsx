@@ -1,100 +1,393 @@
-import React, { useEffect } from 'react';
-import { ArrowLeft, MapPin } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowLeft, Building2, MapPin, RefreshCw, Save, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import MapboxCircle from '@/components/MapboxCircle';
 
-const AireMobilitePage = () => {
-  // Basic SEO: title, description, canonical
+// Simple department list (can be moved to data file later)
+const DEPARTEMENTS = [
+  '01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','2A','2B','21','22','23','24','25','26','27','28','29','30','31','32','33','34','35','36','37','38','39','40','41','42','43','44','45','46','47','48','49','50','51','52','53','54','55','56','57','58','59','60','61','62','63','64','65','66','67','68','69','70','71','72','73','74','75','76','77','78','79','80','81','82','83','84','85','86','87','88','89','90','91','92','93','94','95'
+];
+
+interface Occupation { id: string; label: string; aliases?: string[] | null }
+
+const AireMobilitePage: React.FC = () => {
+  const [occupations, setOccupations] = useState<Occupation[]>([]);
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const [mobilityArea, setMobilityArea] = useState({
+    id: null as string | null,
+    is_active: true,
+    base_address: '',
+    base_lat: null as number | null,
+    base_lng: null as number | null,
+    radius_km: 25,
+    allowed_departments: [] as string[],
+    allowed_cities: [] as string[],
+    remote_ok: true,
+    hybrid_ok: true,
+    relocation_ok: false,
+    max_commute_time_min: 60,
+    travel_modes: ['car','public','bike','walk'] as string[],
+  });
+
+  const [searchProfile, setSearchProfile] = useState({
+    occupation_id: null as string | null,
+    tiers: ['PROCHE','VOISIN'] as Array<'PROCHE'|'VOISIN'|'ELARGI'>,
+    thresholds: { PROCHE: 0.75, VOISIN: 0.60, ELARGI: 0.45 },
+    include_remote: true,
+  });
+
+  const [derived, setDerived] = useState({
+    related_occupations: [] as Array<{ target_id: string; score?: number }>,
+    queries: [] as string[],
+    offers_preview: [] as any[],
+    stats: { IN_AREA: 0, LIMIT: 0, OUT_AREA: 0, TARGET: 0, PROCHE: 0, VOISIN: 0, ELARGI: 0 },
+  });
+
+  // Load occupations (first 50, alphabetic)
   useEffect(() => {
-    const title = 'Aire de mobilité | Anthea RH';
-    const description =
-      "Identifiez vos zones géographiques cibles avec l'aide de l'IA pour accélérer votre recherche d'emploi.";
-    document.title = title;
-
-    const metaDescId = 'meta-description-aire-mobilite';
-    let meta = document.querySelector(`meta[name="description"]#${metaDescId}`) as HTMLMetaElement | null;
-    if (!meta) {
-      meta = document.createElement('meta');
-      meta.name = 'description';
-      meta.id = metaDescId;
-      document.head.appendChild(meta);
-    }
-    meta.content = description;
-
-    const linkRelCanonicalId = 'canonical-aire-mobilite';
-    let canonical = document.querySelector(`link[rel="canonical"]#${linkRelCanonicalId}`) as HTMLLinkElement | null;
-    if (!canonical) {
-      canonical = document.createElement('link');
-      canonical.rel = 'canonical';
-      canonical.id = linkRelCanonicalId;
-      document.head.appendChild(canonical);
-    }
-    canonical.href = `${window.location.origin}/aire-mobilite`;
+    const load = async () => {
+      const { data, error } = await (supabase as any)
+        .from('occupations')
+        .select('id,label,aliases')
+        .order('label', { ascending: true })
+        .limit(50);
+      if (error) {
+        console.error(error);
+      } else {
+        setOccupations(data || []);
+      }
+    };
+    load();
   }, []);
+
+  // Search filter
+  const filteredOccupations = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return occupations;
+    return occupations.filter(o =>
+      o.label.toLowerCase().includes(q) ||
+      (o.aliases || []).some(a => a.toLowerCase().includes(q))
+    );
+  }, [occupations, search]);
+
+  // Geocode via Mapbox public token in localStorage
+  const geocode = async (query: string) => {
+    const token = localStorage.getItem('MAPBOX_PUBLIC_TOKEN');
+    if (!token) {
+      toast.warning('Ajoutez votre MAPBOX_PUBLIC_TOKEN dans le localStorage.');
+      return;
+    }
+    try {
+      const resp = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${token}`);
+      const json = await resp.json();
+      const feat = json.features?.[0];
+      if (feat) {
+        const [lng, lat] = feat.center;
+        setMobilityArea(prev => ({ ...prev, base_address: feat.place_name, base_lat: lat, base_lng: lng }));
+        toast.success('Adresse définie');
+      } else {
+        toast.error('Adresse introuvable');
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error("Erreur de géocodage");
+    }
+  };
+
+  // Related occupations (Edge Function)
+  const fetchRelated = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await (supabase as any).functions.invoke('related-occupations', {
+        body: { occupation_id: searchProfile.occupation_id, tiers: searchProfile.tiers }
+      });
+      if (error) throw error;
+      const related = Array.isArray(data?.related) ? data.related : [];
+      const target = searchProfile.occupation_id ? [searchProfile.occupation_id] : [];
+      const queries = Array.from(new Set([ ...target, ...related.map((r: any) => r.target_id) ]));
+      setDerived(prev => ({ ...prev, related_occupations: related, queries }));
+      await refreshOffers(queries);
+    } catch (e: any) {
+      console.error(e);
+      toast.error('Erreur lors de la récupération des métiers liés');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refreshOffers = async (queries?: string[]) => {
+    setLoading(true);
+    try {
+      const session = await (supabase as any).auth.getSession();
+      const userId = session.data.session?.user?.id;
+      const { data, error } = await (supabase as any).functions.invoke('filter-offers-by-mobility', {
+        body: {
+          user_id: userId,
+          occupation_id: searchProfile.occupation_id,
+          related_occupation_ids: (queries || derived.queries).filter(Boolean),
+          tiers: searchProfile.tiers,
+          mobility: mobilityArea,
+        }
+      });
+      if (error) throw error;
+      const offers = Array.isArray(data?.offers) ? data.offers : [];
+      const stats: any = { IN_AREA:0, LIMIT:0, OUT_AREA:0, TARGET:0, PROCHE:0, VOISIN:0, ELARGI:0 };
+      for (const o of offers) {
+        if (o.mobility_status) stats[o.mobility_status] = (stats[o.mobility_status] || 0) + 1;
+        if (o.occupation_match) stats[o.occupation_match] = (stats[o.occupation_match] || 0) + 1;
+      }
+      setDerived(prev => ({ ...prev, offers_preview: offers, stats }));
+    } catch (e: any) {
+      console.error(e);
+      toast.error('Erreur lors de la mise à jour des offres');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveAll = async () => {
+    try {
+      const { data: sess } = await (supabase as any).auth.getUser();
+      const userId = sess.user?.id;
+      if (!userId) {
+        toast.error('Utilisateur non authentifié');
+        return;
+      }
+      const payload = { ...mobilityArea, user_id: userId } as any;
+      const { data, error } = await (supabase as any)
+        .from('mobility_area')
+        .upsert(payload)
+        .select('id')
+        .single();
+      if (error) throw error;
+      setMobilityArea(prev => ({ ...prev, id: data.id }));
+      toast.success('Profil de mobilité sauvegardé');
+      await fetchRelated();
+    } catch (e: any) {
+      console.error(e);
+      toast.error('Échec de la sauvegarde');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <header className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-4 py-4">
           <Link to="/" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900">
-            <ArrowLeft className="h-4 w-4" />
-            Retour à l'accueil
+            <ArrowLeft className="h-4 w-4" /> Retour à l'accueil
           </Link>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-10">
+      <main className="container mx-auto px-4 py-8">
         <section className="text-center max-w-3xl mx-auto mb-10">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Aire de mobilité</h1>
-          <p className="text-lg text-gray-600">
-            Déterminez où concentrer vos candidatures et vos efforts réseau selon votre profil,
-            vos contraintes et vos ambitions.
-          </p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-3">Aire de mobilité</h1>
+          <p className="text-gray-600 text-lg">Déterminez où concentrer vos candidatures et vos efforts réseau.</p>
         </section>
 
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          <Card className="h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-1">
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <span className="p-2 bg-[#a4007c]/10 rounded-md">
-                  <MapPin className="h-5 w-5 text-[#a4007c]" />
-                </span>
-                <CardTitle className="text-lg">Définir vos préférences</CardTitle>
+              <CardTitle className="text-lg">Métier cible & extension</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="search-m">Métier cible</Label>
+                <div className="flex gap-2">
+                  <Input id="search-m" placeholder="Rechercher un métier..." value={search} onChange={(e) => setSearch(e.target.value)} />
+                </div>
+                <div className="max-h-48 overflow-auto border rounded">
+                  {filteredOccupations.map((o) => (
+                    <button
+                      key={o.id}
+                      className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${searchProfile.occupation_id===o.id ? 'bg-gray-50' : ''}`}
+                      onClick={() => setSearchProfile(p => ({ ...p, occupation_id: o.id }))}
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                  {!filteredOccupations.length && (
+                    <div className="px-3 py-2 text-sm text-gray-500">Aucun résultat</div>
+                  )}
+                </div>
               </div>
-            </CardHeader>
-            <CardContent className="text-sm text-gray-600">
-              Sélectionnez vos villes cibles, votre rayon de mobilité et vos critères (télétravail,
-              transports, qualité de vie).
+
+              <div className="space-y-2">
+                <Label>Étendue métiers</Label>
+                <ToggleGroup type="multiple" value={searchProfile.tiers} onValueChange={(v: any) => setSearchProfile(p => ({ ...p, tiers: v }))}>
+                  <ToggleGroupItem value="PROCHE">Proches</ToggleGroupItem>
+                  <ToggleGroupItem value="VOISIN">Voisins</ToggleGroupItem>
+                  <ToggleGroupItem value="ELARGI">Élargis</ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+
+              <Button className="w-full" variant="secondary" onClick={fetchRelated} disabled={loading}>
+                <Search className="h-4 w-4 mr-2" /> Calculer les métiers inclus
+              </Button>
+
+              <div className="space-y-2">
+                <Label>Métiers inclus</Label>
+                <div className="flex flex-wrap gap-2">
+                  {derived.queries.map((q) => (
+                    <Badge key={q} variant="secondary">{q}</Badge>
+                  ))}
+                  {!derived.queries.length && (
+                    <span className="text-xs text-gray-500">Sélectionnez un métier pour voir les correspondances</span>
+                  )}
+                </div>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="h-full">
+          <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle className="text-lg">Analyser les bassins d'emploi</CardTitle>
+              <CardTitle className="text-lg">Zone & contraintes</CardTitle>
             </CardHeader>
-            <CardContent className="text-sm text-gray-600">
-              Visualisez les zones à forte demande pour votre métier et votre niveau d'expérience.
-            </CardContent>
-          </Card>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Adresse de base</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Saisir une adresse"
+                      value={mobilityArea.base_address}
+                      onChange={(e) => setMobilityArea(a => ({ ...a, base_address: e.target.value }))}
+                    />
+                    <Button type="button" variant="secondary" onClick={() => geocode(mobilityArea.base_address)}>
+                      <MapPin className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
 
-          <Card className="h-full">
-            <CardHeader>
-              <CardTitle className="text-lg">Identifier les entreprises cibles</CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-gray-600">
-              Repérez les entreprises pertinentes par secteur, taille et dynamique de recrutement.
+                <div className="space-y-2">
+                  <Label>Rayon (km)</Label>
+                  <Slider
+                    min={0}
+                    max={150}
+                    step={1}
+                    value={[mobilityArea.radius_km]}
+                    onValueChange={(v) => setMobilityArea(a => ({ ...a, radius_km: v[0] }))}
+                    onValueCommit={() => refreshOffers()}
+                  />
+                </div>
+              </div>
+
+              <MapboxCircle lat={mobilityArea.base_lat} lng={mobilityArea.base_lng} radiusKm={mobilityArea.radius_km} />
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Départements autorisés</Label>
+                  <Input
+                    placeholder="Ex: 33, 75, 92 (séparés par des virgules)"
+                    value={mobilityArea.allowed_departments.join(', ')}
+                    onChange={(e) => setMobilityArea(a => ({ ...a, allowed_departments: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Villes autorisées</Label>
+                  <Textarea
+                    placeholder="Ex: Bordeaux, Paris 15e"
+                    value={mobilityArea.allowed_cities.join(', ')}
+                    onChange={(e) => setMobilityArea(a => ({ ...a, allowed_cities: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="flex items-center justify-between border rounded p-3">
+                  <div className="space-y-1">
+                    <Label>Télétravail</Label>
+                    <p className="text-xs text-gray-500">Inclure les offres remote</p>
+                  </div>
+                  <Switch checked={mobilityArea.remote_ok} onCheckedChange={(v) => setMobilityArea(a => ({ ...a, remote_ok: v }))} />
+                </div>
+                <div className="flex items-center justify-between border rounded p-3">
+                  <div className="space-y-1">
+                    <Label>Hybride</Label>
+                    <p className="text-xs text-gray-500">Jours sur site acceptés</p>
+                  </div>
+                  <Switch checked={mobilityArea.hybrid_ok} onCheckedChange={(v) => setMobilityArea(a => ({ ...a, hybrid_ok: v }))} />
+                </div>
+                <div className="flex items-center justify-between border rounded p-3">
+                  <div className="space-y-1">
+                    <Label>Temps trajet max (min)</Label>
+                    <Input type="number" value={mobilityArea.max_commute_time_min}
+                      onChange={(e) => setMobilityArea(a => ({ ...a, max_commute_time_min: Number(e.target.value) || 0 }))}
+                      onBlur={() => refreshOffers()}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <Button variant="outline" onClick={() => refreshOffers()} disabled={loading}>
+                  <RefreshCw className="h-4 w-4 mr-2" /> Rafraîchir les offres
+                </Button>
+                <Button onClick={saveAll} disabled={loading}>
+                  <Save className="h-4 w-4 mr-2" /> Sauvegarder le profil
+                </Button>
+              </div>
             </CardContent>
           </Card>
+        </div>
+
+        <Separator className="my-8" />
+
+        <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
+          {Object.entries(derived.stats).map(([k,v]) => (
+            <Card key={k}>
+              <CardContent className="py-3">
+                <div className="text-xs text-gray-500">{k}</div>
+                <div className="text-xl font-semibold">{v as any}</div>
+              </CardContent>
+            </Card>
+          ))}
         </section>
 
-        <section className="max-w-xl mx-auto mt-10 text-center">
-          <Button className="w-full bg-[#a4007c] hover:bg-[#8a0066] text-white" asChild>
-            <Link to="/renforcez-votre-reseau">Explorer mon aire de mobilité</Link>
-          </Button>
-          <p className="text-xs text-gray-500 mt-3">
-            Bientôt: intégration IA pour recommandations ultra-personnalisées.
-          </p>
+        <section className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {derived.offers_preview.map((item: any, idx: number) => (
+            <Card key={idx} className="h-full">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center justify-between">
+                  <span className="truncate mr-2">{item.title || item.intitule || 'Offre'}</span>
+                  <span className="text-xs text-gray-500">{item.city || ''}</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div className="text-sm text-gray-600 flex items-center gap-2"><Building2 className="h-4 w-4" /> {item.company || item.entreprise || 'Entreprise'}</div>
+                <div className="text-xs text-gray-500">{item.description?.slice(0, 220)}{item.description?.length > 220 ? '…' : ''}</div>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <Badge variant="outline">Mobilité: {item.mobility_status || '-'}</Badge>
+                  <Badge variant="outline">Métier: {item.occupation_match || '-'}</Badge>
+                  {item.distance_km != null && (
+                    <Badge variant="secondary">{Number(item.distance_km).toFixed(1)} km</Badge>
+                  )}
+                </div>
+                {item.url && (
+                  <div className="text-right">
+                    <a className="text-[#a4007c] hover:underline text-sm" href={item.url} target="_blank" rel="noreferrer">Voir l’offre</a>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+          {!derived.offers_preview.length && (
+            <div className="text-sm text-gray-500">Aucune offre pour l’instant. Ajustez la zone ou les métiers inclus.</div>
+          )}
         </section>
       </main>
     </div>

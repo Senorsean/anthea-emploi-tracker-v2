@@ -191,14 +191,13 @@ const App = () => (
             }
           />
           <Route
-            path="/settings"
+            path="/mobility"
             element={
               <RequireAuth>
-                <Settings />
+                <AireMobilitePage />
               </RequireAuth>
             }
           />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
