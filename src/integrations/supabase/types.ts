@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      mobility_area: {
+        Row: {
+          allowed_cities: string[]
+          allowed_departments: string[]
+          base_address: string | null
+          base_lat: number | null
+          base_lng: number | null
+          created_at: string
+          hybrid_ok: boolean
+          id: string
+          is_active: boolean
+          max_commute_time_min: number
+          radius_km: number
+          relocation_ok: boolean
+          remote_ok: boolean
+          travel_modes: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allowed_cities?: string[]
+          allowed_departments?: string[]
+          base_address?: string | null
+          base_lat?: number | null
+          base_lng?: number | null
+          created_at?: string
+          hybrid_ok?: boolean
+          id?: string
+          is_active?: boolean
+          max_commute_time_min?: number
+          radius_km?: number
+          relocation_ok?: boolean
+          remote_ok?: boolean
+          travel_modes?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allowed_cities?: string[]
+          allowed_departments?: string[]
+          base_address?: string | null
+          base_lat?: number | null
+          base_lng?: number | null
+          created_at?: string
+          hybrid_ok?: boolean
+          id?: string
+          is_active?: boolean
+          max_commute_time_min?: number
+          radius_km?: number
+          relocation_ok?: boolean
+          remote_ok?: boolean
+          travel_modes?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      occupations: {
+        Row: {
+          aliases: string[] | null
+          created_at: string
+          id: string
+          label: string
+          updated_at: string
+        }
+        Insert: {
+          aliases?: string[] | null
+          created_at?: string
+          id?: string
+          label: string
+          updated_at?: string
+        }
+        Update: {
+          aliases?: string[] | null
+          created_at?: string
+          id?: string
+          label?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
