@@ -45,9 +45,11 @@ serve(async (req) => {
       });
     }
 
-    const { occupation_id, tiers } = await req.json();
-    if (!occupation_id) {
-      return new Response(JSON.stringify({ related: [] }), {
+    const { occupation_id, query_label, tiers } = await req.json();
+    const hasId = Boolean(occupation_id);
+    const hasLabel = typeof query_label === 'string' && query_label.trim().length > 0;
+    if (!hasId && !hasLabel) {
+      return new Response(JSON.stringify({ related: [], message: 'No occupation_id or query_label provided' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -60,17 +62,23 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
-    // Load target occupation
-    const { data: target, error: targetErr } = await supabase
-      .from('occupations')
-      .select('id,label,aliases')
-      .eq('id', occupation_id)
-      .single();
-    if (targetErr || !target) {
-      console.error('target occupation not found', targetErr);
-      return new Response(JSON.stringify({ related: [] }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
+    // Resolve target occupation (from DB when id provided) or use label fallback
+    let target: { id: string | null; label: string; aliases?: string[] | null } | null = null;
+    if (hasId) {
+      const { data: t, error: targetErr } = await supabase
+        .from('occupations')
+        .select('id,label,aliases')
+        .eq('id', occupation_id)
+        .single();
+      if (targetErr || !t) {
+        console.error('target occupation not found', targetErr);
+        return new Response(JSON.stringify({ related: [] }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      target = { id: t.id, label: t.label, aliases: t.aliases || [] };
+    } else if (hasLabel) {
+      target = { id: null, label: String(query_label).trim(), aliases: [] };
     }
 
     // Load catalog (limit to keep prompt small)
@@ -85,14 +93,14 @@ serve(async (req) => {
 
     const catalogForAI = (catalog || []).map((o) => ({ id: o.id, label: o.label, aliases: o.aliases || [] })).slice(0, 600);
 
-    const systemPrompt = `Tu es un assistant RH français. Donne des métiers \"proches\", \"voisins\" et \"élargis\" par rapport à un métier cible (en France). 
-- \"Proches\": intitulé quasi identique / même famille métier
-- \"Voisins\": compétences très similaires, passerelle évidente
-- \"Élargis\": périmètre élargi mais encore pertinent
+    const systemPrompt = `Tu es un assistant RH français. Donne des métiers "proches", "voisins" et "élargis" par rapport à un métier cible (en France). 
+- "Proches": intitulé quasi identique / même famille métier
+- "Voisins": compétences très similaires, passerelle évidente
+- "Élargis": périmètre élargi mais encore pertinent
 Réponds uniquement en JSON compact avec les clés proches, voisins, elargi (tableaux de libellés). Maximum 10 éléments par niveau. N'inclus pas le métier cible.`;
 
     const userPrompt = {
-      target: { id: target.id, label: target.label, aliases: target.aliases || [] },
+      target: { id: target?.id, label: target?.label, aliases: target?.aliases || [] },
       tiers: Array.isArray(tiers) ? tiers : ['PROCHE','VOISIN','ELARGI'],
       catalog_sample: catalogForAI.map((c) => ({ label: c.label, aliases: c.aliases })).slice(0, 200),
       format: {
@@ -112,7 +120,7 @@ Réponds uniquement en JSON compact avec les clés proches, voisins, elargi (tab
         model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Cible: ${target.label}. Aliases: ${(target.aliases || []).join(', ')}\nCatalogue (extrait): ${JSON.stringify(userPrompt.catalog_sample)}\nTiers demandés: ${JSON.stringify(userPrompt.tiers)}\nFormat strict JSON: ${JSON.stringify(userPrompt.format)}` }
+          { role: 'user', content: `Cible: ${target?.label}. Aliases: ${(target?.aliases || []).join(', ')}\nCatalogue (extrait): ${JSON.stringify(userPrompt.catalog_sample)}\nTiers demandés: ${JSON.stringify(userPrompt.tiers)}\nFormat strict JSON: ${JSON.stringify(userPrompt.format)}` }
         ],
         temperature: 0.3,
       }),
@@ -177,9 +185,11 @@ Réponds uniquement en JSON compact avec les clés proches, voisins, elargi (tab
       const list: string[] = Array.isArray(parsed?.[key]) ? parsed[key] : [];
       for (const name of list) {
         const id = matchToId(name);
-        if (id && id !== occupation_id && !relatedSet.has(id)) {
-          relatedSet.add(id);
-          related.push({ target_id: id, score: scores[t] ?? 0.6, tier: t });
+        const idToUse = id || name; // fallback to label when no mapping found
+        const isSameAsTarget = hasId ? (idToUse === occupation_id) : (normalize(name) === normalize(target?.label || ''));
+        if (!isSameAsTarget && !relatedSet.has(idToUse)) {
+          relatedSet.add(idToUse);
+          related.push({ target_id: idToUse, score: scores[t] ?? 0.6, tier: t });
         }
       }
     }
