@@ -1,1 +1,4 @@
 project_id = "gefunbsxfofqvwvvqgnb"
+
+[functions.fetch-indeed-listings]
+verify_jwt = true

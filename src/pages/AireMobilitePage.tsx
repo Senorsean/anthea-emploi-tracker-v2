@@ -14,6 +14,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import MapboxCircle from '@/components/MapboxCircle';
+import { useJobs } from '@/hooks/useJobs';
 
 // Simple department list (can be moved to data file later)
 const DEPARTEMENTS = [
@@ -56,6 +57,65 @@ const AireMobilitePage: React.FC = () => {
     offers_preview: [] as any[],
     stats: { IN_AREA: 0, LIMIT: 0, OUT_AREA: 0, TARGET: 0, PROCHE: 0, VOISIN: 0, ELARGI: 0 },
   });
+
+  const { jobs, setJobs } = useJobs();
+
+  const [indeedKeyword, setIndeedKeyword] = useState('software engineer');
+  const [indeedDomain, setIndeedDomain] = useState('www.indeed.com');
+  const [indeedUseAllowedCities, setIndeedUseAllowedCities] = useState(true);
+  const [indeedResults, setIndeedResults] = useState<any[]>([]);
+  const [indeedLoading, setIndeedLoading] = useState(false);
+
+  const fetchIndeed = async () => {
+    setIndeedLoading(true);
+    try {
+      const { data, error } = await (supabase as any).functions.invoke('fetch-indeed-listings', {
+        body: {
+          keyword: indeedKeyword,
+          domain: indeedDomain,
+          mobility: mobilityArea,
+          useAllowedCities: indeedUseAllowedCities,
+        }
+      });
+      if (error) throw error;
+      const items = Array.isArray(data?.results) ? data.results : [];
+      setIndeedResults(items);
+      toast.success(`${items.length} offres Indeed trouvées`);
+    } catch (e: any) {
+      console.error(e);
+      toast.error('Échec de la récupération des offres Indeed');
+    } finally {
+      setIndeedLoading(false);
+    }
+  };
+
+  const addToKanban = (item: any) => {
+    try {
+      const newJob = {
+        id: crypto.randomUUID(),
+        title: item.title || item.jobTitle || 'Offre Indeed',
+        company: item.company || item.companyName || '',
+        location: item.location || item.city || '',
+        priority: 'medium',
+        label: 'Indeed',
+        url: item.url || item.jobUrl || item.link || '',
+        dateAdded: new Date().toISOString().split('T')[0],
+        interviewDate: undefined,
+        followUpDate: undefined,
+        offerStatus: undefined,
+        offerType: undefined,
+      } as any;
+      setJobs((prev: any) => {
+        const next = { ...prev };
+        next.offer = [newJob, ...(prev.offer || [])];
+        return next;
+      });
+      toast.success('Ajouté au Kanban');
+    } catch (e) {
+      console.error(e);
+      toast.error("Impossible d'ajouter au Kanban");
+    }
+  };
 
   // Load occupations (first 50, alphabetic)
   useEffect(() => {
@@ -405,6 +465,62 @@ const AireMobilitePage: React.FC = () => {
           {!derived.offers_preview.length && (
             <div className="text-sm text-gray-500">Aucune offre pour l’instant. Ajustez la zone ou les métiers inclus.</div>
           )}
+        </section>
+
+        <Separator className="my-8" />
+
+        <section className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Offres Indeed</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Mot-clé</Label>
+                  <Input value={indeedKeyword} onChange={(e) => setIndeedKeyword(e.target.value)} placeholder="software engineer" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Domaine</Label>
+                  <Input value={indeedDomain} onChange={(e) => setIndeedDomain(e.target.value)} placeholder="www.indeed.com" />
+                </div>
+                <div className="flex items-center justify-between border rounded p-3">
+                  <div className="space-y-1">
+                    <Label>Villes autorisées</Label>
+                    <p className="text-xs text-gray-500">Utiliser la liste plutôt que l’adresse de base</p>
+                  </div>
+                  <Switch checked={indeedUseAllowedCities} onCheckedChange={setIndeedUseAllowedCities} />
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button onClick={fetchIndeed} disabled={indeedLoading}>
+                  <Search className="h-4 w-4 mr-2" /> Chercher sur Indeed
+                </Button>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {indeedResults.map((r: any, idx: number) => (
+                  <Card key={idx}>
+                    <CardHeader>
+                      <CardTitle className="text-base truncate">{r.title || r.jobTitle || 'Offre Indeed'}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <div className="text-sm text-gray-600 flex items-center gap-2"><Building2 className="h-4 w-4" /> {r.company || r.companyName || ''}</div>
+                      <div className="text-xs text-gray-500">{r.location || r.city || ''}</div>
+                      <div className="flex items-center justify-between">
+                        {(r.url || r.jobUrl) ? (
+                          <a className="text-[#a4007c] hover:underline text-sm" href={(r.url || r.jobUrl)} target="_blank" rel="noreferrer">Voir</a>
+                        ) : <span />}
+                        <Button size="sm" variant="secondary" onClick={() => addToKanban(r)}>Ajouter au Kanban</Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                {!indeedResults.length && (
+                  <div className="text-sm text-gray-500">Lancez une recherche pour voir les offres Indeed.</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </section>
       </main>
     </div>
