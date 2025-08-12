@@ -35,6 +35,21 @@ serve(async (req: Request): Promise<Response> => {
       locations = [baseAddress];
     }
 
+    // Normalize locations to include country context for better matching (e.g., "Paris, France")
+    const expandLocation = (loc: string): string[] => {
+      const l = String(loc || '').trim();
+      if (!l) return [];
+      if (/,/.test(l) || /france/i.test(l) || /\bFR\b/i.test(l)) return [l];
+      return [`${l}, France`, l];
+    };
+    const seen = new Set<string>();
+    locations = locations.flatMap(expandLocation).filter((l) => {
+      const key = l.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, 8);
+
     if (!locations.length) {
       return new Response(
         JSON.stringify({ results: [], note: 'No locations provided' }),
@@ -45,34 +60,44 @@ serve(async (req: Request): Promise<Response> => {
     const results: any[] = [];
 
     for (const loc of locations) {
-      const url = `https://api.hasdata.com/scrape/indeed/listing?keyword=${encodeURIComponent(keyword)}&location=${encodeURIComponent(loc)}&domain=${encodeURIComponent(domain)}`;
-      const res = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-        },
-      });
+      const domainsToTry = domain.includes('indeed') ? [domain, 'fr.indeed.com'] : [domain];
 
-      if (!res.ok) {
-        const txt = await res.text();
-        console.error('HasData error for', loc, txt);
-        continue;
-      }
+      let foundForLoc = false;
+      for (const d of domainsToTry) {
+        const url = `https://api.hasdata.com/scrape/indeed/listing?keyword=${encodeURIComponent(keyword)}&location=${encodeURIComponent(loc)}&domain=${encodeURIComponent(d)}`;
+        const res = await fetch(url, {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+          },
+        });
 
-      const json = await res.json();
-      const items = Array.isArray(json?.data || json?.items || json?.results)
-        ? (json.data || json.items || json.results)
-        : [];
-      for (const it of items) {
-        const normalized = {
-          title: it.title || it.jobTitle || it.position || '',
-          company: it.company || it.companyName || '',
-          location: it.location || it.city || loc,
-          url: it.url || it.jobUrl || it.link || it.jobLink || '',
-          description: it.snippet || it.description || '',
-          sourceLocation: loc,
-        };
-        results.push(normalized);
+        if (!res.ok) {
+          const txt = await res.text();
+          console.error('HasData error for', loc, 'domain', d, txt);
+          continue;
+        }
+
+        const json = await res.json();
+        const items = Array.isArray(json?.data || json?.items || json?.results)
+          ? (json.data || json.items || json.results)
+          : [];
+
+        if (items.length) {
+          for (const it of items) {
+            const normalized = {
+              title: it.title || it.jobTitle || it.position || '',
+              company: it.company || it.companyName || '',
+              location: it.location || it.city || loc,
+              url: it.url || it.jobUrl || it.link || it.jobLink || '',
+              description: it.snippet || it.description || '',
+              sourceLocation: loc,
+            };
+            results.push(normalized);
+          }
+          foundForLoc = true;
+          break; // stop trying other domains for this location
+        }
       }
 
       if (results.length > 60) break; // avoid huge payloads
