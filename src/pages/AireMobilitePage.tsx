@@ -60,8 +60,8 @@ const AireMobilitePage: React.FC = () => {
 
   const { jobs, setJobs } = useJobs();
 
-  const [indeedKeyword, setIndeedKeyword] = useState('software engineer');
-  const [indeedDomain, setIndeedDomain] = useState('www.indeed.com');
+  const [indeedKeyword, setIndeedKeyword] = useState('Responsable informatique');
+  const [indeedDomain, setIndeedDomain] = useState('fr.indeed.com');
   const [indeedUseAllowedCities, setIndeedUseAllowedCities] = useState(true);
   const [indeedResults, setIndeedResults] = useState<any[]>([]);
   const [indeedLoading, setIndeedLoading] = useState(false);
@@ -132,6 +132,25 @@ const AireMobilitePage: React.FC = () => {
       }
     };
     load();
+  }, []);
+
+  useEffect(() => {
+    document.title = 'Aire de mobilité — Offres emplois et Indeed';
+    const desc = 'Définissez votre zone de mobilité et trouvez des offres d’emploi pertinentes.';
+    let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute('name', 'description');
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', desc);
+    let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement('link');
+      link.setAttribute('rel','canonical');
+      document.head.appendChild(link);
+    }
+    link.setAttribute('href', window.location.origin + '/aire-mobilite');
   }, []);
 
   // Search filter
@@ -244,7 +263,8 @@ const AireMobilitePage: React.FC = () => {
         toast.error('Utilisateur non authentifié');
         return;
       }
-      const payload = { ...mobilityArea, user_id: userId } as any;
+      const payload: any = { ...mobilityArea, user_id: userId };
+      if (!payload.id) delete payload.id;
       const { data, error } = await (supabase as any)
         .from('mobility_area')
         .upsert(payload)
@@ -360,6 +380,7 @@ const AireMobilitePage: React.FC = () => {
                     onValueChange={(v) => setMobilityArea(a => ({ ...a, radius_km: v[0] }))}
                     onValueCommit={() => refreshOffers()}
                   />
+                  <p className="text-xs text-gray-500">Rayon actuel: {mobilityArea.radius_km} km</p>
                 </div>
               </div>
 
@@ -381,6 +402,7 @@ const AireMobilitePage: React.FC = () => {
                     value={mobilityArea.allowed_cities.join(', ')}
                     onChange={(e) => setMobilityArea(a => ({ ...a, allowed_cities: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }))}
                   />
+                  <p className="text-xs text-gray-500">Séparez les villes par des virgules</p>
                 </div>
               </div>
 
