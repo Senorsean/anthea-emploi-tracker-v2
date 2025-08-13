@@ -275,23 +275,22 @@ const AireMobilitePage: React.FC = () => {
         .eq('user_id', userId)
         .single();
 
-      const payload: any = { ...mobilityArea, user_id: userId };
-      
       let result;
       if (existing) {
-        // Update existing record
+        // Update existing record - remove id from payload for updates
+        const { id, ...updatePayload } = { ...mobilityArea, user_id: userId };
         result = await (supabase as any)
           .from('mobility_area')
-          .update(payload)
+          .update(updatePayload)
           .eq('id', existing.id)
           .select('id')
           .single();
       } else {
         // Insert new record
-        delete payload.id;
+        const { id, ...insertPayload } = { ...mobilityArea, user_id: userId };
         result = await (supabase as any)
           .from('mobility_area')
-          .insert(payload)
+          .insert(insertPayload)
           .select('id')
           .single();
       }
