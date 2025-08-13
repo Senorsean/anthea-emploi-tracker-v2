@@ -267,15 +267,37 @@ const AireMobilitePage: React.FC = () => {
         toast.error('Utilisateur non authentifié');
         return;
       }
-      const payload: any = { ...mobilityArea, user_id: userId };
-      if (!payload.id) delete payload.id;
-      const { data, error } = await (supabase as any)
+
+      // Check if user already has a mobility area
+      const { data: existing } = await (supabase as any)
         .from('mobility_area')
-        .upsert(payload)
         .select('id')
+        .eq('user_id', userId)
         .single();
-      if (error) throw error;
-      setMobilityArea(prev => ({ ...prev, id: data.id }));
+
+      const payload: any = { ...mobilityArea, user_id: userId };
+      
+      let result;
+      if (existing) {
+        // Update existing record
+        result = await (supabase as any)
+          .from('mobility_area')
+          .update(payload)
+          .eq('id', existing.id)
+          .select('id')
+          .single();
+      } else {
+        // Insert new record
+        delete payload.id;
+        result = await (supabase as any)
+          .from('mobility_area')
+          .insert(payload)
+          .select('id')
+          .single();
+      }
+
+      if (result.error) throw result.error;
+      setMobilityArea(prev => ({ ...prev, id: result.data.id }));
       toast.success('Profil de mobilité sauvegardé');
       await fetchRelated();
     } catch (e: any) {
