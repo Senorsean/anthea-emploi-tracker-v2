@@ -44,6 +44,10 @@ const AireMobilitePage: React.FC = () => {
     travel_modes: ['car','public','bike','walk'] as string[],
   });
 
+  // Raw input strings for better UX
+  const [citiesInput, setCitiesInput] = useState('');
+  const [departmentsInput, setDepartmentsInput] = useState('');
+
   const [searchProfile, setSearchProfile] = useState({
     occupation_id: null as string | null,
     tiers: ['PROCHE','VOISIN'] as Array<'PROCHE'|'VOISIN'|'ELARGI'>,
@@ -390,19 +394,26 @@ const AireMobilitePage: React.FC = () => {
                 <div className="space-y-2">
                   <Label>Départements autorisés</Label>
                   <Input
-                    placeholder="Ex: 33, 75, 92 (séparés par des virgules)"
-                    value={mobilityArea.allowed_departments.join(', ')}
-                    onChange={(e) => setMobilityArea(a => ({ ...a, allowed_departments: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }))}
+                    placeholder="Ex: 33, 75, 92"
+                    value={departmentsInput}
+                    onChange={(e) => {
+                      setDepartmentsInput(e.target.value);
+                      setMobilityArea(a => ({ ...a, allowed_departments: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }));
+                    }}
                   />
+                  <p className="text-xs text-gray-500">Séparez par des virgules</p>
                 </div>
                 <div className="space-y-2">
                   <Label>Villes autorisées</Label>
                   <Textarea
                     placeholder="Ex: Bordeaux, Paris 15e"
-                    value={mobilityArea.allowed_cities.join(', ')}
-                    onChange={(e) => setMobilityArea(a => ({ ...a, allowed_cities: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }))}
+                    value={citiesInput}
+                    onChange={(e) => {
+                      setCitiesInput(e.target.value);
+                      setMobilityArea(a => ({ ...a, allowed_cities: e.target.value.split(',').map(s => s.trim()).filter(Boolean) }));
+                    }}
                   />
-                  <p className="text-xs text-gray-500">Séparez les villes par des virgules</p>
+                  <p className="text-xs text-gray-500">Séparez par des virgules</p>
                 </div>
               </div>
 
