@@ -28,6 +28,8 @@ serve(async (req: Request): Promise<Response> => {
     const allowedCities: string[] = Array.isArray(mobility?.allowed_cities) ? mobility.allowed_cities : [];
     const baseAddress: string = (mobility?.base_address || '').toString();
 
+    console.log('HasData API request params:', { keyword, domain, mobility, useAllowedCities, allowedCities, baseAddress });
+
     let locations: string[] = [];
     if (useAllowedCities && allowedCities.length) {
       locations = allowedCities.slice(0, 5);
@@ -50,7 +52,10 @@ serve(async (req: Request): Promise<Response> => {
       return true;
     }).slice(0, 8);
 
+    console.log('Final locations to search:', locations);
+
     if (!locations.length) {
+      console.log('No locations provided, returning empty results');
       return new Response(
         JSON.stringify({ results: [], note: 'No locations provided' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -65,6 +70,8 @@ serve(async (req: Request): Promise<Response> => {
       let foundForLoc = false;
       for (const d of domainsToTry) {
         const url = `https://api.hasdata.com/scrape/indeed/listing?keyword=${encodeURIComponent(keyword)}&location=${encodeURIComponent(loc)}&domain=${encodeURIComponent(d)}`;
+        console.log('Making request to HasData API:', url);
+        
         const res = await fetch(url, {
           headers: {
             'Content-Type': 'application/json',
@@ -72,16 +79,22 @@ serve(async (req: Request): Promise<Response> => {
           },
         });
 
+        console.log(`HasData API response for ${loc} on ${d}: status ${res.status}`);
+
         if (!res.ok) {
           const txt = await res.text();
-          console.error('HasData error for', loc, 'domain', d, txt);
+          console.error('HasData error for', loc, 'domain', d, 'status:', res.status, 'response:', txt);
           continue;
         }
 
         const json = await res.json();
+        console.log(`HasData API response JSON for ${loc}:`, json);
+        
         const items = Array.isArray(json?.data || json?.items || json?.results)
           ? (json.data || json.items || json.results)
           : [];
+
+        console.log(`Found ${items.length} items for location ${loc} on domain ${d}`);
 
         if (items.length) {
           for (const it of items) {
