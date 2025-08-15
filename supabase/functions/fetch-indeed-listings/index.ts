@@ -90,7 +90,10 @@ serve(async (req: Request): Promise<Response> => {
         const json = await res.json();
         console.log(`HasData API response JSON for ${loc}:`, json);
         
-        const items = Array.isArray(json?.data || json?.items || json?.results)
+        // HasData API returns jobs in a "jobs" field, not "data", "items" or "results"
+        const items = Array.isArray(json?.jobs)
+          ? json.jobs
+          : Array.isArray(json?.data || json?.items || json?.results)
           ? (json.data || json.items || json.results)
           : [];
 
