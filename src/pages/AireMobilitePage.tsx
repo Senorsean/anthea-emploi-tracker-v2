@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Building2, MapPin, RefreshCw, Save, Search } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Building2, MapPin, RefreshCw, Save, Search, Target, Info } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -24,6 +25,7 @@ const DEPARTEMENTS = [
 interface Occupation { id: string; label: string; aliases?: string[] | null }
 
 const AireMobilitePage: React.FC = () => {
+  const navigate = useNavigate();
   const [occupations, setOccupations] = useState<Occupation[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
@@ -525,10 +527,21 @@ const AireMobilitePage: React.FC = () => {
 
         <section className="mt-6">
           <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Offres Indeed</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="text-lg">Recherche sur Indeed</CardTitle>
+              <Button variant="outline" size="sm" onClick={() => navigate('/')}>
+                <Target className="h-4 w-4 mr-2" />
+                Voir le Kanban
+              </Button>
             </CardHeader>
             <CardContent className="space-y-4">
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Le Kanban</strong> est votre tableau de bord pour organiser vos candidatures en colonnes : Offres → Candidature envoyée → Entretien → Offre reçue. 
+                  Cliquez sur "Ajouter au Kanban" pour transférer une offre vers votre tableau de suivi.
+                </AlertDescription>
+              </Alert>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label>Mot-clé</Label>
@@ -557,16 +570,25 @@ const AireMobilitePage: React.FC = () => {
                     <CardHeader>
                       <CardTitle className="text-base truncate">{r.title || r.jobTitle || 'Offre Indeed'}</CardTitle>
                     </CardHeader>
-                    <CardContent className="space-y-2">
-                      <div className="text-sm text-gray-600 flex items-center gap-2"><Building2 className="h-4 w-4" /> {r.company || r.companyName || ''}</div>
-                      <div className="text-xs text-gray-500">{r.location || r.city || ''}</div>
-                      <div className="flex items-center justify-between">
-                        {(r.url || r.jobUrl) ? (
-                          <a className="text-[#a4007c] hover:underline text-sm" href={(r.url || r.jobUrl)} target="_blank" rel="noreferrer">Voir</a>
-                        ) : <span />}
-                        <Button size="sm" variant="secondary" onClick={() => addToKanban(r)}>Ajouter au Kanban</Button>
-                      </div>
-                    </CardContent>
+                     <CardContent className="space-y-3">
+                       <div className="text-sm text-gray-600 flex items-center gap-2"><Building2 className="h-4 w-4" /> {r.company || r.companyName || ''}</div>
+                       <div className="text-xs text-gray-500">{r.location || r.city || ''}</div>
+                       {(r.description || r.summary) && (
+                         <div className="text-xs text-gray-600 line-clamp-3">
+                           {(r.description || r.summary).slice(0, 150)}...
+                         </div>
+                       )}
+                       <div className="flex items-center justify-between pt-2">
+                         {(r.url || r.jobUrl) ? (
+                           <a className="text-primary hover:underline text-sm font-medium" href={(r.url || r.jobUrl)} target="_blank" rel="noreferrer">
+                             Voir l'offre complète
+                           </a>
+                         ) : <span />}
+                         <Button size="sm" variant="outline" onClick={() => addToKanban(r)}>
+                           + Kanban
+                         </Button>
+                       </div>
+                     </CardContent>
                   </Card>
                 ))}
                 {!indeedResults.length && (
