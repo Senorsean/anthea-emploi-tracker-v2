@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -292,20 +292,20 @@ export type Database = {
       get_shared_resume: {
         Args: { token: string }
         Returns: {
-          resume_id: string
-          title: string
-          template_id: number
           color_scheme_id: number
-          personal_info: Json
-          experiences: Json
-          education: Json
-          skills: Json
-          languages: Json
-          interests: Json
           custom_sections: Json
+          education: Json
+          experiences: Json
+          interests: Json
           is_public: boolean
-          qr_code_url: string
+          languages: Json
           pdf_url: string
+          personal_info: Json
+          qr_code_url: string
+          resume_id: string
+          skills: Json
+          template_id: number
+          title: string
         }[]
       }
     }
