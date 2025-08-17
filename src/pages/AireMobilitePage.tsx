@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Building2, MapPin, RefreshCw, Save, Search, Target, Info } from 'lucide-react';
+import { ArrowLeft, Building2, MapPin, RefreshCw, Save, Search, Target, Info, CheckSquare } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import MapboxCircle from '@/components/MapboxCircle';
@@ -66,32 +67,49 @@ const AireMobilitePage: React.FC = () => {
 
   const { jobs, setJobs } = useJobs();
 
-  const [indeedKeyword, setIndeedKeyword] = useState('Responsable informatique');
-  const [indeedDomain, setIndeedDomain] = useState('fr.indeed.com');
-  const [indeedUseAllowedCities, setIndeedUseAllowedCities] = useState(true);
-  const [indeedResults, setIndeedResults] = useState<any[]>([]);
-  const [indeedLoading, setIndeedLoading] = useState(false);
+  const [jobSearchKeyword, setJobSearchKeyword] = useState('Responsable informatique');
+  const [selectedJobSources, setSelectedJobSources] = useState<string[]>(['fr.indeed.com']);
+  const [jobSearchUseAllowedCities, setJobSearchUseAllowedCities] = useState(true);
+  const [jobSearchResults, setJobSearchResults] = useState<any[]>([]);
+  const [jobSearchLoading, setJobSearchLoading] = useState(false);
 
-  const fetchIndeed = async () => {
-    setIndeedLoading(true);
+  const jobSources = [
+    { id: 'fr.indeed.com', label: 'Indeed France', enabled: true },
+    { id: 'francetravail.fr', label: 'France Travail', enabled: false },
+    { id: 'linkedin.com', label: 'LinkedIn Jobs', enabled: false },
+    { id: 'monster.fr', label: 'Monster', enabled: false },
+    { id: 'leboncoin.fr', label: 'Leboncoin Emploi', enabled: false }
+  ];
+
+  const fetchJobOffers = async () => {
+    setJobSearchLoading(true);
     try {
-      const { data, error } = await (supabase as any).functions.invoke('fetch-indeed-listings', {
-        body: {
-          keyword: indeedKeyword,
-          domain: indeedDomain,
-          mobility: mobilityArea,
-          useAllowedCities: indeedUseAllowedCities,
+      let allResults: any[] = [];
+      
+      // Fetch from Indeed if selected
+      if (selectedJobSources.includes('fr.indeed.com')) {
+        const { data, error } = await (supabase as any).functions.invoke('fetch-indeed-listings', {
+          body: {
+            keyword: jobSearchKeyword,
+            domain: 'fr.indeed.com',
+            mobility: mobilityArea,
+            useAllowedCities: jobSearchUseAllowedCities,
+          }
+        });
+        if (!error && Array.isArray(data?.results)) {
+          allResults = [...allResults, ...data.results.map((item: any) => ({ ...item, source: 'Indeed' }))];
         }
-      });
-      if (error) throw error;
-      const items = Array.isArray(data?.results) ? data.results : [];
-      setIndeedResults(items);
-      toast.success(`${items.length} offres Indeed trouvées`);
+      }
+      
+      // TODO: Add France Travail, LinkedIn Jobs and other sources when available
+      
+      setJobSearchResults(allResults);
+      toast.success(`${allResults.length} offres trouvées (${selectedJobSources.length} source${selectedJobSources.length > 1 ? 's' : ''})`);
     } catch (e: any) {
       console.error(e);
-      toast.error('Échec de la récupération des offres Indeed');
+      toast.error('Échec de la récupération des offres d\'emploi');
     } finally {
-      setIndeedLoading(false);
+      setJobSearchLoading(false);
     }
   };
 
@@ -99,11 +117,11 @@ const AireMobilitePage: React.FC = () => {
     try {
       const newJob = {
         id: crypto.randomUUID(),
-        title: item.title || item.jobTitle || 'Offre Indeed',
+        title: item.title || item.jobTitle || 'Offre emploi',
         company: item.company || item.companyName || '',
         location: item.location || item.city || '',
         priority: 'medium',
-        label: 'Indeed',
+        label: item.source || 'Recherche emploi',
         url: item.url || item.jobUrl || item.link || '',
         dateAdded: new Date().toISOString().split('T')[0],
         interviewDate: undefined,
@@ -528,7 +546,7 @@ const AireMobilitePage: React.FC = () => {
         <section className="mt-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg">Recherche sur Indeed</CardTitle>
+              <CardTitle className="text-lg">Recherche d'emploi</CardTitle>
               <Button variant="outline" size="sm" onClick={() => navigate('/')}>
                 <Target className="h-4 w-4 mr-2" />
                 Voir le Kanban
@@ -542,33 +560,64 @@ const AireMobilitePage: React.FC = () => {
                   Cliquez sur "Ajouter au Kanban" pour transférer une offre vers votre tableau de suivi.
                 </AlertDescription>
               </Alert>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Mot-clé</Label>
-                  <Input value={indeedKeyword} onChange={(e) => setIndeedKeyword(e.target.value)} placeholder="software engineer" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Domaine</Label>
-                  <Input value={indeedDomain} onChange={(e) => setIndeedDomain(e.target.value)} placeholder="www.indeed.com" />
+                  <Input value={jobSearchKeyword} onChange={(e) => setJobSearchKeyword(e.target.value)} placeholder="responsable informatique" />
                 </div>
                 <div className="flex items-center justify-between border rounded p-3">
                   <div className="space-y-1">
                     <Label>Villes autorisées</Label>
                     <p className="text-xs text-gray-500">Utiliser la liste plutôt que l’adresse de base</p>
                   </div>
-                  <Switch checked={indeedUseAllowedCities} onCheckedChange={setIndeedUseAllowedCities} />
+                  <Switch checked={jobSearchUseAllowedCities} onCheckedChange={setJobSearchUseAllowedCities} />
                 </div>
               </div>
+              
+              <div className="space-y-3">
+                <Label>Sources d'emploi</Label>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {jobSources.map((source) => (
+                    <div key={source.id} className="flex items-center space-x-2 p-3 border rounded-lg">
+                      <Checkbox
+                        id={source.id}
+                        checked={selectedJobSources.includes(source.id)}
+                        disabled={!source.enabled}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setSelectedJobSources([...selectedJobSources, source.id]);
+                          } else {
+                            setSelectedJobSources(selectedJobSources.filter(id => id !== source.id));
+                          }
+                        }}
+                      />
+                      <label 
+                        htmlFor={source.id} 
+                        className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed ${!source.enabled ? 'text-gray-400' : 'cursor-pointer'}`}
+                      >
+                        {source.label}
+                        {!source.enabled && <span className="text-xs text-gray-400 ml-1">(bientôt)</span>}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                {selectedJobSources.length === 0 && (
+                  <p className="text-sm text-amber-600">Sélectionnez au moins une source d'emploi</p>
+                )}
+              </div>
+              
               <div className="flex justify-end">
-                <Button onClick={fetchIndeed} disabled={indeedLoading}>
-                  <Search className="h-4 w-4 mr-2" /> Chercher sur Indeed
+                <Button onClick={fetchJobOffers} disabled={jobSearchLoading || selectedJobSources.length === 0}>
+                  <Search className="h-4 w-4 mr-2" /> 
+                  {jobSearchLoading ? 'Recherche en cours...' : 'Lancer la recherche'}
                 </Button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {indeedResults.map((r: any, idx: number) => (
+                {jobSearchResults.map((r: any, idx: number) => (
                   <Card key={idx}>
                     <CardHeader>
-                      <CardTitle className="text-base truncate">{r.title || r.jobTitle || 'Offre Indeed'}</CardTitle>
+                      <CardTitle className="text-base truncate">{r.title || r.jobTitle || 'Offre d\'emploi'}</CardTitle>
+                      <Badge variant="secondary" className="w-fit">{r.source}</Badge>
                     </CardHeader>
                      <CardContent className="space-y-3">
                        <div className="text-sm text-gray-600 flex items-center gap-2"><Building2 className="h-4 w-4" /> {r.company || r.companyName || ''}</div>
@@ -591,8 +640,8 @@ const AireMobilitePage: React.FC = () => {
                      </CardContent>
                   </Card>
                 ))}
-                {!indeedResults.length && (
-                  <div className="text-sm text-gray-500">Lancez une recherche pour voir les offres Indeed.</div>
+                {!jobSearchResults.length && (
+                  <div className="text-sm text-gray-500">Sélectionnez vos sources et lancez une recherche pour voir les offres d'emploi.</div>
                 )}
               </div>
             </CardContent>
