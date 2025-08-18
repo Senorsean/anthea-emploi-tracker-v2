@@ -46,19 +46,29 @@ serve(async (req) => {
     }
 
     console.log('Fetching job offers from Adzuna API...');
+    console.log('Adzuna credentials:', { 
+      app_id: !!adzunaAppId, 
+      api_key: !!adzunaApiKey,
+      app_id_length: adzunaAppId?.length,
+      api_key_length: adzunaApiKey?.length 
+    });
     
     // Build Adzuna search URL
     const baseUrl = 'https://api.adzuna.com/v1/api/jobs/fr/search/1';
     const searchParams = new URLSearchParams({
       app_id: adzunaAppId,
       app_key: adzunaApiKey,
-      results_per_page: '50',
-      what: motsCles || '',
-      where: commune || '',
-      distance: (rayon || 25).toString(),
+      results_per_page: '20', // Reduce for testing
       content_type: 'application/json'
     });
 
+    // Add search parameters only if they exist
+    if (motsCles) searchParams.append('what', motsCles);
+    if (commune) searchParams.append('where', commune);
+    if (rayon) searchParams.append('distance', rayon.toString());
+
+    const finalUrl = `${baseUrl}?${searchParams.toString()}`;
+    console.log('Adzuna request URL:', finalUrl.replace(adzunaApiKey, '[HIDDEN]').replace(adzunaAppId, '[HIDDEN]'));
     console.log('Adzuna search parameters:', {
       what: motsCles,
       where: commune,
