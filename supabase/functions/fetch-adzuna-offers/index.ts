@@ -69,54 +69,70 @@ serve(async (req) => {
 
     const finalUrl = `${baseUrl}?${searchParams.toString()}`;
     console.log('Adzuna request URL:', finalUrl.replace(adzunaApiKey, '[HIDDEN]').replace(adzunaAppId, '[HIDDEN]'));
-    console.log('Adzuna search parameters:', {
-      what: motsCles,
-      where: commune,
-      distance: rayon
-    });
 
-    const adzunaResponse = await fetch(`${baseUrl}?${searchParams.toString()}`);
+    try {
+      const adzunaResponse = await fetch(finalUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Emploi-Tracker/1.0'
+        }
+      });
 
-    if (!adzunaResponse.ok) {
-      const errorText = await adzunaResponse.text();
-      console.error('Adzuna API request failed:', errorText);
+      console.log('Adzuna response status:', adzunaResponse.status);
+      console.log('Adzuna response headers:', Object.fromEntries(adzunaResponse.headers.entries()));
+
+      if (!adzunaResponse.ok) {
+        const errorText = await adzunaResponse.text();
+        console.error('Adzuna API error response:', errorText);
+        return new Response(
+          JSON.stringify({ error: `Adzuna API error: ${adzunaResponse.status} - ${errorText}` }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      const adzunaData = await adzunaResponse.json();
+      console.log('Adzuna response:', JSON.stringify(adzunaData));
+      console.log(`Found ${adzunaData.results?.length || 0} offers from Adzuna`);
+
+      // Transform the data to match our format
+      const transformedOffers = (adzunaData.results || []).map((offer: AdzunaOffer) => ({
+        id: offer.id || `adzuna-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        title: offer.title,
+        company: offer.company?.display_name || 'Non spécifié',
+        location: offer.location?.display_name || '',
+        contractType: offer.contract_type || '',
+        salary: offer.salary_min && offer.salary_max 
+          ? `${offer.salary_min} - ${offer.salary_max} €`
+          : offer.salary_min 
+          ? `À partir de ${offer.salary_min} €`
+          : '',
+        description: offer.description || '',
+        url: offer.redirect_url || '',
+        source: 'adzuna.com',
+        dateCreated: offer.created || new Date().toISOString(),
+      }));
+
       return new Response(
-        JSON.stringify({ error: 'Erreur lors de la recherche d\'offres Adzuna' }),
+        JSON.stringify({ offers: transformedOffers }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+
+    } catch (fetchError) {
+      console.error('Adzuna fetch error:', fetchError);
+      return new Response(
+        JSON.stringify({ error: `Erreur de connexion à Adzuna: ${fetchError.message}` }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
       );
     }
-
-    const adzunaData = await adzunaResponse.json();
-    console.log('Adzuna response:', JSON.stringify(adzunaData));
-    console.log(`Found ${adzunaData.results?.length || 0} offers from Adzuna`);
-
-    // Transform the data to match our format
-    const transformedOffers = (adzunaData.results || []).map((offer: AdzunaOffer) => ({
-      id: offer.id || `adzuna-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      title: offer.title,
-      company: offer.company?.display_name || 'Non spécifié',
-      location: offer.location?.display_name || '',
-      contractType: offer.contract_type || '',
-      salary: offer.salary_min && offer.salary_max 
-        ? `${offer.salary_min} - ${offer.salary_max} €`
-        : offer.salary_min 
-        ? `À partir de ${offer.salary_min} €`
-        : '',
-      description: offer.description || '',
-      url: offer.redirect_url || '',
-      source: 'adzuna.com',
-      dateCreated: offer.created || new Date().toISOString(),
-    }));
-
-    return new Response(
-      JSON.stringify({ offers: transformedOffers }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    );
 
   } catch (error) {
     console.error('Adzuna API error:', error);
