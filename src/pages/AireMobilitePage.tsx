@@ -75,7 +75,7 @@ const AireMobilitePage: React.FC = () => {
 
   const jobSources = [
     { id: 'fr.indeed.com', label: 'Indeed France', enabled: true },
-    { id: 'francetravail.fr', label: 'France Travail', enabled: false },
+    { id: 'francetravail.fr', label: 'France Travail', enabled: true },
     { id: 'linkedin.com', label: 'LinkedIn Jobs', enabled: false },
     { id: 'monster.fr', label: 'Monster', enabled: false },
     { id: 'leboncoin.fr', label: 'Leboncoin Emploi', enabled: false }
@@ -101,7 +101,21 @@ const AireMobilitePage: React.FC = () => {
         }
       }
       
-      // TODO: Add France Travail, LinkedIn Jobs and other sources when available
+      // Fetch from France Travail if selected
+      if (selectedJobSources.includes('francetravail.fr')) {
+        const { data, error } = await (supabase as any).functions.invoke('fetch-francetravail-offers', {
+          body: {
+            motsCles: jobSearchKeyword,
+            commune: jobSearchUseAllowedCities && mobilityArea.allowed_cities.length > 0 
+              ? mobilityArea.allowed_cities[0] 
+              : mobilityArea.base_address,
+            rayon: mobilityArea.radius_km,
+          }
+        });
+        if (!error && Array.isArray(data?.offers)) {
+          allResults = [...allResults, ...data.offers.map((item: any) => ({ ...item, source: 'France Travail' }))];
+        }
+      }
       
       setJobSearchResults(allResults);
       toast.success(`${allResults.length} offres trouvées (${selectedJobSources.length} source${selectedJobSources.length > 1 ? 's' : ''})`);
