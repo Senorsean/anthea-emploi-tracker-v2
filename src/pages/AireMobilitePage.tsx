@@ -140,7 +140,8 @@ const AireMobilitePage: React.FC = () => {
         const { data: filteredData, error: filterError } = await (supabase as any).functions.invoke('filter-offers-by-mobility', {
           body: {
             offers: allResults,
-            user_id: userId
+            user_id: userId,
+            keywords: jobSearchKeyword
           }
         });
         if (!filterError && Array.isArray(filteredData?.offers)) {

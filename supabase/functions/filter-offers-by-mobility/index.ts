@@ -16,7 +16,8 @@ serve(async (req) => {
     const body = await req.json();
     const {
       offers = [],
-      user_id
+      user_id,
+      keywords = ''
     } = body || {};
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
@@ -45,10 +46,30 @@ serve(async (req) => {
     }
 
     console.log(`Mobility area: departments=${mobilityArea.allowed_departments}, cities=${mobilityArea.allowed_cities}, radius=${mobilityArea.radius_km}km`);
+    
+    // Function to check keyword relevance
+    const isKeywordRelevant = (offer: any, keywords: string) => {
+      if (!keywords) return true;
+      
+      const searchText = `${offer.title || ''} ${offer.description || ''} ${offer.company || ''}`.toLowerCase();
+      const keywordsList = keywords.toLowerCase().split(' ').filter(k => k.length > 2);
+      
+      // At least half of the keywords should be present
+      const matchingKeywords = keywordsList.filter(keyword => searchText.includes(keyword));
+      const relevanceScore = matchingKeywords.length / keywordsList.length;
+      
+      return relevanceScore >= 0.5; // At least 50% keyword match
+    };
 
-    // Filter offers based on mobility area
+    // Filter offers based on mobility area and keyword relevance
     const filteredOffers = offers.filter((offer: any) => {
       const location = offer.location || '';
+      
+      // First check keyword relevance
+      if (!isKeywordRelevant(offer, keywords)) {
+        console.log(`✗ Offer "${offer.title}" - not relevant to keywords "${keywords}"`);
+        return false;
+      }
       
       // Extract department number from location
       const departmentMatch = location.match(/(\d{2,3})/);

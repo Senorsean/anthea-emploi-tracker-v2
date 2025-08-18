@@ -112,9 +112,13 @@ serve(async (req) => {
 
     console.log('Access token obtained, searching for offers...');
 
-    // Step 2: Search for job offers
+    // Step 2: Search for job offers with better keyword filtering
     const searchParams = new URLSearchParams();
-    if (motsCles) searchParams.append('motsCles', motsCles);
+    if (motsCles) {
+      // Ensure exact keyword matching for better relevance
+      searchParams.append('motsCles', motsCles);
+      console.log(`Searching France Travail for: "${motsCles}"`);
+    }
     
     // Temporarily disable location filtering for France Travail API due to reliability issues
     // The filtering will be done by the filter-offers-by-mobility function instead

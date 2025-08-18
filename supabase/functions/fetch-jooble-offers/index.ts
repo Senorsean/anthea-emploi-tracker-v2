@@ -42,18 +42,19 @@ serve(async (req) => {
 
     console.log('Fetching job offers from Jooble API...');
     
-    // Prepare search parameters for Jooble
+    // Prepare search parameters for Jooble API
     const searchBody = {
-      keywords: motsCles || '',
+      keywords: motsCles || 'informatique',
       location: commune || '',
-      radius: rayon || 25,
-      resultsOnPage: 50,
+      radius: Math.min(rayon || 25, 100), // Jooble max radius is 100km
+      resultsOnPage: Math.min(50, 20), // Start with fewer results for testing
       page: 1
     };
 
     console.log('Jooble search parameters:', JSON.stringify(searchBody));
-    console.log('Using API endpoint:', `https://jooble.org/api/${joobleApiKey}`);
-
+    console.log('Jooble API Key configured:', !!joobleApiKey);
+    
+    // Jooble expects the API key in the URL path
     const joobleResponse = await fetch(`https://jooble.org/api/${joobleApiKey}`, {
       method: 'POST',
       headers: {
