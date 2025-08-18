@@ -104,9 +104,16 @@ serve(async (req) => {
     const searchParams = new URLSearchParams();
     if (motsCles) searchParams.append('motsCles', motsCles);
     
-    // For now, skip the commune parameter as it's causing issues
-    // The France Travail API has very specific requirements for commune codes
-    console.log(`Searching with keywords: ${motsCles}, radius: ${rayon}`);
+    // Use INSEE code for location filtering
+    if (commune) {
+      const inseeCode = cityToInseeCode[commune];
+      if (inseeCode) {
+        console.log(`Using commune: ${commune} -> INSEE code: ${inseeCode}`);
+        searchParams.append('commune', inseeCode);
+      } else {
+        console.log(`No INSEE code found for ${commune}, searching without location filter`);
+      }
+    }
     
     if (rayon) searchParams.append('distance', rayon.toString());
     if (typeContrat) searchParams.append('typeContrat', typeContrat);
