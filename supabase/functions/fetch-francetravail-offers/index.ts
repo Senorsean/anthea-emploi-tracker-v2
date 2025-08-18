@@ -26,6 +26,30 @@ interface FranceTravailOffer {
   dateCreation: string;
 }
 
+// Mapping of common city names to INSEE codes
+const cityToInseeCode: Record<string, string> = {
+  'Paris': '75056',
+  'Marseille': '13055',
+  'Lyon': '69123',
+  'Toulouse': '31555',
+  'Nice': '06088',
+  'Nantes': '44109',
+  'Montpellier': '34172',
+  'Strasbourg': '67482',
+  'Bordeaux': '33063',
+  'Lille': '59350',
+  'Rennes': '35238',
+  'Reims': '51454',
+  'Saint-Étienne': '42218',
+  'Le Havre': '76351',
+  'Toulon': '83137',
+  'Grenoble': '38185',
+  'Dijon': '21231',
+  'Angers': '49007',
+  'Nîmes': '30189',
+  'Villeurbanne': '69266'
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -79,7 +103,14 @@ serve(async (req) => {
     // Step 2: Search for job offers
     const searchParams = new URLSearchParams();
     if (motsCles) searchParams.append('motsCles', motsCles);
-    if (commune) searchParams.append('commune', commune);
+    
+    // Convert city name to INSEE code if needed
+    if (commune) {
+      const inseeCode = cityToInseeCode[commune] || commune;
+      console.log(`Using commune: ${commune} -> INSEE code: ${inseeCode}`);
+      searchParams.append('commune', inseeCode);
+    }
+    
     if (rayon) searchParams.append('distance', rayon.toString());
     if (typeContrat) searchParams.append('typeContrat', typeContrat);
     searchParams.append('range', '0-149'); // Max 150 results per request
