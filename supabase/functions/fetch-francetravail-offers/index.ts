@@ -26,7 +26,7 @@ interface FranceTravailOffer {
   dateCreation: string;
 }
 
-// Mapping of common city names to INSEE codes
+// Mapping of common city names to INSEE codes - comprehensive list
 const cityToInseeCode: Record<string, string> = {
   'Paris': '75056',
   'Marseille': '13055',
@@ -47,7 +47,19 @@ const cityToInseeCode: Record<string, string> = {
   'Dijon': '21231',
   'Angers': '49007',
   'Nîmes': '30189',
-  'Villeurbanne': '69266'
+  'Villeurbanne': '69266',
+  // Essonne (91) cities
+  'Évry': '91228',
+  'EVRY': '91228',
+  'Évry-Courcouronnes': '91228',
+  'Corbeil-Essonnes': '91174',
+  'Palaiseau': '91477',
+  'Massy': '91377',
+  'Savigny-sur-Orge': '91589',
+  'Sainte-Geneviève-des-Bois': '91549',
+  'Brunoy': '91114',
+  'Yerres': '91691',
+  'Montgeron': '91421'
 };
 
 serve(async (req) => {
@@ -104,44 +116,14 @@ serve(async (req) => {
     const searchParams = new URLSearchParams();
     if (motsCles) searchParams.append('motsCles', motsCles);
     
-    // Use department code - extract from INSEE code or city mapping
+    // Use INSEE code for precise location filtering
     if (commune) {
-      let departmentCode = '';
-      
-      // Try to extract department from INSEE code first
       const inseeCode = cityToInseeCode[commune];
       if (inseeCode) {
-        departmentCode = inseeCode.substring(0, 2);
-        console.log(`Using department code from INSEE ${inseeCode} for ${commune}: ${departmentCode}`);
+        console.log(`Using INSEE code for ${commune}: ${inseeCode}`);
+        searchParams.append('commune', inseeCode);
       } else {
-        // Manual mapping for major cities
-        const cityToDepartment: Record<string, string> = {
-          'Paris': '75',
-          'Lyon': '69',
-          'Marseille': '13',
-          'Évry': '91',
-          'EVRY': '91',
-          'Évry-Courcouronnes': '91',
-          'Corbeil-Essonnes': '91',
-          'Palaiseau': '91',
-          'Massy': '91',
-          'Savigny-sur-Orge': '91',
-          'Sainte-Geneviève-des-Bois': '91',
-          'Brunoy': '91',
-          'Yerres': '91',
-          'Montgeron': '91'
-        };
-        
-        departmentCode = cityToDepartment[commune] || '';
-        if (departmentCode) {
-          console.log(`Using mapped department code for ${commune}: ${departmentCode}`);
-        }
-      }
-      
-      if (departmentCode) {
-        searchParams.append('departement', departmentCode);
-      } else {
-        console.log(`No department code found for ${commune}, searching without location filter`);
+        console.log(`No INSEE code found for ${commune}, searching without location filter`);
       }
     }
     
