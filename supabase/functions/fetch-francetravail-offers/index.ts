@@ -104,14 +104,20 @@ serve(async (req) => {
     const searchParams = new URLSearchParams();
     if (motsCles) searchParams.append('motsCles', motsCles);
     
-    // Use INSEE code for location filtering
+    // Use department code instead of commune code which is more reliable
     if (commune) {
-      const inseeCode = cityToInseeCode[commune];
-      if (inseeCode) {
-        console.log(`Using commune: ${commune} -> INSEE code: ${inseeCode}`);
-        searchParams.append('commune', inseeCode);
-      } else {
-        console.log(`No INSEE code found for ${commune}, searching without location filter`);
+      let departmentCode = '';
+      if (commune === 'Paris') {
+        departmentCode = '75';
+      } else if (commune === 'Lyon') {
+        departmentCode = '69';
+      } else if (commune === 'Marseille') {
+        departmentCode = '13';
+      }
+      
+      if (departmentCode) {
+        console.log(`Using department code for ${commune}: ${departmentCode}`);
+        searchParams.append('departement', departmentCode);
       }
     }
     
