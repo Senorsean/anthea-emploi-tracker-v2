@@ -77,6 +77,7 @@ const AireMobilitePage: React.FC = () => {
     { id: 'fr.indeed.com', label: 'Indeed France', enabled: true },
     { id: 'francetravail.fr', label: 'France Travail', enabled: true },
     { id: 'jooble.org', label: 'Jooble', enabled: true },
+    { id: 'adzuna.com', label: 'Adzuna', enabled: true },
     { id: 'monster.fr', label: 'Monster', enabled: false },
     { id: 'leboncoin.fr', label: 'Leboncoin Emploi', enabled: false }
   ];
@@ -130,6 +131,22 @@ const AireMobilitePage: React.FC = () => {
         });
         if (!error && Array.isArray(data?.offers)) {
           allResults = [...allResults, ...data.offers.map((item: any) => ({ ...item, source: 'Jooble' }))];
+        }
+      }
+      
+      // Fetch from Adzuna if selected
+      if (selectedJobSources.includes('adzuna.com')) {
+        const { data, error } = await (supabase as any).functions.invoke('fetch-adzuna-offers', {
+          body: {
+            motsCles: jobSearchKeyword,
+            commune: jobSearchUseAllowedCities && mobilityArea.allowed_cities.length > 0 
+              ? mobilityArea.allowed_cities[0] 
+              : mobilityArea.base_address,
+            rayon: mobilityArea.radius_km,
+          }
+        });
+        if (!error && Array.isArray(data?.offers)) {
+          allResults = [...allResults, ...data.offers.map((item: any) => ({ ...item, source: 'Adzuna' }))];
         }
       }
       
