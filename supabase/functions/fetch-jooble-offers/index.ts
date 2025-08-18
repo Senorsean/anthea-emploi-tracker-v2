@@ -51,7 +51,10 @@ serve(async (req) => {
       page: 1
     };
 
-    const joobleResponse = await fetch('https://jooble.org/api/' + joobleApiKey, {
+    console.log('Jooble search parameters:', JSON.stringify(searchBody));
+    console.log('Using API endpoint:', `https://jooble.org/api/${joobleApiKey}`);
+
+    const joobleResponse = await fetch(`https://jooble.org/api/${joobleApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -72,7 +75,12 @@ serve(async (req) => {
     }
 
     const joobleData = await joobleResponse.json();
+    console.log('Jooble response:', JSON.stringify(joobleData));
     console.log(`Found ${joobleData.jobs?.length || 0} offers from Jooble`);
+    
+    if (joobleData.jobs?.length === 0) {
+      console.log('No jobs found - checking if this is due to location constraints');
+    }
 
     // Transform the data to match our format
     const transformedOffers = (joobleData.jobs || []).map((offer: JoobleOffer) => ({
