@@ -116,15 +116,10 @@ serve(async (req) => {
     const searchParams = new URLSearchParams();
     if (motsCles) searchParams.append('motsCles', motsCles);
     
-    // Use INSEE code for precise location filtering
+    // Temporarily disable location filtering for France Travail API due to reliability issues
+    // The filtering will be done by the filter-offers-by-mobility function instead
     if (commune) {
-      const inseeCode = cityToInseeCode[commune];
-      if (inseeCode) {
-        console.log(`Using INSEE code for ${commune}: ${inseeCode}`);
-        searchParams.append('commune', inseeCode);
-      } else {
-        console.log(`No INSEE code found for ${commune}, searching without location filter`);
-      }
+      console.log(`Note: Location filtering for ${commune} will be handled by post-processing`);
     }
     
     if (rayon) searchParams.append('distance', rayon.toString());
