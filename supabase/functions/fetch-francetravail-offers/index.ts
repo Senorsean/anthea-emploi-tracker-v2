@@ -104,20 +104,44 @@ serve(async (req) => {
     const searchParams = new URLSearchParams();
     if (motsCles) searchParams.append('motsCles', motsCles);
     
-    // Use department code instead of commune code which is more reliable
+    // Use department code - extract from INSEE code or city mapping
     if (commune) {
       let departmentCode = '';
-      if (commune === 'Paris') {
-        departmentCode = '75';
-      } else if (commune === 'Lyon') {
-        departmentCode = '69';
-      } else if (commune === 'Marseille') {
-        departmentCode = '13';
+      
+      // Try to extract department from INSEE code first
+      const inseeCode = cityToInseeCode[commune];
+      if (inseeCode) {
+        departmentCode = inseeCode.substring(0, 2);
+        console.log(`Using department code from INSEE ${inseeCode} for ${commune}: ${departmentCode}`);
+      } else {
+        // Manual mapping for major cities
+        const cityToDepartment: Record<string, string> = {
+          'Paris': '75',
+          'Lyon': '69',
+          'Marseille': '13',
+          'Évry': '91',
+          'EVRY': '91',
+          'Évry-Courcouronnes': '91',
+          'Corbeil-Essonnes': '91',
+          'Palaiseau': '91',
+          'Massy': '91',
+          'Savigny-sur-Orge': '91',
+          'Sainte-Geneviève-des-Bois': '91',
+          'Brunoy': '91',
+          'Yerres': '91',
+          'Montgeron': '91'
+        };
+        
+        departmentCode = cityToDepartment[commune] || '';
+        if (departmentCode) {
+          console.log(`Using mapped department code for ${commune}: ${departmentCode}`);
+        }
       }
       
       if (departmentCode) {
-        console.log(`Using department code for ${commune}: ${departmentCode}`);
         searchParams.append('departement', departmentCode);
+      } else {
+        console.log(`No department code found for ${commune}, searching without location filter`);
       }
     }
     
