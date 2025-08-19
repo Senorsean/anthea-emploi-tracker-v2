@@ -58,7 +58,7 @@ serve(async (req) => {
     const searchParams = new URLSearchParams({
       app_id: adzunaAppId,
       app_key: adzunaApiKey,
-      results_per_page: '20', // Reduce for testing
+      results_per_page: '20',
       content_type: 'application/json'
     });
 
