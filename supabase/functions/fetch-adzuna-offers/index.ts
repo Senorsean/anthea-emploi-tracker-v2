@@ -34,6 +34,14 @@ serve(async (req) => {
     const adzunaAppId = Deno.env.get('ADZUNA_APP_ID');
     const adzunaApiKey = Deno.env.get('ADZUNA_API_KEY');
     
+    console.log('Request received:', { motsCles, commune, rayon });
+    console.log('Adzuna credentials check:', { 
+      hasAppId: !!adzunaAppId, 
+      hasApiKey: !!adzunaApiKey,
+      appIdLength: adzunaAppId?.length,
+      apiKeyLength: adzunaApiKey?.length 
+    });
+    
     if (!adzunaAppId || !adzunaApiKey) {
       console.error('Missing Adzuna credentials');
       return new Response(
@@ -45,33 +53,12 @@ serve(async (req) => {
       );
     }
 
-    console.log('Fetching job offers from Adzuna API...');
-    console.log('Adzuna credentials:', { 
-      app_id: !!adzunaAppId, 
-      api_key: !!adzunaApiKey,
-      app_id_length: adzunaAppId?.length,
-      api_key_length: adzunaApiKey?.length 
-    });
+    // Simple test URL first
+    const testUrl = `https://api.adzuna.com/v1/api/jobs/fr/search/1?app_id=${adzunaAppId}&app_key=${adzunaApiKey}&results_per_page=5`;
+    console.log('Testing basic Adzuna API call...');
     
-    // Build Adzuna search URL
-    const baseUrl = 'https://api.adzuna.com/v1/api/jobs/fr/search/1';
-    const searchParams = new URLSearchParams({
-      app_id: adzunaAppId,
-      app_key: adzunaApiKey,
-      results_per_page: '20',
-      content_type: 'application/json'
-    });
-
-    // Add search parameters only if they exist
-    if (motsCles) searchParams.append('what', motsCles);
-    if (commune) searchParams.append('where', commune);
-    if (rayon) searchParams.append('distance', rayon.toString());
-
-    const finalUrl = `${baseUrl}?${searchParams.toString()}`;
-    console.log('Adzuna request URL:', finalUrl.replace(adzunaApiKey, '[HIDDEN]').replace(adzunaAppId, '[HIDDEN]'));
-
     try {
-      const adzunaResponse = await fetch(finalUrl, {
+      const testResponse = await fetch(testUrl, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
@@ -79,14 +66,26 @@ serve(async (req) => {
         }
       });
 
-      console.log('Adzuna response status:', adzunaResponse.status);
-      console.log('Adzuna response headers:', Object.fromEntries(adzunaResponse.headers.entries()));
+      console.log('Test response status:', testResponse.status);
+      console.log('Test response headers:', Object.fromEntries(testResponse.headers.entries()));
 
-      if (!adzunaResponse.ok) {
-        const errorText = await adzunaResponse.text();
-        console.error('Adzuna API error response:', errorText);
+      if (!testResponse.ok) {
+        const errorText = await testResponse.text();
+        console.error('Adzuna API test error:', errorText);
+        
+        // Try to parse error if it's JSON
+        try {
+          const errorJson = JSON.parse(errorText);
+          console.error('Parsed error:', errorJson);
+        } catch (e) {
+          console.error('Error text (not JSON):', errorText);
+        }
+        
         return new Response(
-          JSON.stringify({ error: `Adzuna API error: ${adzunaResponse.status} - ${errorText}` }),
+          JSON.stringify({ 
+            error: `Adzuna API test failed: ${testResponse.status}`,
+            details: errorText
+          }),
           { 
             status: 500, 
             headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -94,12 +93,44 @@ serve(async (req) => {
         );
       }
 
-      const adzunaData = await adzunaResponse.json();
-      console.log('Adzuna response:', JSON.stringify(adzunaData));
-      console.log(`Found ${adzunaData.results?.length || 0} offers from Adzuna`);
+      const testData = await testResponse.json();
+      console.log('Test API response received, count:', testData.count);
+      console.log('Test results length:', testData.results?.length || 0);
+
+      // If test works, proceed with actual search
+      let searchUrl = `https://api.adzuna.com/v1/api/jobs/fr/search/1?app_id=${adzunaAppId}&app_key=${adzunaApiKey}&results_per_page=20`;
+      
+      if (motsCles) searchUrl += `&what=${encodeURIComponent(motsCles)}`;
+      if (commune) searchUrl += `&where=${encodeURIComponent(commune)}`;
+      if (rayon) searchUrl += `&distance=${rayon}`;
+
+      console.log('Making search request...');
+      const searchResponse = await fetch(searchUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'User-Agent': 'Emploi-Tracker/1.0'
+        }
+      });
+
+      if (!searchResponse.ok) {
+        const errorText = await searchResponse.text();
+        console.error('Search API error:', errorText);
+        return new Response(
+          JSON.stringify({ error: `Search failed: ${searchResponse.status}` }),
+          { 
+            status: 500, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+
+      const searchData = await searchResponse.json();
+      console.log('Search response received, count:', searchData.count);
+      console.log('Search results length:', searchData.results?.length || 0);
 
       // Transform the data to match our format
-      const transformedOffers = (adzunaData.results || []).map((offer: AdzunaOffer) => ({
+      const transformedOffers = (searchData.results || []).map((offer: AdzunaOffer) => ({
         id: offer.id || `adzuna-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         title: offer.title,
         company: offer.company?.display_name || 'Non spécifié',
@@ -116,6 +147,8 @@ serve(async (req) => {
         dateCreated: offer.created || new Date().toISOString(),
       }));
 
+      console.log('Returning', transformedOffers.length, 'transformed offers');
+
       return new Response(
         JSON.stringify({ offers: transformedOffers }),
         { 
@@ -126,7 +159,10 @@ serve(async (req) => {
     } catch (fetchError) {
       console.error('Adzuna fetch error:', fetchError);
       return new Response(
-        JSON.stringify({ error: `Erreur de connexion à Adzuna: ${fetchError.message}` }),
+        JSON.stringify({ 
+          error: `Erreur de connexion à Adzuna: ${fetchError.message}`,
+          details: fetchError.toString()
+        }),
         { 
           status: 500, 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
@@ -135,9 +171,12 @@ serve(async (req) => {
     }
 
   } catch (error) {
-    console.error('Adzuna API error:', error);
+    console.error('General Adzuna API error:', error);
     return new Response(
-      JSON.stringify({ error: 'Erreur interne du serveur' }),
+      JSON.stringify({ 
+        error: 'Erreur interne du serveur',
+        details: error.toString()
+      }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
