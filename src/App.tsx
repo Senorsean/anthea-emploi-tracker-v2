@@ -24,6 +24,7 @@ import ApprentissageCompetencesPage from "./pages/ApprentissageCompetencesPage";
 import IntelligenceMarcheePage from "./pages/IntelligenceMarcheePage";
 import TesterConnaissancesPage from "./pages/TesterConnaissancesPage";
 import AireMobilitePage from "./pages/AireMobilitePage";
+import IkigaiPage from "./pages/IkigaiPage";
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 import { JobsProvider } from "@/hooks/useJobs";
@@ -195,6 +196,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <AireMobilitePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/ikigai"
+            element={
+              <RequireAuth>
+                <IkigaiPage />
               </RequireAuth>
             }
           />
