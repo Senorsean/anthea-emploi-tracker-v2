@@ -75,6 +75,13 @@ export const OverviewFocusAreas = () => {
       link: '/aire-mobilite',
       external: false,
     },
+    {
+      title: 'Découvrez votre IKIGAÏ',
+      description:
+        'Trouvez l\'intersection entre passion, mission, profession et vocation pour votre épanouissement professionnel.',
+      link: '/ikigai',
+      external: false,
+    },
   ];
 
   return (
