@@ -77,7 +77,7 @@ const AireMobilitePage: React.FC = () => {
     { id: 'fr.indeed.com', label: 'Indeed France', enabled: true },
     { id: 'francetravail.fr', label: 'France Travail', enabled: true },
     { id: 'jooble.org', label: 'Jooble', enabled: true },
-    { id: 'adzuna.com', label: 'Adzuna', enabled: false },
+    { id: 'adzuna.com', label: 'Adzuna', enabled: true },
     { id: 'monster.fr', label: 'Monster', enabled: false },
     { id: 'leboncoin.fr', label: 'Leboncoin Emploi', enabled: false }
   ];
