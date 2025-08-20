@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Target, Heart, Brain, DollarSign, Lightbulb } from "lucide-react";
+import { ArrowLeft, Target, Heart, Brain, DollarSign, Lightbulb, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import jsPDF from 'jspdf';
+import { addAntheaHeader } from '@/lib/pdf-utils';
 
 interface IkigaiFormData {
   passions: string;
@@ -97,6 +99,147 @@ const IkigaiPage = () => {
     if (score >= 60) return "Bon alignement";
     if (score >= 40) return "Alignement modéré";
     return "Faible alignement";
+  };
+
+  const downloadPDF = () => {
+    if (!result) return;
+
+    const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 20;
+    const maxWidth = pageWidth - 2 * margin;
+
+    // Ajouter l'en-tête Anthea
+    let yPosition = addAntheaHeader(pdf, "Analyse IKIGAÏ");
+
+    // Fonction pour diviser le texte en lignes
+    const splitText = (text: string, maxWidth: number) => {
+      return pdf.splitTextToSize(text, maxWidth);
+    };
+
+    // Fonction pour ajouter une nouvelle page si nécessaire
+    const checkPageBreak = (requiredHeight: number) => {
+      if (yPosition + requiredHeight > pageHeight - margin) {
+        pdf.addPage();
+        yPosition = addAntheaHeader(pdf, "Analyse IKIGAÏ");
+      }
+    };
+
+    // Score IKIGAÏ
+    checkPageBreak(40);
+    pdf.setFontSize(18);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text("Votre Score IKIGAÏ", margin, yPosition);
+    yPosition += 15;
+
+    pdf.setFontSize(24);
+    pdf.setTextColor(79, 70, 229); // Purple color
+    pdf.text(`${result.ikigai_score}/100`, margin, yPosition);
+    yPosition += 10;
+
+    pdf.setFontSize(12);
+    pdf.setTextColor(0, 0, 0);
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(getScoreLabel(result.ikigai_score), margin, yPosition);
+    yPosition += 20;
+
+    // Alignement Passion
+    checkPageBreak(30);
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text("Alignement Passion", margin, yPosition);
+    yPosition += 8;
+
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    const passionLines = splitText(result.passion_alignment, maxWidth);
+    pdf.text(passionLines, margin, yPosition);
+    yPosition += passionLines.length * 5 + 10;
+
+    // Clarté de Mission
+    checkPageBreak(30);
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text("Clarté de Mission", margin, yPosition);
+    yPosition += 8;
+
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    const missionLines = splitText(result.mission_clarity, maxWidth);
+    pdf.text(missionLines, margin, yPosition);
+    yPosition += missionLines.length * 5 + 10;
+
+    // Recommandations de Carrière
+    checkPageBreak(40);
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text("Recommandations de Carrière", margin, yPosition);
+    yPosition += 8;
+
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    result.profession_recommendations.forEach((prof, index) => {
+      checkPageBreak(6);
+      pdf.text(`• ${prof}`, margin + 5, yPosition);
+      yPosition += 6;
+    });
+    yPosition += 10;
+
+    // Plan de Développement
+    checkPageBreak(30);
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text("Plan de Développement", margin, yPosition);
+    yPosition += 8;
+
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    const planLines = splitText(result.development_plan, maxWidth);
+    pdf.text(planLines, margin, yPosition);
+    yPosition += planLines.length * 5 + 10;
+
+    // Prochaines Étapes
+    checkPageBreak(40);
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text("Prochaines Étapes", margin, yPosition);
+    yPosition += 8;
+
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'normal');
+    result.next_steps.forEach((step, index) => {
+      const stepLines = splitText(`• ${step}`, maxWidth - 10);
+      checkPageBreak(stepLines.length * 5);
+      pdf.text(stepLines, margin + 5, yPosition);
+      yPosition += stepLines.length * 5 + 2;
+    });
+    yPosition += 10;
+
+    // Questions de Réflexion
+    checkPageBreak(40);
+    pdf.setFontSize(14);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text("Questions de Réflexion", margin, yPosition);
+    yPosition += 8;
+
+    pdf.setFontSize(10);
+    pdf.setFont('helvetica', 'italic');
+    result.reflection_questions.forEach((question, index) => {
+      const questionLines = splitText(`• ${question}`, maxWidth - 10);
+      checkPageBreak(questionLines.length * 5);
+      pdf.text(questionLines, margin + 5, yPosition);
+      yPosition += questionLines.length * 5 + 2;
+    });
+
+    // Télécharger le PDF
+    const fileName = `analyse-ikigai-${new Date().toISOString().split('T')[0]}.pdf`;
+    pdf.save(fileName);
+
+    toast({
+      title: "PDF téléchargé",
+      description: "Votre analyse IKIGAÏ a été téléchargée avec succès !",
+    });
   };
 
   return (
@@ -293,10 +436,14 @@ const IkigaiPage = () => {
             </Card>
 
             <div className="flex gap-4">
+              <Button onClick={downloadPDF} variant="default" className="flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                Exporter en PDF
+              </Button>
               <Button onClick={() => setResult(null)} variant="outline">
                 Refaire le test
               </Button>
-              <Button asChild>
+              <Button asChild variant="secondary">
                 <Link to="/">Retour à l'accueil</Link>
               </Button>
             </div>
