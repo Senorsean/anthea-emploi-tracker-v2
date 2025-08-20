@@ -30,6 +30,7 @@ import SwotPersonnelPage from './pages/SwotPersonnelPage';
 import BilanCompetencesPage from './pages/BilanCompetencesPage';
 import MethodeSmartPage from './pages/MethodeSmartPage';
 import GoldenCirclePage from './pages/GoldenCirclePage';
+import CompetencesFormationPage from './pages/CompetencesFormationPage';
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 import { JobsProvider } from "@/hooks/useJobs";
@@ -249,6 +250,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <GoldenCirclePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/competences-formation"
+            element={
+              <RequireAuth>
+                <CompetencesFormationPage />
               </RequireAuth>
             }
           />

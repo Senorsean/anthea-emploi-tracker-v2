@@ -145,6 +145,13 @@ export const OverviewFocusAreas = () => {
           link: '/tester-connaissances',
           external: false,
         },
+        {
+          title: 'Compétences & Formation continue',
+          description:
+            'Identifiez les compétences clés de demain (IA, digital, soft skills). Plan de montée en compétences (MOOC, formations certifiantes, mentorat). Suivi via un portfolio ou carnet de progression.',
+          link: '/competences-formation',
+          external: false,
+        },
       ]
     },
   ];
