@@ -115,6 +115,13 @@ export const OverviewFocusAreas = () => {
           link: '/methode-smart',
           external: false,
         },
+        {
+          title: 'Le Golden Circle de Simon Sinek',
+          description:
+            'Trouver son Why (raison d\'être), puis son How (forces / méthodes), puis son What (activités concrètes). Simple, très inspirant, bon complément de l\'Ikigai.',
+          link: '/golden-circle',
+          external: false,
+        },
       ]
     },
     {

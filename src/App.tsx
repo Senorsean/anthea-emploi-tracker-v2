@@ -29,6 +29,7 @@ import { AnalyseTransactionnellePage } from './pages/AnalyseTransactionnellePage
 import SwotPersonnelPage from './pages/SwotPersonnelPage';
 import BilanCompetencesPage from './pages/BilanCompetencesPage';
 import MethodeSmartPage from './pages/MethodeSmartPage';
+import GoldenCirclePage from './pages/GoldenCirclePage';
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 import { JobsProvider } from "@/hooks/useJobs";
@@ -240,6 +241,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <MethodeSmartPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/golden-circle"
+            element={
+              <RequireAuth>
+                <GoldenCirclePage />
               </RequireAuth>
             }
           />
