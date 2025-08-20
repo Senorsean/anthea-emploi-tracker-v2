@@ -82,6 +82,13 @@ export const OverviewFocusAreas = () => {
       link: '/ikigai',
       external: false,
     },
+    {
+      title: 'L\'Analyse Transactionnelle & Drivers',
+      description:
+        'Identifiez vos schémas inconscients ("Sois parfait", "Fais plaisir", "Sois fort", "Dépêche-toi", "Fais des efforts") et comprenez leur impact professionnel.',
+      link: '/analyse-transactionnelle',
+      external: false,
+    },
   ];
 
   return (

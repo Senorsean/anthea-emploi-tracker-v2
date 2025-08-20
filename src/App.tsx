@@ -25,6 +25,7 @@ import IntelligenceMarcheePage from "./pages/IntelligenceMarcheePage";
 import TesterConnaissancesPage from "./pages/TesterConnaissancesPage";
 import AireMobilitePage from "./pages/AireMobilitePage";
 import IkigaiPage from "./pages/IkigaiPage";
+import { AnalyseTransactionnellePage } from './pages/AnalyseTransactionnellePage';
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 import { JobsProvider } from "@/hooks/useJobs";
@@ -204,6 +205,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <IkigaiPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/analyse-transactionnelle"
+            element={
+              <RequireAuth>
+                <AnalyseTransactionnellePage />
               </RequireAuth>
             }
           />
