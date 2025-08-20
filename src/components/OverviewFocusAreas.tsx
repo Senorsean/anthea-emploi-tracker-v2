@@ -152,6 +152,13 @@ export const OverviewFocusAreas = () => {
           link: '/competences-formation',
           external: false,
         },
+        {
+          title: 'Pictotest des métiers',
+          description:
+            'Explorez vos préférences professionnelles à partir d\'images d\'activités concrètes pour révéler vos pôles d\'intérêt dominants (RIASEC).',
+          link: '/pictotest-metiers',
+          external: false,
+        },
       ]
     },
   ];

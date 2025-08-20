@@ -31,6 +31,7 @@ import BilanCompetencesPage from './pages/BilanCompetencesPage';
 import MethodeSmartPage from './pages/MethodeSmartPage';
 import GoldenCirclePage from './pages/GoldenCirclePage';
 import CompetencesFormationPage from './pages/CompetencesFormationPage';
+import { PictotestMetiersPage } from './pages/PictotestMetiersPage';
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 import { JobsProvider } from "@/hooks/useJobs";
@@ -258,6 +259,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <CompetencesFormationPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/pictotest-metiers"
+            element={
+              <RequireAuth>
+                <PictotestMetiersPage />
               </RequireAuth>
             }
           />
