@@ -4,13 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { Download, BookOpen, Heart, Zap, Target, Briefcase } from 'lucide-react';
+import { Download, BookOpen, Heart, Zap, Target, Briefcase, Home } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
 import { addAntheaHeader } from '@/lib/pdf-utils';
 
 const BilanCompetencesPage = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<any>(null);
@@ -505,6 +507,14 @@ const BilanCompetencesPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
+          <Button
+            variant="outline"
+            onClick={() => navigate('/')}
+            className="mb-6 flex items-center gap-2 mx-auto"
+          >
+            <Home className="h-4 w-4" />
+            Retour accueil
+          </Button>
           <h1 className="text-3xl font-bold text-gray-900 mb-4">
             Bilan de Compétences
           </h1>
