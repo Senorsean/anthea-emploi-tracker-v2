@@ -28,6 +28,7 @@ import IkigaiPage from "./pages/IkigaiPage";
 import { AnalyseTransactionnellePage } from './pages/AnalyseTransactionnellePage';
 import SwotPersonnelPage from './pages/SwotPersonnelPage';
 import BilanCompetencesPage from './pages/BilanCompetencesPage';
+import MethodeSmartPage from './pages/MethodeSmartPage';
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 import { JobsProvider } from "@/hooks/useJobs";
@@ -231,6 +232,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <BilanCompetencesPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/methode-smart"
+            element={
+              <RequireAuth>
+                <MethodeSmartPage />
               </RequireAuth>
             }
           />

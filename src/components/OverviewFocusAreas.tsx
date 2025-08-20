@@ -103,6 +103,13 @@ export const OverviewFocusAreas = () => {
       link: '/bilan-competences',
       external: false,
     },
+    {
+      title: 'Méthode SMART / OKR appliquée à la carrière',
+      description:
+        'Définir un objectif professionnel clair (Spécifique, Mesurable, Atteignable, Réaliste, Temporel). Puis découper en sous-objectifs comme dans la gestion de projet. Concret et actionnable.',
+      link: '/methode-smart',
+      external: false,
+    },
   ];
 
   return (
