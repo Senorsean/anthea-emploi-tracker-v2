@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from 'react-router-dom';
-import { ExternalLink, Search, Target, TrendingUp, GraduationCap } from 'lucide-react';
+import { ExternalLink, Search, Target, TrendingUp, GraduationCap, Grid3X3 } from 'lucide-react';
 
 export const OverviewFocusAreas = () => {
+  const [activeCategory, setActiveCategory] = useState("all");
+
   const categories = [
     {
       title: "Recherche Emploi",
@@ -140,52 +143,128 @@ export const OverviewFocusAreas = () => {
   ];
 
   return (
-    <div className="space-y-12">
-      {categories.map((category, categoryIdx) => (
-        <div key={categoryIdx} className="space-y-6">
-          {/* Category Header */}
-          <div className={`p-6 rounded-lg ${category.color}`}>
-            <div className="flex items-center gap-3 mb-2">
-              <category.icon className={`h-6 w-6 ${category.iconColor}`} />
-              <h2 className="text-2xl font-bold text-gray-900">{category.title}</h2>
-            </div>
-            <p className="text-gray-600">{category.description}</p>
-          </div>
+    <div className="space-y-8">
+      {/* Navigation par onglets */}
+      <Tabs value={activeCategory} onValueChange={setActiveCategory} className="w-full">
+        <TabsList className="grid grid-cols-4 w-full max-w-4xl mx-auto">
+          <TabsTrigger value="all" className="flex items-center gap-2">
+            <Grid3X3 className="h-4 w-4" />
+            Tout voir
+          </TabsTrigger>
+          <TabsTrigger value="recherche" className="flex items-center gap-2">
+            <Search className="h-4 w-4" />
+            Recherche Emploi
+          </TabsTrigger>
+          <TabsTrigger value="projet" className="flex items-center gap-2">
+            <Target className="h-4 w-4" />
+            Projet Pro
+          </TabsTrigger>
+          <TabsTrigger value="carriere" className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4" />
+            Progression
+          </TabsTrigger>
+        </TabsList>
 
-          {/* Category Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {category.areas.map((area, idx) => (
-              <Card key={idx} className="h-full hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <CardTitle className="text-lg font-semibold text-gray-900">
-                    {area.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-sm text-gray-600">{area.description}</p>
-                  {area.external ? (
-                    <a
-                      href={area.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-[#a4007c] hover:underline flex items-center gap-1"
-                    >
-                      En savoir plus <ExternalLink className="h-4 w-4" />
-                    </a>
-                  ) : (
-                    <Link
-                      to={area.link}
-                      className="text-sm text-[#a4007c] hover:underline flex items-center gap-1"
-                    >
-                      En savoir plus <ExternalLink className="h-4 w-4" />
-                    </Link>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      ))}
+        {/* Vue "Tout voir" */}
+        <TabsContent value="all" className="space-y-12 mt-8">
+          {categories.map((category, categoryIdx) => (
+            <div key={categoryIdx} className="space-y-6">
+              {/* Category Header */}
+              <div className={`p-6 rounded-lg ${category.color}`}>
+                <div className="flex items-center gap-3 mb-2">
+                  <category.icon className={`h-6 w-6 ${category.iconColor}`} />
+                  <h2 className="text-2xl font-bold text-gray-900">{category.title}</h2>
+                </div>
+                <p className="text-gray-600">{category.description}</p>
+              </div>
+
+              {/* Category Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {category.areas.map((area, idx) => (
+                  <Card key={idx} className="h-full hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="text-lg font-semibold text-gray-900">
+                        {area.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <p className="text-sm text-gray-600">{area.description}</p>
+                      {area.external ? (
+                        <a
+                          href={area.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-[#a4007c] hover:underline flex items-center gap-1"
+                        >
+                          En savoir plus <ExternalLink className="h-4 w-4" />
+                        </a>
+                      ) : (
+                        <Link
+                          to={area.link}
+                          className="text-sm text-[#a4007c] hover:underline flex items-center gap-1"
+                        >
+                          En savoir plus <ExternalLink className="h-4 w-4" />
+                        </Link>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          ))}
+        </TabsContent>
+
+        {/* Vue par catégorie individuelle */}
+        {categories.map((category, categoryIdx) => (
+          <TabsContent 
+            key={categoryIdx} 
+            value={categoryIdx === 0 ? "recherche" : categoryIdx === 1 ? "projet" : "carriere"} 
+            className="space-y-6 mt-8"
+          >
+            {/* Category Header */}
+            <div className={`p-8 rounded-lg ${category.color} text-center`}>
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <category.icon className={`h-8 w-8 ${category.iconColor}`} />
+                <h1 className="text-3xl font-bold text-gray-900">{category.title}</h1>
+              </div>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">{category.description}</p>
+            </div>
+
+            {/* Category Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {category.areas.map((area, idx) => (
+                <Card key={idx} className="h-full hover:shadow-lg hover:scale-105 transition-all duration-200">
+                  <CardHeader>
+                    <CardTitle className="text-xl font-semibold text-gray-900">
+                      {area.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-gray-600 leading-relaxed">{area.description}</p>
+                    {area.external ? (
+                      <a
+                        href={area.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#a4007c] text-white rounded-lg hover:bg-[#8a0069] transition-colors font-medium"
+                      >
+                        Accéder <ExternalLink className="h-4 w-4" />
+                      </a>
+                    ) : (
+                      <Link
+                        to={area.link}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#a4007c] text-white rounded-lg hover:bg-[#8a0069] transition-colors font-medium"
+                      >
+                        Commencer <ExternalLink className="h-4 w-4" />
+                      </Link>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
 };
