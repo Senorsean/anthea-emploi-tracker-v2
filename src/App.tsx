@@ -27,6 +27,7 @@ import AireMobilitePage from "./pages/AireMobilitePage";
 import IkigaiPage from "./pages/IkigaiPage";
 import { AnalyseTransactionnellePage } from './pages/AnalyseTransactionnellePage';
 import SwotPersonnelPage from './pages/SwotPersonnelPage';
+import BilanCompetencesPage from './pages/BilanCompetencesPage';
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 import { JobsProvider } from "@/hooks/useJobs";
@@ -222,6 +223,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <SwotPersonnelPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/bilan-competences"
+            element={
+              <RequireAuth>
+                <BilanCompetencesPage />
               </RequireAuth>
             }
           />

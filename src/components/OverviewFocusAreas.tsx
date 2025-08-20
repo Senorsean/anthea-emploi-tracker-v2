@@ -96,6 +96,13 @@ export const OverviewFocusAreas = () => {
       link: '/swot-personnel',
       external: false,
     },
+    {
+      title: 'Bilan de compétences (France / Europe)',
+      description:
+        'Méthode structurée et encadrée légalement. Analyse des compétences, motivations, valeurs et aptitudes. Débouche sur un projet professionnel ou de formation réaliste.',
+      link: '/bilan-competences',
+      external: false,
+    },
   ];
 
   return (
