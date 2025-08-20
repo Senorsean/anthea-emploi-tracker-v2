@@ -89,6 +89,13 @@ export const OverviewFocusAreas = () => {
       link: '/analyse-transactionnelle',
       external: false,
     },
+    {
+      title: 'SWOT Personnel',
+      description:
+        'Analysez vos Forces, Faiblesses, Opportunités et Menaces. Issu du management stratégique, adapté à l\'individu pour une vision claire de votre situation professionnelle.',
+      link: '/swot-personnel',
+      external: false,
+    },
   ];
 
   return (
