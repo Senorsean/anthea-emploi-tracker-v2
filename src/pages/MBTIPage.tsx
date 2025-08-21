@@ -239,51 +239,64 @@ export default function MBTIPage() {
     const pageHeight = pdf.internal.pageSize.getHeight();
     const margin = 20;
     const maxWidth = pageWidth - 2 * margin;
-    const lineHeight = 6;
+    const lineHeight = 5.5;
 
     let yPosition = addAntheaHeader(pdf, 'MBTI - Myers-Briggs Type Indicator');
 
-    // Fonction pour vérifier si on a assez d'espace
+    // Fonction pour vérifier si on a assez d'espace avec une marge de sécurité
     const checkSpace = (requiredHeight: number, currentY: number) => {
-      if (currentY + requiredHeight > pageHeight - margin) {
+      if (currentY + requiredHeight + 15 > pageHeight - margin) {
         pdf.addPage();
         return addAntheaHeader(pdf, 'MBTI - Myers-Briggs Type Indicator');
       }
       return currentY;
     };
 
-    // Fonction pour ajouter du texte avec gestion avancée des pages
-    const addText = (text: string, x: number, y: number, fontSize = 11, isBold = false) => {
+    // Fonction pour ajouter du texte ligne par ligne avec gestion stricte des pages
+    const addTextBlock = (text: string, x: number, y: number, fontSize = 10, isBold = false) => {
+      if (!text.trim()) return y;
+      
       let currentY = y;
       pdf.setFontSize(fontSize);
       pdf.setFont(undefined, isBold ? 'bold' : 'normal');
       
-      const lines = pdf.splitTextToSize(text, maxWidth);
+      // Diviser le texte en lignes qui rentrent dans la largeur
+      const words = text.split(' ');
+      let currentLine = '';
       
-      for (let i = 0; i < lines.length; i++) {
+      for (const word of words) {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        const lineWidth = pdf.getTextWidth(testLine);
+        
+        if (lineWidth > maxWidth && currentLine) {
+          // La ligne est trop longue, imprimer la ligne actuelle
+          currentY = checkSpace(lineHeight, currentY);
+          pdf.text(currentLine, x, currentY);
+          currentY += lineHeight;
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+      
+      // Imprimer la dernière ligne s'il y en a une
+      if (currentLine) {
         currentY = checkSpace(lineHeight, currentY);
-        pdf.text(lines[i], x, currentY);
+        pdf.text(currentLine, x, currentY);
         currentY += lineHeight;
       }
       
-      return currentY;
-    };
-
-    // Fonction pour ajouter un paragraphe avec espacement
-    const addParagraph = (text: string, y: number) => {
-      if (!text.trim()) return y;
-      const newY = addText(text, margin, y);
-      return newY + 4; // Espacement après paragraphe
+      return currentY + 2; // Petit espacement après le bloc
     };
 
     // Fonction pour ajouter un titre de section
     const addSectionTitle = (title: string, y: number) => {
-      let currentY = checkSpace(20, y + 8);
+      let currentY = checkSpace(25, y + 8);
       
-      pdf.setFontSize(14);
+      pdf.setFontSize(12);
       pdf.setFont(undefined, 'bold');
       pdf.text(title, margin, currentY);
-      return currentY + 10;
+      return currentY + 12;
     };
 
     // Nettoyer l'analyse des marqueurs Markdown de façon plus complète
@@ -292,7 +305,7 @@ export default function MBTIPage() {
       .replace(/#{1,6}\s*/g, '') // Retirer les autres headers markdown
       .replace(/\*\*(.*?)\*\*/g, '$1') // Retirer le gras markdown
       .replace(/\*(.*?)\*/g, '$1') // Retirer l'italique markdown
-      .replace(/[Øß¯=•\-\*\+]+/g, '') // Retirer tous les caractères parasites
+      .replace(/[Øß¯=•\-\*\+#]+/g, '') // Retirer tous les caractères parasites
       .replace(/^\s*[-•]\s*/gm, '• ') // Normaliser les puces
       .replace(/\n{3,}/g, '\n\n') // Limiter les sauts de ligne multiples
       .trim();
@@ -302,23 +315,25 @@ export default function MBTIPage() {
 
     sections.forEach((section, index) => {
       if (section.trim()) {
-        const lines = section.split('\n').map(line => line.trim()).filter(line => line);
+        const lines = section.split('\n').map(line => line.trim()).filter(line => line && line.length > 2);
         if (lines.length === 0) return;
 
         const title = lines[0];
         const content = lines.slice(1);
 
-        // Ajouter le titre de section
-        if (title) {
+        // Ajouter le titre de section s'il n'est pas vide
+        if (title && !title.match(/^[•\-\*\s]*$/)) {
           yPosition = addSectionTitle(title, yPosition);
         }
 
-        // Ajouter le contenu ligne par ligne
+        // Ajouter le contenu paragraphe par paragraphe
         content.forEach(line => {
-          if (line.trim()) {
-            yPosition = addParagraph(line, yPosition);
+          if (line.trim() && line.length > 2 && !line.match(/^[•\-\*\s#Øß¯=]*$/)) {
+            yPosition = addTextBlock(line, margin, yPosition);
           }
         });
+        
+        yPosition += 5; // Espacement entre sections
       }
     });
 
@@ -364,8 +379,20 @@ export default function MBTIPage() {
             </CardHeader>
             <CardContent>
               <div className="prose max-w-none">
-                <div className="whitespace-pre-line text-gray-700">
-                  {analysis}
+                <div className="whitespace-pre-line text-gray-700 leading-relaxed">
+                  {analysis
+                    .replace(/#{1,6}\s*[🎯📊🚀💡🔄Ø=ß¯]\s*/g, '') // Retirer les headers avec emojis et caractères parasites
+                    .replace(/#{1,6}\s*/g, '') // Retirer les autres headers markdown
+                    .replace(/\*\*(.*?)\*\*/g, '$1') // Retirer le gras markdown
+                    .replace(/\*(.*?)\*/g, '$1') // Retirer l'italique markdown
+                    .replace(/[Øß¯=•\-\*\+]+/g, '') // Retirer tous les caractères parasites
+                    .replace(/^\s*[-•]\s*/gm, '• ') // Normaliser les puces
+                    .replace(/\n{3,}/g, '\n\n') // Limiter les sauts de ligne multiples
+                    .split('\n')
+                    .map(line => line.trim())
+                    .filter(line => line && line.length > 1)
+                    .join('\n')
+                  }
                 </div>
               </div>
             </CardContent>
