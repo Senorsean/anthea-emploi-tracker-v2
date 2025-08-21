@@ -35,6 +35,7 @@ import { PictotestMetiersPage } from './pages/PictotestMetiersPage';
 import IRMR3Page from './pages/IRMR3Page';
 import MBTIPage from './pages/MBTIPage';
 import BigFivePage from './pages/BigFivePage';
+import { MotivationQuestionnairePage } from './pages/MotivationQuestionnairePage';
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 import { JobsProvider } from "@/hooks/useJobs";
@@ -294,6 +295,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <BigFivePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/questionnaire-motivations"
+            element={
+              <RequireAuth>
+                <MotivationQuestionnairePage />
               </RequireAuth>
             }
           />

@@ -180,6 +180,13 @@ export const OverviewFocusAreas = () => {
           link: '/big-five',
           external: false,
         },
+        {
+          title: 'Questionnaire Motivations (ex : MVPI, Reiss Motivation Profile)',
+          description:
+            'Explore les moteurs profonds (pouvoir, sécurité, liberté, reconnaissance, curiosité, etc.). Aide à comprendre ce qui soutient l\'engagement et l\'énergie sur le long terme.',
+          link: '/questionnaire-motivations',
+          external: false,
+        },
       ]
     },
   ];
