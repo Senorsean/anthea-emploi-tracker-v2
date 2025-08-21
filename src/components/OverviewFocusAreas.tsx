@@ -187,6 +187,13 @@ export const OverviewFocusAreas = () => {
           link: '/questionnaire-motivations',
           external: false,
         },
+        {
+          title: 'CAP (Cartographie des Atouts Professionnels)',
+          description:
+            'Utilisé en France dans les bilans de compétences. Combine centres d\'intérêt, valeurs et compétences transversales. Très pratique pour déboucher sur des plans d\'action concrets.',
+          link: '/bilan-competences',
+          external: false,
+        },
       ]
     },
   ];
