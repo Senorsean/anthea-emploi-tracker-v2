@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
+import { addAntheaHeader } from '@/lib/pdf-utils';
 
 const IRMR3Page = () => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -146,40 +147,50 @@ const IRMR3Page = () => {
   const exportToPDF = () => {
     const pdf = new jsPDF();
     const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
     const margin = 20;
     const maxWidth = pageWidth - 2 * margin;
-    let yPosition = margin;
 
-    // Titre
-    pdf.setFontSize(20);
-    pdf.setFont(undefined, 'bold');
-    pdf.text('Analyse IRMR3 - Inventaire des Intérêts Professionnels', margin, yPosition);
-    yPosition += 20;
+    // Ajouter l'en-tête Anthea
+    let yPosition = addAntheaHeader(pdf, 'IRMR3 - Inventaire des Intérêts Professionnels');
 
-    // Date
-    pdf.setFontSize(12);
-    pdf.setFont(undefined, 'normal');
-    pdf.text(`Généré le ${new Date().toLocaleDateString('fr-FR')}`, margin, yPosition);
-    yPosition += 20;
-
-    // Analyse
-    pdf.setFontSize(14);
-    pdf.setFont(undefined, 'bold');
-    pdf.text('Votre Profil IRMR3', margin, yPosition);
-    yPosition += 15;
-
-    pdf.setFontSize(11);
-    pdf.setFont(undefined, 'normal');
-    const analysisLines = pdf.splitTextToSize(analysis, maxWidth);
-    
-    analysisLines.forEach((line: string) => {
-      if (yPosition > 270) {
+    // Fonction pour ajouter du texte avec gestion des pages
+    const addText = (text: string, x: number, y: number, fontSize = 11, isBold = false) => {
+      const requiredHeight = fontSize * 1.2;
+      if (y + requiredHeight > pageHeight - margin) {
         pdf.addPage();
-        yPosition = margin;
+        y = addAntheaHeader(pdf, 'IRMR3 - Inventaire des Intérêts Professionnels');
       }
-      pdf.text(line, margin, yPosition);
-      yPosition += 6;
-    });
+      
+      pdf.setFontSize(fontSize);
+      pdf.setFont(undefined, isBold ? 'bold' : 'normal');
+      
+      const lines = pdf.splitTextToSize(text, maxWidth);
+      lines.forEach((line: string) => {
+        if (y + requiredHeight > pageHeight - margin) {
+          pdf.addPage();
+          y = addAntheaHeader(pdf, 'IRMR3 - Inventaire des Intérêts Professionnels');
+        }
+        pdf.text(line, x, y);
+        y += fontSize * 1.2;
+      });
+      
+      return y;
+    };
+
+    // Nettoyer l'analyse des marqueurs Markdown
+    const cleanedAnalysis = analysis
+      .replace(/#{1,6}\s*[🎯📊🚀💡🔄]\s*/g, '') // Retirer les headers avec emojis
+      .replace(/#{1,6}\s*/g, '') // Retirer les autres headers markdown
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Retirer le gras markdown
+      .replace(/\*(.*?)\*/g, '$1') // Retirer l'italique markdown
+      .split('\n')
+      .filter(line => line.trim()) // Retirer les lignes vides
+      .join('\n\n');
+
+    // Ajouter le contenu
+    yPosition = addText('VOTRE PROFIL IRMR3', margin, yPosition + 10, 16, true);
+    yPosition = addText(cleanedAnalysis, margin, yPosition + 5);
 
     pdf.save('analyse-irmr3.pdf');
     
