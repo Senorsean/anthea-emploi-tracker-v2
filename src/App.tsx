@@ -32,6 +32,7 @@ import MethodeSmartPage from './pages/MethodeSmartPage';
 import GoldenCirclePage from './pages/GoldenCirclePage';
 import CompetencesFormationPage from './pages/CompetencesFormationPage';
 import { PictotestMetiersPage } from './pages/PictotestMetiersPage';
+import IRMR3Page from './pages/IRMR3Page';
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 import { JobsProvider } from "@/hooks/useJobs";
@@ -267,6 +268,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <PictotestMetiersPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/irmr3"
+            element={
+              <RequireAuth>
+                <IRMR3Page />
               </RequireAuth>
             }
           />

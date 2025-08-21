@@ -159,6 +159,13 @@ export const OverviewFocusAreas = () => {
           link: '/pictotest-metiers',
           external: false,
         },
+        {
+          title: 'IRMR3 (Inventaire des Intérêts Professionnels)',
+          description:
+            'Mesure les centres d\'intérêt professionnels selon 7 grands domaines : Artistique, Contact, Entreprise, Gestion, Manuel, Sciences, Social. Adapté aux jeunes comme aux adultes en reconversion.',
+          link: '/irmr3',
+          external: false,
+        },
       ]
     },
   ];
