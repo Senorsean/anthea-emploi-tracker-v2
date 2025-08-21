@@ -150,46 +150,52 @@ const IRMR3Page = () => {
     const pageHeight = pdf.internal.pageSize.getHeight();
     const margin = 20;
     const maxWidth = pageWidth - 2 * margin;
+    const lineHeight = 6;
 
     // Ajouter l'en-tête Anthea
     let yPosition = addAntheaHeader(pdf, 'IRMR3 - Inventaire des Intérêts Professionnels');
 
-    // Fonction pour ajouter du texte avec gestion des pages
-    const addText = (text: string, x: number, y: number, fontSize = 11, isBold = false) => {
-      const requiredHeight = fontSize * 1.2;
-      if (y + requiredHeight > pageHeight - margin) {
+    // Fonction pour vérifier si on a assez d'espace
+    const checkSpace = (requiredHeight: number, currentY: number) => {
+      if (currentY + requiredHeight > pageHeight - margin) {
         pdf.addPage();
-        y = addAntheaHeader(pdf, 'IRMR3 - Inventaire des Intérêts Professionnels');
+        return addAntheaHeader(pdf, 'IRMR3 - Inventaire des Intérêts Professionnels');
       }
-      
+      return currentY;
+    };
+
+    // Fonction pour ajouter du texte avec gestion avancée des pages
+    const addText = (text: string, x: number, y: number, fontSize = 11, isBold = false) => {
+      let currentY = y;
       pdf.setFontSize(fontSize);
       pdf.setFont(undefined, isBold ? 'bold' : 'normal');
       
       const lines = pdf.splitTextToSize(text, maxWidth);
-      lines.forEach((line: string) => {
-        if (y + requiredHeight > pageHeight - margin) {
-          pdf.addPage();
-          y = addAntheaHeader(pdf, 'IRMR3 - Inventaire des Intérêts Professionnels');
-        }
-        pdf.text(line, x, y);
-        y += fontSize * 1.2;
-      });
       
-      return y;
+      for (let i = 0; i < lines.length; i++) {
+        currentY = checkSpace(lineHeight, currentY);
+        pdf.text(lines[i], x, currentY);
+        currentY += lineHeight;
+      }
+      
+      return currentY;
+    };
+
+    // Fonction pour ajouter un paragraphe avec espacement
+    const addParagraph = (text: string, y: number) => {
+      if (!text.trim()) return y;
+      const newY = addText(text, margin, y);
+      return newY + 4; // Espacement après paragraphe
     };
 
     // Fonction pour ajouter un titre de section
     const addSectionTitle = (title: string, y: number) => {
-      const requiredHeight = 20;
-      if (y + requiredHeight > pageHeight - margin) {
-        pdf.addPage();
-        y = addAntheaHeader(pdf, 'IRMR3 - Inventaire des Intérêts Professionnels');
-      }
+      let currentY = checkSpace(20, y + 8);
       
       pdf.setFontSize(14);
       pdf.setFont(undefined, 'bold');
-      pdf.text(title, margin, y);
-      return y + 15;
+      pdf.text(title, margin, currentY);
+      return currentY + 10;
     };
 
     // Nettoyer l'analyse des marqueurs Markdown de façon plus complète
@@ -198,28 +204,33 @@ const IRMR3Page = () => {
       .replace(/#{1,6}\s*/g, '') // Retirer les autres headers markdown
       .replace(/\*\*(.*?)\*\*/g, '$1') // Retirer le gras markdown
       .replace(/\*(.*?)\*/g, '$1') // Retirer l'italique markdown
-      .replace(/[Øß¯=]+/g, '') // Retirer les caractères parasites spécifiques
+      .replace(/[Øß¯=•\-\*\+]+/g, '') // Retirer tous les caractères parasites
       .replace(/^\s*[-•]\s*/gm, '• ') // Normaliser les puces
-      .split('\n')
-      .map(line => line.trim()) // Nettoyer les espaces
-      .filter(line => line && line.length > 1) // Retirer les lignes vides ou trop courtes
-      .join('\n');
+      .replace(/\n{3,}/g, '\n\n') // Limiter les sauts de ligne multiples
+      .trim();
 
     // Diviser le contenu en sections
     const sections = cleanedAnalysis.split(/(?=VOS DOMAINES D'INTÉRÊT DOMINANTS|PROFIL DÉTAILLÉ IRMR3|MÉTIERS ET SECTEURS RECOMMANDÉS|PLAN D'ACTION PERSONNALISÉ|COHÉRENCE AVEC VOS ASPIRATIONS)/);
 
     sections.forEach((section, index) => {
       if (section.trim()) {
-        const lines = section.split('\n');
-        const title = lines[0].trim();
-        const content = lines.slice(1).join('\n').trim();
+        const lines = section.split('\n').map(line => line.trim()).filter(line => line);
+        if (lines.length === 0) return;
 
+        const title = lines[0];
+        const content = lines.slice(1);
+
+        // Ajouter le titre de section
         if (title) {
-          yPosition = addSectionTitle(title, yPosition + 10);
+          yPosition = addSectionTitle(title, yPosition);
         }
-        if (content) {
-          yPosition = addText(content, margin, yPosition + 5) + 10;
-        }
+
+        // Ajouter le contenu ligne par ligne
+        content.forEach(line => {
+          if (line.trim()) {
+            yPosition = addParagraph(line, yPosition);
+          }
+        });
       }
     });
 
