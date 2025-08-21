@@ -173,6 +173,13 @@ export const OverviewFocusAreas = () => {
           link: '/mbti',
           external: false,
         },
+        {
+          title: 'Big Five / OCEAN',
+          description:
+            'Mesure la personnalité selon 5 grands traits (Ouverture, Conscienciosité, Extraversion, Agréabilité, Neuroticisme). Très utilisé scientifiquement, aide à identifier les environnements de travail favorables.',
+          link: '/big-five',
+          external: false,
+        },
       ]
     },
   ];
