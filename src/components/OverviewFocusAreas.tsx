@@ -154,14 +154,14 @@ export const OverviewFocusAreas = () => {
         },
         // Tests d'intérêts
         {
-          title: 'IRMR3 (Inventaire des Intérêts Professionnels)',
+          title: 'IRMR3 [Intérêts] (Inventaire des Intérêts Professionnels)',
           description:
             'Tests d\'intérêts - Mesure les centres d\'intérêt professionnels selon 7 grands domaines : Artistique, Contact, Entreprise, Gestion, Manuel, Sciences, Social. Adapté aux jeunes comme aux adultes en reconversion.',
           link: '/irmr3',
           external: false,
         },
         {
-          title: 'Pictotest des métiers (RIASEC)',
+          title: 'Pictotest des métiers [Intérêts] (RIASEC)',
           description:
             'Tests d\'intérêts - Explorez vos préférences professionnelles à partir d\'images d\'activités concrètes pour révéler vos pôles d\'intérêt dominants selon le modèle RIASEC.',
           link: '/pictotest-metiers',
@@ -169,14 +169,14 @@ export const OverviewFocusAreas = () => {
         },
         // Tests de personnalité
         {
-          title: 'MBTI (Myers-Briggs Type Indicator)',
+          title: 'MBTI [Personnalité] (Myers-Briggs Type Indicator)',
           description:
             'Tests de personnalité - Mesure la personnalité sur 4 axes → 16 types de profils. Utile pour comprendre son style de communication, de travail et de management.',
           link: '/mbti',
           external: false,
         },
         {
-          title: 'Big Five / OCEAN',
+          title: 'Big Five [Personnalité] / OCEAN',
           description:
             'Tests de personnalité - Mesure la personnalité selon 5 grands traits (Ouverture, Conscienciosité, Extraversion, Agréabilité, Neuroticisme). Très utilisé scientifiquement.',
           link: '/big-five',
@@ -184,14 +184,14 @@ export const OverviewFocusAreas = () => {
         },
         // Tests de motivations
         {
-          title: 'Questionnaire Motivations (MVPI, Reiss)',
+          title: 'Questionnaire Motivations [Motivations] (MVPI, Reiss)',
           description:
             'Tests de motivations - Explore les moteurs profonds (pouvoir, sécurité, liberté, reconnaissance, curiosité, etc.). Aide à comprendre ce qui soutient l\'engagement sur le long terme.',
           link: '/questionnaire-motivations',
           external: false,
         },
         {
-          title: 'CAP (Cartographie des Atouts Professionnels)',
+          title: 'CAP [Motivations] (Cartographie des Atouts Professionnels)',
           description:
             'Tests de motivations - Utilisé en France dans les bilans de compétences. Combine centres d\'intérêt, valeurs et compétences transversales pour des plans d\'action concrets.',
           link: '/bilan-competences',
