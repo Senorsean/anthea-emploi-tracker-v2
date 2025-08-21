@@ -33,6 +33,7 @@ import GoldenCirclePage from './pages/GoldenCirclePage';
 import CompetencesFormationPage from './pages/CompetencesFormationPage';
 import { PictotestMetiersPage } from './pages/PictotestMetiersPage';
 import IRMR3Page from './pages/IRMR3Page';
+import MBTIPage from './pages/MBTIPage';
 import Settings from "./pages/Settings";
 import RequireAuth from "./components/RequireAuth";
 import { JobsProvider } from "@/hooks/useJobs";
@@ -276,6 +277,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <IRMR3Page />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/mbti"
+            element={
+              <RequireAuth>
+                <MBTIPage />
               </RequireAuth>
             }
           />

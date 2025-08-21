@@ -166,6 +166,13 @@ export const OverviewFocusAreas = () => {
           link: '/irmr3',
           external: false,
         },
+        {
+          title: 'MBTI (Myers-Briggs Type Indicator)',
+          description:
+            'Mesure la personnalité sur 4 axes → 16 types de profils. Utile pour comprendre son style de communication, de travail et de management. Complémentaire aux intérêts professionnels.',
+          link: '/mbti',
+          external: false,
+        },
       ]
     },
   ];
