@@ -178,19 +178,50 @@ const IRMR3Page = () => {
       return y;
     };
 
-    // Nettoyer l'analyse des marqueurs Markdown
+    // Fonction pour ajouter un titre de section
+    const addSectionTitle = (title: string, y: number) => {
+      const requiredHeight = 20;
+      if (y + requiredHeight > pageHeight - margin) {
+        pdf.addPage();
+        y = addAntheaHeader(pdf, 'IRMR3 - Inventaire des Intérêts Professionnels');
+      }
+      
+      pdf.setFontSize(14);
+      pdf.setFont(undefined, 'bold');
+      pdf.text(title, margin, y);
+      return y + 15;
+    };
+
+    // Nettoyer l'analyse des marqueurs Markdown de façon plus complète
     const cleanedAnalysis = analysis
-      .replace(/#{1,6}\s*[🎯📊🚀💡🔄]\s*/g, '') // Retirer les headers avec emojis
+      .replace(/#{1,6}\s*[🎯📊🚀💡🔄Ø=ß¯]\s*/g, '') // Retirer les headers avec emojis et caractères parasites
       .replace(/#{1,6}\s*/g, '') // Retirer les autres headers markdown
       .replace(/\*\*(.*?)\*\*/g, '$1') // Retirer le gras markdown
       .replace(/\*(.*?)\*/g, '$1') // Retirer l'italique markdown
+      .replace(/[Øß¯=]+/g, '') // Retirer les caractères parasites spécifiques
+      .replace(/^\s*[-•]\s*/gm, '• ') // Normaliser les puces
       .split('\n')
-      .filter(line => line.trim()) // Retirer les lignes vides
-      .join('\n\n');
+      .map(line => line.trim()) // Nettoyer les espaces
+      .filter(line => line && line.length > 1) // Retirer les lignes vides ou trop courtes
+      .join('\n');
 
-    // Ajouter le contenu
-    yPosition = addText('VOTRE PROFIL IRMR3', margin, yPosition + 10, 16, true);
-    yPosition = addText(cleanedAnalysis, margin, yPosition + 5);
+    // Diviser le contenu en sections
+    const sections = cleanedAnalysis.split(/(?=VOS DOMAINES D'INTÉRÊT DOMINANTS|PROFIL DÉTAILLÉ IRMR3|MÉTIERS ET SECTEURS RECOMMANDÉS|PLAN D'ACTION PERSONNALISÉ|COHÉRENCE AVEC VOS ASPIRATIONS)/);
+
+    sections.forEach((section, index) => {
+      if (section.trim()) {
+        const lines = section.split('\n');
+        const title = lines[0].trim();
+        const content = lines.slice(1).join('\n').trim();
+
+        if (title) {
+          yPosition = addSectionTitle(title, yPosition + 10);
+        }
+        if (content) {
+          yPosition = addText(content, margin, yPosition + 5) + 10;
+        }
+      }
+    });
 
     pdf.save('analyse-irmr3.pdf');
     
