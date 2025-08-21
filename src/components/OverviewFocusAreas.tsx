@@ -152,39 +152,49 @@ export const OverviewFocusAreas = () => {
           link: '/competences-formation',
           external: false,
         },
-        {
-          title: 'Pictotest des métiers',
-          description:
-            'Explorez vos préférences professionnelles à partir d\'images d\'activités concrètes pour révéler vos pôles d\'intérêt dominants (RIASEC).',
-          link: '/pictotest-metiers',
-          external: false,
-        },
+        // Tests d'intérêts
         {
           title: 'IRMR3 (Inventaire des Intérêts Professionnels)',
           description:
-            'Mesure les centres d\'intérêt professionnels selon 7 grands domaines : Artistique, Contact, Entreprise, Gestion, Manuel, Sciences, Social. Adapté aux jeunes comme aux adultes en reconversion.',
+            'Tests d\'intérêts - Mesure les centres d\'intérêt professionnels selon 7 grands domaines : Artistique, Contact, Entreprise, Gestion, Manuel, Sciences, Social. Adapté aux jeunes comme aux adultes en reconversion.',
           link: '/irmr3',
           external: false,
         },
         {
+          title: 'Pictotest des métiers (RIASEC)',
+          description:
+            'Tests d\'intérêts - Explorez vos préférences professionnelles à partir d\'images d\'activités concrètes pour révéler vos pôles d\'intérêt dominants selon le modèle RIASEC.',
+          link: '/pictotest-metiers',
+          external: false,
+        },
+        // Tests de personnalité
+        {
           title: 'MBTI (Myers-Briggs Type Indicator)',
           description:
-            'Mesure la personnalité sur 4 axes → 16 types de profils. Utile pour comprendre son style de communication, de travail et de management. Complémentaire aux intérêts professionnels.',
+            'Tests de personnalité - Mesure la personnalité sur 4 axes → 16 types de profils. Utile pour comprendre son style de communication, de travail et de management.',
           link: '/mbti',
           external: false,
         },
         {
           title: 'Big Five / OCEAN',
           description:
-            'Mesure la personnalité selon 5 grands traits (Ouverture, Conscienciosité, Extraversion, Agréabilité, Neuroticisme). Très utilisé scientifiquement, aide à identifier les environnements de travail favorables.',
+            'Tests de personnalité - Mesure la personnalité selon 5 grands traits (Ouverture, Conscienciosité, Extraversion, Agréabilité, Neuroticisme). Très utilisé scientifiquement.',
           link: '/big-five',
           external: false,
         },
+        // Tests de motivations
         {
-          title: 'Questionnaire Motivations (ex : MVPI, Reiss Motivation Profile)',
+          title: 'Questionnaire Motivations (MVPI, Reiss)',
           description:
-            'Explore les moteurs profonds (pouvoir, sécurité, liberté, reconnaissance, curiosité, etc.). Aide à comprendre ce qui soutient l\'engagement et l\'énergie sur le long terme.',
+            'Tests de motivations - Explore les moteurs profonds (pouvoir, sécurité, liberté, reconnaissance, curiosité, etc.). Aide à comprendre ce qui soutient l\'engagement sur le long terme.',
           link: '/questionnaire-motivations',
+          external: false,
+        },
+        {
+          title: 'CAP (Cartographie des Atouts Professionnels)',
+          description:
+            'Tests de motivations - Utilisé en France dans les bilans de compétences. Combine centres d\'intérêt, valeurs et compétences transversales pour des plans d\'action concrets.',
+          link: '/bilan-competences',
           external: false,
         },
       ]
