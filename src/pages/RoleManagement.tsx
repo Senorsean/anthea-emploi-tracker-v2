@@ -5,10 +5,13 @@ import { ConsultantPanel } from '@/components/ConsultantPanel';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, BookOpen, Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Users, BookOpen, Lock, Home } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const RoleManagement = () => {
   const { userRole, loading, candidateModules } = useUserRole();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -39,6 +42,16 @@ const RoleManagement = () => {
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       <div className="text-center space-y-4">
+        <div className="flex items-center justify-between mb-4">
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2"
+          >
+            <Home className="h-4 w-4" />
+            Retour à l'accueil
+          </Button>
+        </div>
         <h1 className="text-4xl font-bold text-gray-900">Gestion des Rôles et Modules</h1>
         <p className="text-xl text-muted-foreground">
           Interface de gestion selon votre rôle dans Anthea
