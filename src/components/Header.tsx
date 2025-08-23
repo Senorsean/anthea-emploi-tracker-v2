@@ -182,7 +182,7 @@ export const Header = ({ onLogoClick }: HeaderProps) => {
                 <Settings className="h-4 w-4 text-white" />
               </Link>
             </Button>
-            {userRole === 'admin' && (
+            {(userRole === 'admin' || userRole === 'consultant') && (
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/gestion-des-roles">
                   <Users className="h-4 w-4 text-white" />
