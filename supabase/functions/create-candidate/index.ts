@@ -79,7 +79,8 @@ serve(async (req) => {
       .upsert({
         id: newUser.user.id,
         email,
-        full_name
+        full_name,
+        consultant_id: currentUser.id
       });
 
     if (profileError) {

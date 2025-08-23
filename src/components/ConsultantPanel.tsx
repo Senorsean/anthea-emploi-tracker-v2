@@ -47,10 +47,14 @@ export const ConsultantPanel = () => {
 
   const fetchData = async () => {
     try {
-      // Get candidates (users with candidat role)
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Get candidates created by this consultant (users with candidat role)
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('*');
+        .select('*')
+        .eq('consultant_id', user.id);
 
       if (profiles) {
         const candidatesWithRoles = await Promise.all(
