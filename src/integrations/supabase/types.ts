@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      candidate_modules: {
+        Row: {
+          assigned_at: string
+          candidate_id: string
+          consultant_id: string | null
+          id: string
+          is_active: boolean
+          module_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          candidate_id: string
+          consultant_id?: string | null
+          id?: string
+          is_active?: boolean
+          module_id: string
+        }
+        Update: {
+          assigned_at?: string
+          candidate_id?: string
+          consultant_id?: string | null
+          id?: string
+          is_active?: boolean
+          module_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_modules_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mobility_area: {
         Row: {
           allowed_cities: string[]
@@ -68,6 +103,39 @@ export type Database = {
           travel_modes?: string[]
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      modules: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          route: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          route: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          route?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -316,6 +384,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      candidate_has_module_access: {
+        Args: { _candidate_id: string; _module_id: string }
+        Returns: boolean
+      }
+      get_candidate_modules: {
+        Args: { _candidate_id: string }
+        Returns: {
+          assigned_at: string
+          category: string
+          description: string
+          module_id: string
+          module_name: string
+          route: string
+        }[]
+      }
       get_current_user_profile: {
         Args: Record<PropertyKey, never>
         Returns: {
