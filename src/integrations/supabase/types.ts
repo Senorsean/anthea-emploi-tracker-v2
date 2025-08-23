@@ -316,6 +316,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_current_user_profile: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          avatar_url: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          updated_at: string
+        }[]
+      }
       get_shared_resume: {
         Args: { token: string }
         Returns: {
