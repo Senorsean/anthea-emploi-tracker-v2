@@ -150,31 +150,31 @@ export const ConsultantPanel = () => {
     }
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        toast.error('Vous devez être connecté');
+        return;
+      }
 
-      // Create profile
-      const candidateId = crypto.randomUUID();
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: candidateId,
+      // Call edge function to create candidate with admin privileges
+      const response = await fetch(`https://gefunbsxfofqvwvvqgnb.supabase.co/functions/v1/create-candidate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlZnVuYnN4Zm9mcXZ3dnZxZ25iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE1MzM0MzgsImV4cCI6MjA2NzEwOTQzOH0.zfDCdXGfoJEcIH2Jy9MnvFI76vT1xaA7qct27f-mCV8'
+        },
+        body: JSON.stringify({
           email: newCandidateEmail.trim(),
           full_name: newCandidateName.trim()
-        });
+        })
+      });
 
-      if (profileError) throw profileError;
+      const result = await response.json();
 
-      // Assign candidat role
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: candidateId,
-          role: 'candidat',
-          assigned_by: user.id
-        });
-
-      if (roleError) throw roleError;
+      if (!response.ok) {
+        throw new Error(result.error || 'Erreur lors de la création du candidat');
+      }
 
       toast.success('Candidat créé avec succès');
       setNewCandidateEmail('');
@@ -182,7 +182,7 @@ export const ConsultantPanel = () => {
       fetchData();
     } catch (error) {
       console.error('Error creating candidate:', error);
-      toast.error('Erreur lors de la création du candidat');
+      toast.error(error instanceof Error ? error.message : 'Erreur lors de la création du candidat');
     }
   };
 
