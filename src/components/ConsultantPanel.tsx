@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { UserCheck, BookOpen, Plus, Minus } from 'lucide-react';
+import { UserCheck, BookOpen, Plus, Minus, UserPlus } from 'lucide-react';
 
 interface Candidate {
   id: string;
@@ -36,6 +38,8 @@ export const ConsultantPanel = () => {
   const [candidateModules, setCandidateModules] = useState<CandidateModule[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [newCandidateEmail, setNewCandidateEmail] = useState('');
+  const [newCandidateName, setNewCandidateName] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -139,6 +143,49 @@ export const ConsultantPanel = () => {
     }
   };
 
+  const createCandidate = async () => {
+    if (!newCandidateEmail.trim() || !newCandidateName.trim()) {
+      toast.error('Veuillez remplir tous les champs');
+      return;
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Create profile
+      const candidateId = crypto.randomUUID();
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: candidateId,
+          email: newCandidateEmail.trim(),
+          full_name: newCandidateName.trim()
+        });
+
+      if (profileError) throw profileError;
+
+      // Assign candidat role
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert({
+          user_id: candidateId,
+          role: 'candidat',
+          assigned_by: user.id
+        });
+
+      if (roleError) throw roleError;
+
+      toast.success('Candidat créé avec succès');
+      setNewCandidateEmail('');
+      setNewCandidateName('');
+      fetchData();
+    } catch (error) {
+      console.error('Error creating candidate:', error);
+      toast.error('Erreur lors de la création du candidat');
+    }
+  };
+
   const isModuleAssigned = (candidateId: string, moduleId: string) => {
     return candidateModules.some(
       cm => cm.candidate_id === candidateId && cm.module_id === moduleId
@@ -180,6 +227,44 @@ export const ConsultantPanel = () => {
           <p className="text-muted-foreground">
             Gérez l'attribution des modules aux candidats.
           </p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UserPlus className="h-5 w-5" />
+            Créer un Nouveau Candidat
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="candidateEmail">Email du candidat</Label>
+              <Input
+                id="candidateEmail"
+                type="email"
+                placeholder="email@example.com"
+                value={newCandidateEmail}
+                onChange={(e) => setNewCandidateEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="candidateName">Nom complet</Label>
+              <Input
+                id="candidateName"
+                placeholder="Prénom Nom"
+                value={newCandidateName}
+                onChange={(e) => setNewCandidateName(e.target.value)}
+              />
+            </div>
+            <div className="flex items-end">
+              <Button onClick={createCandidate} className="w-full">
+                <UserPlus className="h-4 w-4 mr-2" />
+                Créer Candidat
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
