@@ -2,10 +2,108 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from 'react-router-dom';
-import { ExternalLink, Search, Target, TrendingUp, GraduationCap, Grid3X3 } from 'lucide-react';
+import { ExternalLink, Search, Target, TrendingUp, GraduationCap, Grid3X3, Lock } from 'lucide-react';
+import { useUserRole } from '@/hooks/useUserRole';
 
 export const OverviewFocusAreas = () => {
   const [activeCategory, setActiveCategory] = useState("all");
+  const { userRole, hasModuleAccess, isAdmin, isConsultant, loading } = useUserRole();
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  const renderModuleCard = (area: any, idx: number) => {
+    const hasAccess = area.external || hasModuleAccess(area.link);
+    const isLocked = !hasAccess && userRole === 'candidat';
+
+    return (
+      <Card 
+        key={idx} 
+        className={`h-full transition-shadow ${hasAccess ? 'hover:shadow-lg' : 'opacity-60'} ${isLocked ? 'border-red-200' : ''}`}
+      >
+        <CardHeader>
+          <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            {area.title}
+            {isLocked && <Lock className="h-4 w-4 text-red-500" />}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm text-gray-600">{area.description}</p>
+          {isLocked ? (
+            <div className="text-sm text-red-600 flex items-center gap-1">
+              <Lock className="h-3 w-3" />
+              Module non assigné
+            </div>
+          ) : area.external ? (
+            <a
+              href={area.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-[#a4007c] hover:underline flex items-center gap-1"
+            >
+              En savoir plus <ExternalLink className="h-4 w-4" />
+            </a>
+          ) : (
+            <Link
+              to={area.link}
+              className="text-sm text-[#a4007c] hover:underline flex items-center gap-1"
+            >
+              En savoir plus <ExternalLink className="h-4 w-4" />
+            </Link>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderDetailedModuleCard = (area: any, idx: number) => {
+    const hasAccess = area.external || hasModuleAccess(area.link);
+    const isLocked = !hasAccess && userRole === 'candidat';
+
+    return (
+      <Card 
+        key={idx} 
+        className={`h-full transition-all duration-200 ${hasAccess ? 'hover:shadow-lg hover:scale-105' : 'opacity-60'} ${isLocked ? 'border-red-200' : ''}`}
+      >
+        <CardHeader>
+          <CardTitle className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            {area.title}
+            {isLocked && <Lock className="h-5 w-5 text-red-500" />}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-gray-600 leading-relaxed">{area.description}</p>
+          {isLocked ? (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-lg font-medium">
+              <Lock className="h-4 w-4" />
+              Module non assigné
+            </div>
+          ) : area.external ? (
+            <a
+              href={area.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#a4007c] text-white rounded-lg hover:bg-[#8a0069] transition-colors font-medium"
+            >
+              Accéder <ExternalLink className="h-4 w-4" />
+            </a>
+          ) : (
+            <Link
+              to={area.link}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#a4007c] text-white rounded-lg hover:bg-[#8a0069] transition-colors font-medium"
+            >
+              Commencer <ExternalLink className="h-4 w-4" />
+            </Link>
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
 
   const categories = [
     {
@@ -239,35 +337,7 @@ export const OverviewFocusAreas = () => {
 
               {/* Category Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {category.areas.map((area, idx) => (
-                  <Card key={idx} className="h-full hover:shadow-lg transition-shadow">
-                    <CardHeader>
-                      <CardTitle className="text-lg font-semibold text-gray-900">
-                        {area.title}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <p className="text-sm text-gray-600">{area.description}</p>
-                      {area.external ? (
-                        <a
-                          href={area.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-[#a4007c] hover:underline flex items-center gap-1"
-                        >
-                          En savoir plus <ExternalLink className="h-4 w-4" />
-                        </a>
-                      ) : (
-                        <Link
-                          to={area.link}
-                          className="text-sm text-[#a4007c] hover:underline flex items-center gap-1"
-                        >
-                          En savoir plus <ExternalLink className="h-4 w-4" />
-                        </Link>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))}
+                {category.areas.map((area, idx) => renderModuleCard(area, idx))}
               </div>
             </div>
           ))}
@@ -291,35 +361,7 @@ export const OverviewFocusAreas = () => {
 
             {/* Category Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {category.areas.map((area, idx) => (
-                <Card key={idx} className="h-full hover:shadow-lg hover:scale-105 transition-all duration-200">
-                  <CardHeader>
-                    <CardTitle className="text-xl font-semibold text-gray-900">
-                      {area.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <p className="text-gray-600 leading-relaxed">{area.description}</p>
-                    {area.external ? (
-                      <a
-                        href={area.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#a4007c] text-white rounded-lg hover:bg-[#8a0069] transition-colors font-medium"
-                      >
-                        Accéder <ExternalLink className="h-4 w-4" />
-                      </a>
-                    ) : (
-                      <Link
-                        to={area.link}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#a4007c] text-white rounded-lg hover:bg-[#8a0069] transition-colors font-medium"
-                      >
-                        Commencer <ExternalLink className="h-4 w-4" />
-                      </Link>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+              {category.areas.map((area, idx) => renderDetailedModuleCard(area, idx))}
             </div>
           </TabsContent>
         ))}

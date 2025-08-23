@@ -37,8 +37,10 @@ import MBTIPage from './pages/MBTIPage';
 import BigFivePage from './pages/BigFivePage';
 import { MotivationQuestionnairePage } from './pages/MotivationQuestionnairePage';
 import Settings from "./pages/Settings";
+import RoleManagement from "./pages/RoleManagement";
 import RequireAuth from "./components/RequireAuth";
 import { JobsProvider } from "@/hooks/useJobs";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -311,6 +313,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <Settings />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/role-management"
+            element={
+              <RequireAuth>
+                <RoleManagement />
               </RequireAuth>
             }
           />
