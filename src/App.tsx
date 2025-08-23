@@ -324,6 +324,14 @@ const App = () => (
               </RequireAuth>
             }
           />
+          <Route
+            path="/gestion-des-roles"
+            element={
+              <RequireAuth>
+                <RoleManagement />
+              </RequireAuth>
+            }
+          />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
