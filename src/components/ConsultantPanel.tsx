@@ -55,17 +55,34 @@ export const ConsultantPanel = () => {
       }
 
       // Get candidates created by this consultant (users with candidat role)
-      const { data: candidates, error: candidatesError } = await supabase
+      // First get all profiles created by this consultant
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select(`
-          *,
-          user_roles!inner(role)
-        `)
-        .eq('consultant_id', user.id)
-        .eq('user_roles.role', 'candidat')
-        .eq('user_roles.is_active', true);
+        .select('*')
+        .eq('consultant_id', user.id);
 
-      console.log('Candidates query result:', { candidates, candidatesError, consultantId: user.id });
+      console.log('Profiles query result:', { profiles, profilesError, consultantId: user.id });
+
+      let candidates: Candidate[] = [];
+      if (profiles && profiles.length > 0) {
+        // Then get user roles for these profiles
+        const profileIds = profiles.map(p => p.id);
+        const { data: userRoles, error: rolesError } = await supabase
+          .from('user_roles')
+          .select('user_id, role')
+          .in('user_id', profileIds)
+          .eq('role', 'candidat')
+          .eq('is_active', true);
+
+        console.log('User roles query result:', { userRoles, rolesError });
+
+        if (userRoles) {
+          const candidateIds = new Set(userRoles.map(ur => ur.user_id));
+          candidates = profiles.filter(p => candidateIds.has(p.id)) as Candidate[];
+        }
+      }
+
+      console.log('Final candidates list:', candidates);
 
       if (candidates) {
         setCandidates(candidates as Candidate[]);
