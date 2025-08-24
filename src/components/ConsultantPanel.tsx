@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { UserCheck, BookOpen, Plus, Minus, UserPlus } from 'lucide-react';
+import { UserCheck, BookOpen, Plus, Minus, UserPlus, Mail } from 'lucide-react';
 
 interface Candidate {
   id: string;
@@ -210,6 +210,31 @@ export const ConsultantPanel = () => {
     }
   };
 
+  const sendPasswordReset = async (email: string, candidateName: string) => {
+    try {
+      const { data: currentUser } = await supabase.auth.getUser();
+      
+      const { data, error } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          email: email,
+          senderRole: 'consultant',
+          senderName: currentUser.user?.user_metadata?.full_name || 'Consultant'
+        }
+      });
+
+      if (error) {
+        console.error('Error sending password reset:', error);
+        toast.error('Impossible d\'envoyer l\'email de réinitialisation');
+        return;
+      }
+
+      toast.success(`Email de réinitialisation envoyé à ${candidateName}`);
+    } catch (error) {
+      console.error('Error sending password reset:', error);
+      toast.error('Une erreur s\'est produite');
+    }
+  };
+
   const isModuleAssigned = (candidateId: string, moduleId: string) => {
     return candidateModules.some(
       cm => cm.candidate_id === candidateId && cm.module_id === moduleId
@@ -297,18 +322,36 @@ export const ConsultantPanel = () => {
           <CardTitle>Sélectionner un Candidat</CardTitle>
         </CardHeader>
         <CardContent>
-          <Select onValueChange={setSelectedCandidate} value={selectedCandidate}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Choisir un candidat" />
-            </SelectTrigger>
-            <SelectContent>
-              {candidates.map((candidate) => (
-                <SelectItem key={candidate.id} value={candidate.id}>
-                  {candidate.full_name || candidate.email}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2">
+            <Select onValueChange={setSelectedCandidate} value={selectedCandidate}>
+              <SelectTrigger className="flex-1">
+                <SelectValue placeholder="Choisir un candidat" />
+              </SelectTrigger>
+              <SelectContent>
+                {candidates.map((candidate) => (
+                  <SelectItem key={candidate.id} value={candidate.id}>
+                    {candidate.full_name || candidate.email}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            
+            {selectedCandidate && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const candidate = candidates.find(c => c.id === selectedCandidate);
+                  if (candidate) {
+                    sendPasswordReset(candidate.email, candidate.full_name || candidate.email);
+                  }
+                }}
+                className="flex items-center gap-2"
+              >
+                <Mail className="h-4 w-4" />
+                Réinitialiser MDP
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
 

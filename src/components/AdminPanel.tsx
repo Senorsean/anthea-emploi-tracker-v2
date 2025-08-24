@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { UserPlus, Users, Settings } from 'lucide-react';
+import { UserPlus, Users, Settings, Mail } from 'lucide-react';
 
 interface User {
   id: string;
@@ -98,6 +98,29 @@ export const AdminPanel = () => {
     }
   };
 
+  const sendPasswordReset = async (email: string, userName: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('send-password-reset', {
+        body: {
+          email: email,
+          senderRole: 'admin',
+          senderName: 'Administrateur'
+        }
+      });
+
+      if (error) {
+        console.error('Error sending password reset:', error);
+        toast.error('Impossible d\'envoyer l\'email de réinitialisation');
+        return;
+      }
+
+      toast.success(`Email de réinitialisation envoyé à ${userName}`);
+    } catch (error) {
+      console.error('Error sending password reset:', error);
+      toast.error('Une erreur s\'est produite');
+    }
+  };
+
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'admin': return 'bg-red-100 text-red-800';
@@ -142,6 +165,7 @@ export const AdminPanel = () => {
                   <TableHead>Email</TableHead>
                   <TableHead>Nom</TableHead>
                   <TableHead>Rôle Actuel</TableHead>
+                  <TableHead>Assigner Rôle</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -160,21 +184,30 @@ export const AdminPanel = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
-                        <Select
-                          onValueChange={(role) => assignRole(user.id, role as any)}
-                          defaultValue={user.role || undefined}
-                        >
-                          <SelectTrigger className="w-40">
-                            <SelectValue placeholder="Assigner rôle" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="consultant">Consultant</SelectItem>
-                            <SelectItem value="candidat">Candidat</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      <Select
+                        onValueChange={(role) => assignRole(user.id, role as any)}
+                        defaultValue={user.role || undefined}
+                      >
+                        <SelectTrigger className="w-40">
+                          <SelectValue placeholder="Assigner rôle" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="admin">Admin</SelectItem>
+                          <SelectItem value="consultant">Consultant</SelectItem>
+                          <SelectItem value="candidat">Candidat</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => sendPasswordReset(user.email, user.full_name || user.email)}
+                        className="flex items-center gap-2"
+                      >
+                        <Mail className="h-4 w-4" />
+                        Réinitialiser MDP
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
