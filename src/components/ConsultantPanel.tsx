@@ -55,26 +55,20 @@ export const ConsultantPanel = () => {
       }
 
       // Get candidates created by this consultant (users with candidat role)
-      const { data: profiles, error: profilesError } = await supabase
+      const { data: candidates, error: candidatesError } = await supabase
         .from('profiles')
-        .select('*')
-        .eq('consultant_id', user.id);
+        .select(`
+          *,
+          user_roles!inner(role)
+        `)
+        .eq('consultant_id', user.id)
+        .eq('user_roles.role', 'candidat')
+        .eq('user_roles.is_active', true);
 
-      console.log('Profiles query result:', { profiles, profilesError, consultantId: user.id });
+      console.log('Candidates query result:', { candidates, candidatesError, consultantId: user.id });
 
-      if (profiles) {
-        const candidatesWithRoles = await Promise.all(
-          profiles.map(async (profile) => {
-            const { data: roleData, error: roleError } = await supabase.rpc('get_user_role', {
-              _user_id: profile.id
-            });
-            console.log(`Role for ${profile.email}:`, { roleData, roleError });
-            return roleData === 'candidat' ? profile : null;
-          })
-        );
-        const filteredCandidates = candidatesWithRoles.filter(Boolean) as Candidate[];
-        console.log('Final candidates list:', filteredCandidates);
-        setCandidates(filteredCandidates);
+      if (candidates) {
+        setCandidates(candidates as Candidate[]);
       }
 
       // Get all modules
