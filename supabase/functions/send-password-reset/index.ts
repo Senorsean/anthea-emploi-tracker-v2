@@ -54,7 +54,7 @@ const handler = async (req: Request): Promise<Response> => {
       type: 'recovery',
       email: email,
       options: {
-        redirectTo: `${Deno.env.get("SUPABASE_URL")?.replace('.supabase.co', '.lovable.app') || 'https://your-app.lovable.app'}/login`
+        redirectTo: 'https://id-preview--203d2aff-eb03-48ba-81af-fd4166240394.lovable.app/login'
       }
     });
 
