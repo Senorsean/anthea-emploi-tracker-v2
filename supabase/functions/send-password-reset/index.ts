@@ -73,7 +73,7 @@ const handler = async (req: Request): Promise<Response> => {
     
     // Envoyer l'email via Resend
     const emailResponse = await resend.emails.send({
-      from: "Anthea <noreply@resend.dev>",
+      from: "Anthea <noreply@infos.anthea-emploi-tracker.fr>",
       to: [email],
       subject: "Réinitialisation de votre mot de passe - Anthea",
       html: `
