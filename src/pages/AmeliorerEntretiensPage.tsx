@@ -90,6 +90,20 @@ export default function AmeliorerEntretiensPage() {
           </Link>
         </section>
 
+        <section className="mb-6 bg-green-50 p-6 rounded-lg">
+          <h2 className="text-xl font-semibold mb-4">📧 Et après l'entretien ?</h2>
+          <p className="mb-4">
+            Découvrez comment relancer professionnellement un recruteur après un entretien : 
+            timing optimal, messages types, erreurs à éviter et stratégies pour rester visible sans être intrusif.
+          </p>
+          <Link 
+            to="/relancer-employeur" 
+            className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            Apprendre à relancer →
+          </Link>
+        </section>
+
         <Card className="mb-6" id="notes">
           <CardHeader>
             <CardTitle>📝 Mes notes personnelles</CardTitle>

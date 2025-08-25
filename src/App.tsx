@@ -10,6 +10,7 @@ import AmeliorerEntretiensPage from "./pages/AmeliorerEntretiensPage";
 import NegociationOffrePage from "./pages/NegociationOffrePage";
 import PreparationEntretienPage from "./pages/PreparationEntretienPage";
 import MethodeStarPage from "./pages/MethodeStarPage";
+import RelancerEmployeurPage from "./pages/RelancerEmployeurPage";
 import RenforcezVotreReseauPage from "./pages/RenforcezVotreReseauPage";
 import OptimiserProfilLinkedinPage from "./pages/OptimiserProfilLinkedinPage";
 import ProgressionEntretiensPage from "./pages/ProgressionEntretiensPage";
@@ -113,6 +114,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <MethodeStarPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/relancer-employeur"
+            element={
+              <RequireAuth>
+                <RelancerEmployeurPage />
               </RequireAuth>
             }
           />
