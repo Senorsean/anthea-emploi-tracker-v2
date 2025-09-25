@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { supabase } from '@/integrations/supabase/client';
-import { Bell, Check, Settings, LogOut, Pencil, X, Users } from 'lucide-react';
+import { Bell, Check, Settings, LogOut, Pencil, X, Users, Info } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Link } from 'react-router-dom';
 import { useAlerts } from '@/hooks/useAlerts';
@@ -177,6 +177,11 @@ export const Header = ({ onLogoClick }: HeaderProps) => {
                 )}
               </PopoverContent>
             </Popover>
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/presentation">
+                <Info className="h-4 w-4 text-white" />
+              </Link>
+            </Button>
             <Button variant="ghost" size="sm" asChild>
               <Link to="/settings">
                 <Settings className="h-4 w-4 text-white" />

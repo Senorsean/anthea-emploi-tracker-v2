@@ -37,6 +37,7 @@ import IRMR3Page from './pages/IRMR3Page';
 import MBTIPage from './pages/MBTIPage';
 import BigFivePage from './pages/BigFivePage';
 import { MotivationQuestionnairePage } from './pages/MotivationQuestionnairePage';
+import PresentationPage from './pages/PresentationPage';
 import Settings from "./pages/Settings";
 import RoleManagement from "./pages/RoleManagement";
 import RequireAuth from "./components/RequireAuth";
@@ -53,6 +54,7 @@ const App = () => (
         <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/presentation" element={<PresentationPage />} />
           <Route
             path="/"
             element={
