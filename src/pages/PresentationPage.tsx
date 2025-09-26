@@ -204,13 +204,6 @@ export const PresentationPage = () => {
           link: "/renforcez-votre-reseau"
         },
         {
-          title: "Analyse du CV et Générateur de lettre de motivation",
-          description: "Optimisez vos candidatures avec l'IA",
-          features: ["Analyse CV automatique", "Génération lettres personnalisées", "Conseils d'amélioration", "Optimisation ATS"],
-          icon: <FileText className="h-5 w-5" />,
-          link: "https://joyful-crepe-00afff.netlify.app/"
-        },
-        {
           title: "Optimiser profil LinkedIn",
           description: "Maximisez votre présence sur LinkedIn",
           features: ["Optimisation profil", "Contenu engageant", "Réseau stratégique", "Visibilité"],
