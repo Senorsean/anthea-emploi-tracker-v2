@@ -101,6 +101,20 @@ export const PresentationPage = () => {
       ]
     },
     {
+      category: "Recherche d'emploi",
+      icon: <Briefcase className="h-6 w-6" />,
+      color: "bg-indigo-50 border-indigo-200",
+      items: [
+        {
+          title: "Analyse du CV et Générateur de lettre de motivation",
+          description: "Optimisez vos candidatures avec l'IA",
+          features: ["Analyse CV automatique", "Génération lettres personnalisées", "Conseils d'amélioration", "Optimisation ATS"],
+          icon: <FileText className="h-5 w-5" />,
+          link: "https://joyful-crepe-00afff.netlify.app/"
+        }
+      ]
+    },
+    {
       category: "Développement professionnel", 
       icon: <BookOpen className="h-6 w-6" />,
       color: "bg-purple-50 border-purple-200",
