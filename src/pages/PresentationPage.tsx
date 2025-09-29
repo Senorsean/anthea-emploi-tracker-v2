@@ -106,11 +106,25 @@ export const PresentationPage = () => {
       color: "bg-indigo-50 border-indigo-200",
       items: [
         {
+          title: "Optimiser votre CV",
+          description: "Amélioration et optimisation de votre CV",
+          features: ["Analyse structure", "Mots-clés secteur", "Format ATS", "Conseils personnalisés"],
+          icon: <FileText className="h-5 w-5" />,
+          link: "/"
+        },
+        {
           title: "Analyse du CV et Générateur de lettre de motivation",
           description: "Optimisez vos candidatures avec l'IA",
           features: ["Analyse CV automatique", "Génération lettres personnalisées", "Conseils d'amélioration", "Optimisation ATS"],
           icon: <FileText className="h-5 w-5" />,
           link: "https://joyful-crepe-00afff.netlify.app/"
+        },
+        {
+          title: "Développer votre réseau",
+          description: "Stratégies de networking professionnel",
+          features: ["Événements ciblés", "Approches personnalisées", "Suivi relations", "Opportunités cachées"],
+          icon: <Users className="h-5 w-5" />,
+          link: "/"
         }
       ]
     },
