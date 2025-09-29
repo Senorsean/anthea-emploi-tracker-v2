@@ -135,6 +135,13 @@ export const OverviewFocusAreas = () => {
           external: true,
         },
         {
+          title: 'Analyse du CV et Générateur de lettre de motivation',
+          description:
+            'Optimisez vos candidatures avec l\'IA pour analyser votre CV et générer des lettres personnalisées.',
+          link: 'https://joyful-crepe-00afff.netlify.app/',
+          external: true,
+        },
+        {
           title: 'Développer votre Réseau',
           description:
             'Tirez parti de LinkedIn et de vos contacts pour découvrir de nouvelles opportunités.',
