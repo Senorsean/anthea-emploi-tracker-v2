@@ -176,6 +176,13 @@ export const OverviewFocusAreas = () => {
           link: '/aire-mobilite',
           external: false,
         },
+        {
+          title: 'Préparation pitch de présentation 🎤',
+          description:
+            'Créez vos elevator pitchs de 30s, 1min et 3min avec des techniques de storytelling professionnel et recevez un feedback IA.',
+          link: '/pitch-presentation',
+          external: false,
+        },
       ]
     },
     {

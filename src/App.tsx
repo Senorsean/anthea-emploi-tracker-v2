@@ -34,6 +34,7 @@ import GoldenCirclePage from './pages/GoldenCirclePage';
 import AncresCarrierePage from './pages/AncresCarrierePage';
 import LifeDesignPage from './pages/LifeDesignPage';
 import RoueVieProfessionnellePage from './pages/RoueVieProfessionnellePage';
+import PitchPresentationPage from './pages/PitchPresentationPage';
 import CompetencesFormationPage from './pages/CompetencesFormationPage';
 import { PictotestMetiersPage } from './pages/PictotestMetiersPage';
 import IRMR3Page from './pages/IRMR3Page';
@@ -215,6 +216,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <AireMobilitePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/pitch-presentation"
+            element={
+              <RequireAuth>
+                <PitchPresentationPage />
               </RequireAuth>
             }
           />
