@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Plus, Trash2, Lightbulb } from 'lucide-react';
+import { Loader2, Plus, Trash2, Lightbulb, Home } from 'lucide-react';
 
 interface LifePrototype {
   id: string;
@@ -16,6 +17,7 @@ interface LifePrototype {
 }
 
 const LifeDesignPage = () => {
+  const navigate = useNavigate();
   const [prototypes, setPrototypes] = useState<LifePrototype[]>([
     { id: '1', title: '', description: '', experiments: '' }
   ]);
@@ -74,6 +76,17 @@ const LifeDesignPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50 p-6">
       <div className="max-w-4xl mx-auto space-y-8">
+        <div className="flex justify-start">
+          <Button
+            onClick={() => navigate('/')}
+            variant="outline"
+            className="gap-2"
+          >
+            <Home className="h-4 w-4" />
+            Retour accueil
+          </Button>
+        </div>
+
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             Life Design 🎨
