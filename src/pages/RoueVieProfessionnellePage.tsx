@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Home, Target } from 'lucide-react';
+import { Loader2, Home, Target, Download } from 'lucide-react';
 import { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer, Legend } from 'recharts';
+import jsPDF from 'jspdf';
 
 interface Dimension {
   name: string;
@@ -64,6 +65,79 @@ const RoueVieProfessionnellePage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleExport = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    let yPosition = 20;
+
+    // Titre
+    doc.setFontSize(20);
+    doc.setTextColor(79, 70, 229);
+    doc.text('Roue de la vie professionnelle', pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 15;
+
+    // Date
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Date: ${new Date().toLocaleDateString('fr-FR')}`, pageWidth / 2, yPosition, { align: 'center' });
+    yPosition += 15;
+
+    // Score moyen
+    const avgScore = (dimensions.reduce((sum, d) => sum + d.value, 0) / dimensions.length).toFixed(1);
+    doc.setFontSize(12);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Score moyen: ${avgScore}/10`, margin, yPosition);
+    yPosition += 10;
+
+    // Dimensions
+    doc.setFontSize(14);
+    doc.setTextColor(79, 70, 229);
+    doc.text('Évaluation par dimension:', margin, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(10);
+    doc.setTextColor(0, 0, 0);
+    dimensions.forEach((dim) => {
+      if (yPosition > 270) {
+        doc.addPage();
+        yPosition = 20;
+      }
+      doc.text(`${dim.name}: ${dim.value}/10`, margin + 5, yPosition);
+      yPosition += 7;
+    });
+
+    // Analyse
+    if (analysis) {
+      yPosition += 10;
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setTextColor(79, 70, 229);
+      doc.text('Analyse:', margin, yPosition);
+      yPosition += 10;
+
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+
+      const lines = doc.splitTextToSize(analysis, pageWidth - 2 * margin);
+      lines.forEach((line: string) => {
+        if (yPosition > 280) {
+          doc.addPage();
+          yPosition = 20;
+        }
+        doc.text(line, margin, yPosition);
+        yPosition += 5;
+      });
+    }
+
+    doc.save('roue-vie-professionnelle.pdf');
+    toast.success('PDF exporté avec succès !');
   };
 
   return (
@@ -184,7 +258,17 @@ const RoueVieProfessionnellePage = () => {
         {analysis && (
           <Card className="border-indigo-200 shadow-lg">
             <CardHeader>
-              <CardTitle className="text-indigo-600">Analyse de votre roue de vie professionnelle</CardTitle>
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-indigo-600">Analyse de votre roue de vie professionnelle</CardTitle>
+                <Button
+                  onClick={handleExport}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Exporter en PDF
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="prose prose-indigo max-w-none">
