@@ -234,6 +234,13 @@ export const OverviewFocusAreas = () => {
           link: '/life-design',
           external: false,
         },
+        {
+          title: 'Roue de la vie professionnelle ⭕',
+          description:
+            'Évaluation visuelle de 8 dimensions (salaire, sens, relations, développement...). Identifie les zones à rééquilibrer.',
+          link: '/roue-vie-professionnelle',
+          external: false,
+        },
       ]
     },
     {

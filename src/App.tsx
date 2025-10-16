@@ -33,6 +33,7 @@ import MethodeSmartPage from './pages/MethodeSmartPage';
 import GoldenCirclePage from './pages/GoldenCirclePage';
 import AncresCarrierePage from './pages/AncresCarrierePage';
 import LifeDesignPage from './pages/LifeDesignPage';
+import RoueVieProfessionnellePage from './pages/RoueVieProfessionnellePage';
 import CompetencesFormationPage from './pages/CompetencesFormationPage';
 import { PictotestMetiersPage } from './pages/PictotestMetiersPage';
 import IRMR3Page from './pages/IRMR3Page';
@@ -286,6 +287,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <LifeDesignPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/roue-vie-professionnelle"
+            element={
+              <RequireAuth>
+                <RoueVieProfessionnellePage />
               </RequireAuth>
             }
           />
