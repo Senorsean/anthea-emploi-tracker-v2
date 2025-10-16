@@ -35,6 +35,7 @@ import AncresCarrierePage from './pages/AncresCarrierePage';
 import LifeDesignPage from './pages/LifeDesignPage';
 import RoueVieProfessionnellePage from './pages/RoueVieProfessionnellePage';
 import PitchPresentationPage from './pages/PitchPresentationPage';
+import PersonalBrandingPage from './pages/PersonalBrandingPage';
 import CompetencesFormationPage from './pages/CompetencesFormationPage';
 import { PictotestMetiersPage } from './pages/PictotestMetiersPage';
 import IRMR3Page from './pages/IRMR3Page';
@@ -224,6 +225,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <PitchPresentationPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/personal-branding"
+            element={
+              <RequireAuth>
+                <PersonalBrandingPage />
               </RequireAuth>
             }
           />

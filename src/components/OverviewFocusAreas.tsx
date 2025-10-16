@@ -183,6 +183,13 @@ export const OverviewFocusAreas = () => {
           link: '/pitch-presentation',
           external: false,
         },
+        {
+          title: 'Personal branding digital 💼',
+          description:
+            'Cohérence CV / LinkedIn / portfolio, créer son portfolio en ligne et stratégie de contenu professionnel.',
+          link: '/personal-branding',
+          external: false,
+        },
       ]
     },
     {
