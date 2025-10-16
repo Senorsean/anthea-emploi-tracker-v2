@@ -207,13 +207,6 @@ export const OverviewFocusAreas = () => {
           external: false,
         },
         {
-          title: 'Bilan de compétences (France / Europe)',
-          description:
-            'Méthode structurée et encadrée légalement. Analyse des compétences, motivations, valeurs et aptitudes. Débouche sur un projet professionnel ou de formation réaliste.',
-          link: '/bilan-competences',
-          external: false,
-        },
-        {
           title: 'Méthode SMART / OKR appliquée à la carrière',
           description:
             'Définir un objectif professionnel clair (Spécifique, Mesurable, Atteignable, Réaliste, Temporel). Puis découper en sous-objectifs comme dans la gestion de projet. Concret et actionnable.',
@@ -225,6 +218,13 @@ export const OverviewFocusAreas = () => {
           description:
             'Trouver son Why (raison d\'être), puis son How (forces / méthodes), puis son What (activités concrètes). Simple, très inspirant, bon complément de l\'Ikigai.',
           link: '/golden-circle',
+          external: false,
+        },
+        {
+          title: 'Ancres de carrière de Schein 📍',
+          description:
+            '8 motivateurs de carrière (technique, management, autonomie, sécurité, créativité, etc.). Aide à comprendre ce qui vous retient vraiment dans un emploi.',
+          link: '/ancres-carriere',
           external: false,
         },
       ]
