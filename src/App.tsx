@@ -32,6 +32,7 @@ import BilanCompetencesPage from './pages/BilanCompetencesPage';
 import MethodeSmartPage from './pages/MethodeSmartPage';
 import GoldenCirclePage from './pages/GoldenCirclePage';
 import AncresCarrierePage from './pages/AncresCarrierePage';
+import LifeDesignPage from './pages/LifeDesignPage';
 import CompetencesFormationPage from './pages/CompetencesFormationPage';
 import { PictotestMetiersPage } from './pages/PictotestMetiersPage';
 import IRMR3Page from './pages/IRMR3Page';
@@ -277,6 +278,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <AncresCarrierePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/life-design"
+            element={
+              <RequireAuth>
+                <LifeDesignPage />
               </RequireAuth>
             }
           />

@@ -227,6 +227,13 @@ export const OverviewFocusAreas = () => {
           link: '/ancres-carriere',
           external: false,
         },
+        {
+          title: 'Life Design / Design Thinking appliqué à la carrière 🎨',
+          description:
+            'Approche Stanford : prototypez plusieurs vies possibles et testez par petites expériences avant de vous engager.',
+          link: '/life-design',
+          external: false,
+        },
       ]
     },
     {
