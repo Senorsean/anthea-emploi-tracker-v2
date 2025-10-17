@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, RefreshCw, Loader2 } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Loader2, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import jsPDF from 'jspdf';
+import { addAntheaHeader } from '@/lib/pdf-utils';
 
 const ReconversionProfessionnellePage = () => {
   const [currentJob, setCurrentJob] = useState('');
@@ -63,6 +65,72 @@ const ReconversionProfessionnellePage = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleExport = () => {
+    if (!analysis) return;
+
+    try {
+      const pdf = new jsPDF();
+      let yPosition = addAntheaHeader(pdf, 'Analyse de Reconversion Professionnelle');
+
+      // Add profile information
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Profil:', 20, yPosition);
+      yPosition += 10;
+
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      pdf.text(`Poste actuel: ${currentJob}`, 20, yPosition);
+      yPosition += 7;
+      
+      if (targetSector) {
+        pdf.text(`Secteur visé: ${targetSector}`, 20, yPosition);
+        yPosition += 10;
+      } else {
+        yPosition += 3;
+      }
+
+      // Add analysis
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Analyse:', 20, yPosition);
+      yPosition += 10;
+
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const margin = 20;
+      const maxWidth = pageWidth - 2 * margin;
+      const lineHeight = 7;
+      
+      const lines = pdf.splitTextToSize(analysis, maxWidth);
+      
+      lines.forEach((line: string) => {
+        if (yPosition > pdf.internal.pageSize.getHeight() - 20) {
+          pdf.addPage();
+          yPosition = addAntheaHeader(pdf, 'Analyse de Reconversion Professionnelle');
+        }
+        pdf.text(line, margin, yPosition);
+        yPosition += lineHeight;
+      });
+
+      pdf.save('analyse-reconversion-professionnelle.pdf');
+      
+      toast({
+        title: "Export réussi",
+        description: "Votre analyse a été exportée en PDF.",
+      });
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'export.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -195,10 +263,20 @@ const ReconversionProfessionnellePage = () => {
         {analysis && (
           <Card className="max-w-4xl mx-auto">
             <CardHeader>
-              <CardTitle className="text-2xl flex items-center gap-2">
-                <RefreshCw className="h-6 w-6 text-[#a4007c]" />
-                Votre Analyse de Reconversion
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-2xl flex items-center gap-2">
+                  <RefreshCw className="h-6 w-6 text-[#a4007c]" />
+                  Votre Analyse de Reconversion
+                </CardTitle>
+                <Button
+                  onClick={handleExport}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Exporter
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="prose prose-lg max-w-none">
