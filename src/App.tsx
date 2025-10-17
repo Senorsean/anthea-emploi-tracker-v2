@@ -38,6 +38,7 @@ import PitchPresentationPage from './pages/PitchPresentationPage';
 import PersonalBrandingPage from './pages/PersonalBrandingPage';
 import CompetencesFormationPage from './pages/CompetencesFormationPage';
 import ReconversionProfessionnellePage from './pages/ReconversionProfessionnellePage';
+import LeadershipManagementPage from './pages/LeadershipManagementPage';
 import { PictotestMetiersPage } from './pages/PictotestMetiersPage';
 import IRMR3Page from './pages/IRMR3Page';
 import MBTIPage from './pages/MBTIPage';
@@ -370,6 +371,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <ReconversionProfessionnellePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/leadership-management"
+            element={
+              <RequireAuth>
+                <LeadershipManagementPage />
               </RequireAuth>
             }
           />

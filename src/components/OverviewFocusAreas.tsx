@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from 'react-router-dom';
-import { ExternalLink, Search, Target, TrendingUp, GraduationCap, Grid3X3, Lock } from 'lucide-react';
+import { ExternalLink, Search, Target, TrendingUp, GraduationCap, Grid3X3, Lock, Users, RefreshCw } from 'lucide-react';
 import { useUserRole } from '@/hooks/useUserRole';
 
 export const OverviewFocusAreas = () => {
@@ -335,6 +335,13 @@ export const OverviewFocusAreas = () => {
           description:
             'Évaluer la faisabilité d\'une reconversion, métiers accessibles selon votre profil et plan de transition détaillé.',
           link: '/reconversion-professionnelle',
+          external: false,
+        },
+        {
+          title: 'Leadership & Management 👔',
+          description:
+            'Tests de style de leadership, compétences managériales à développer et transition vers des rôles de management.',
+          link: '/leadership-management',
           external: false,
         },
       ]
