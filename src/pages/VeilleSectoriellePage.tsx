@@ -96,17 +96,19 @@ const VeilleSectoriellePage = () => {
       pdf.setFontSize(10);
       
       const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
       const margin = 20;
       const maxWidth = pageWidth - 2 * margin;
       const lineHeight = 7;
+      const bottomMargin = 20;
       
       const lines = pdf.splitTextToSize(analysis, maxWidth);
       
       lines.forEach((line: string) => {
-        if (yPosition > pdf.internal.pageSize.getHeight() - 30) {
+        // Check if we need a new page BEFORE writing
+        if (yPosition + lineHeight > pageHeight - bottomMargin) {
           pdf.addPage();
           yPosition = addAntheaHeader(pdf, 'Veille Sectorielle & Tendances');
-          yPosition += 5; // Add extra spacing after header on new pages
         }
         pdf.text(line, margin, yPosition);
         yPosition += lineHeight;
