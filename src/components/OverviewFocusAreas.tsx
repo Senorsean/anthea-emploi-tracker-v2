@@ -330,6 +330,13 @@ export const OverviewFocusAreas = () => {
           link: '/bilan-competences',
           external: false,
         },
+        {
+          title: 'Reconversion professionnelle 🔄',
+          description:
+            'Évaluer la faisabilité d\'une reconversion, métiers accessibles selon votre profil et plan de transition détaillé.',
+          link: '/reconversion-professionnelle',
+          external: false,
+        },
       ]
     },
   ];

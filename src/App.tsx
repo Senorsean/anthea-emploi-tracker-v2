@@ -37,6 +37,7 @@ import RoueVieProfessionnellePage from './pages/RoueVieProfessionnellePage';
 import PitchPresentationPage from './pages/PitchPresentationPage';
 import PersonalBrandingPage from './pages/PersonalBrandingPage';
 import CompetencesFormationPage from './pages/CompetencesFormationPage';
+import ReconversionProfessionnellePage from './pages/ReconversionProfessionnellePage';
 import { PictotestMetiersPage } from './pages/PictotestMetiersPage';
 import IRMR3Page from './pages/IRMR3Page';
 import MBTIPage from './pages/MBTIPage';
@@ -361,6 +362,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <MotivationQuestionnairePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/reconversion-professionnelle"
+            element={
+              <RequireAuth>
+                <ReconversionProfessionnellePage />
               </RequireAuth>
             }
           />
