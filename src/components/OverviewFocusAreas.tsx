@@ -344,6 +344,13 @@ export const OverviewFocusAreas = () => {
           link: '/leadership-management',
           external: false,
         },
+        {
+          title: 'Veille sectorielle & tendances métiers 📈',
+          description:
+            'Évolution de votre secteur, métiers émergents et compétences du futur à anticiper.',
+          link: '/veille-sectorielle',
+          external: false,
+        },
       ]
     },
   ];
