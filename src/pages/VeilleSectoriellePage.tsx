@@ -159,7 +159,15 @@ const VeilleSectoriellePage = () => {
         {/* Form Card */}
         <Card className="max-w-4xl mx-auto mb-8">
           <CardHeader>
-            <CardTitle className="text-2xl">Votre Profil Professionnel</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-2xl">Votre Profil Professionnel</CardTitle>
+              <Link to="/">
+                <Button variant="outline" className="flex items-center gap-2">
+                  <ArrowLeft className="h-4 w-4" />
+                  Retour à l'accueil
+                </Button>
+              </Link>
+            </div>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
