@@ -8,7 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Home, Briefcase, Linkedin, FileText, Target } from 'lucide-react';
+import { Loader2, Home, Briefcase, Linkedin, FileText, Target, Download } from 'lucide-react';
+import jsPDF from 'jspdf';
+import { addAntheaHeader } from '@/lib/pdf-utils';
 
 const PersonalBrandingPage = () => {
   const navigate = useNavigate();
@@ -51,6 +53,70 @@ const PersonalBrandingPage = () => {
       toast.error('Erreur lors de la génération de la stratégie');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleExport = () => {
+    if (!analysis) {
+      toast.error('Aucune analyse à exporter');
+      return;
+    }
+
+    try {
+      const pdf = new jsPDF();
+      
+      let yPosition = addAntheaHeader(pdf, 'Stratégie Personal Branding');
+      
+      // Profile info
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Profil :', 20, yPosition);
+      yPosition += 7;
+      
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Rôle actuel : ${formData.currentRole}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Rôle visé : ${formData.targetRole}`, 20, yPosition);
+      yPosition += 6;
+      pdf.text(`Expertise : ${formData.expertise}`, 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Stratégie générée :', 20, yPosition);
+      yPosition += 10;
+      
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 20;
+      const bottomMargin = 30;
+      const maxWidth = pageWidth - 2 * margin;
+      const lineHeight = 7;
+      
+      const lines = pdf.splitTextToSize(analysis, maxWidth);
+      
+      lines.forEach((line: string) => {
+        // Check if we need a new page BEFORE writing
+        if (yPosition + lineHeight > pageHeight - bottomMargin) {
+          pdf.addPage();
+          yPosition = addAntheaHeader(pdf, 'Stratégie Personal Branding');
+          // Reset body font after header so wrapping stays correct
+          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(10);
+        }
+        pdf.text(line, margin, yPosition);
+        yPosition += lineHeight;
+      });
+      
+      pdf.save('strategie-personal-branding.pdf');
+      toast.success('PDF exporté avec succès !');
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      toast.error('Erreur lors de l\'export du PDF');
     }
   };
 
@@ -233,12 +299,19 @@ const PersonalBrandingPage = () => {
             <CardHeader>
               <CardTitle className="text-blue-600">Votre stratégie de personal branding</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <div className="prose prose-blue max-w-none">
                 <div className="whitespace-pre-wrap text-gray-700 leading-relaxed">
                   {analysis}
                 </div>
               </div>
+              <Button
+                onClick={handleExport}
+                className="w-full bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Exporter en PDF
+              </Button>
             </CardContent>
           </Card>
         )}
