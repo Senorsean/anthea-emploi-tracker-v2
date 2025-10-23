@@ -106,10 +106,13 @@ const VeilleSectoriellePage = () => {
       
       lines.forEach((line: string) => {
         // Check if we need a new page BEFORE writing
-        if (yPosition + lineHeight > pageHeight - bottomMargin) {
-          pdf.addPage();
-          yPosition = addAntheaHeader(pdf, 'Veille Sectorielle & Tendances');
-        }
+          if (yPosition + lineHeight > pageHeight - bottomMargin) {
+            pdf.addPage();
+            yPosition = addAntheaHeader(pdf, 'Veille Sectorielle & Tendances');
+            // Reset body font after header so wrapping stays correct
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(10);
+          }
         pdf.text(line, margin, yPosition);
         yPosition += lineHeight;
       });
