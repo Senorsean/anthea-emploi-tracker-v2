@@ -103,16 +103,22 @@ const ReconversionProfessionnellePage = () => {
       pdf.setFontSize(10);
       
       const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
       const margin = 20;
+      const bottomMargin = 30;
       const maxWidth = pageWidth - 2 * margin;
       const lineHeight = 7;
       
       const lines = pdf.splitTextToSize(analysis, maxWidth);
       
       lines.forEach((line: string) => {
-        if (yPosition > pdf.internal.pageSize.getHeight() - 20) {
+        // Check if we need a new page BEFORE writing
+        if (yPosition + lineHeight > pageHeight - bottomMargin) {
           pdf.addPage();
           yPosition = addAntheaHeader(pdf, 'Analyse de Reconversion Professionnelle');
+          // Reset body font after header so wrapping stays correct
+          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(10);
         }
         pdf.text(line, margin, yPosition);
         yPosition += lineHeight;
