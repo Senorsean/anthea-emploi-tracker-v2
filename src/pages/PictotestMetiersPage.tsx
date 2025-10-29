@@ -354,8 +354,10 @@ export const PictotestMetiersPage = () => {
                 <div>
                   <h3 className="text-lg font-semibold mb-4">Vos pôles dominants :</h3>
                   <div className="grid gap-3">
-                    {results.dominantProfiles?.map((profile: any, index: number) => {
-                      const category = riasecCategories[profile.category as keyof typeof riasecCategories];
+                    {Array.isArray(results.dominantProfiles) && results.dominantProfiles.map((profile: any, index: number) => {
+                      // L'API retourne 'code' et non 'category'
+                      const profileCode = profile.code || profile.category;
+                      const category = riasecCategories[profileCode as keyof typeof riasecCategories];
                       if (!category) return null;
                       
                       return (
@@ -373,7 +375,7 @@ export const PictotestMetiersPage = () => {
                 <div>
                   <h3 className="text-lg font-semibold mb-4">Métiers recommandés :</h3>
                   <div className="grid gap-2">
-                    {results.recommendations?.map((rec: string, index: number) => (
+                    {Array.isArray(results.recommendations) && results.recommendations.map((rec: string, index: number) => (
                       <div key={index} className="p-3 bg-secondary/50 rounded-lg">
                         • {rec}
                       </div>
@@ -384,7 +386,7 @@ export const PictotestMetiersPage = () => {
                 <div>
                   <h3 className="text-lg font-semibold mb-4">Plan d'exploration :</h3>
                   <div className="space-y-3">
-                    {results.actionPlan?.map((action: string, index: number) => (
+                    {Array.isArray(results.actionPlan) && results.actionPlan.map((action: string, index: number) => (
                       <div key={index} className="flex items-start gap-3">
                         <div className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-0.5">
                           {index + 1}
