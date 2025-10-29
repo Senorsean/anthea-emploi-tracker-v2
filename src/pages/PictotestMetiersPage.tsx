@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import jsPDF from 'jspdf';
+import { addAntheaHeader } from '@/lib/pdf-utils';
 
 interface Activity {
   id: number;
@@ -125,31 +126,118 @@ export const PictotestMetiersPage = () => {
   const exportToPDF = () => {
     if (!results) return;
     
-    const doc = new jsPDF();
-    doc.setFontSize(20);
-    doc.text('Profil RIASEC - Pictotest des métiers', 20, 20);
+    const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 20;
+    const maxWidth = pageWidth - 2 * margin;
     
-    doc.setFontSize(14);
-    let yPosition = 40;
+    let yPosition = addAntheaHeader(pdf, 'Profil RIASEC - Pictotest des métiers');
     
-    doc.text('Vos pôles dominants:', 20, yPosition);
+    // Fonction pour ajouter une nouvelle page si nécessaire
+    const checkNewPage = (requiredSpace: number) => {
+      if (yPosition + requiredSpace > pageHeight - margin) {
+        pdf.addPage();
+        yPosition = addAntheaHeader(pdf, 'Profil RIASEC - Pictotest des métiers');
+      }
+    };
+    
+    // Section Pôles dominants
+    checkNewPage(30);
+    pdf.setFontSize(16);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Vos pôles dominants', margin, yPosition);
     yPosition += 10;
     
-    results.dominantProfiles?.forEach((profile: any) => {
-      doc.text(`• ${profile.category}: ${profile.description}`, 30, yPosition);
-      yPosition += 8;
-    });
+    if (Array.isArray(results.dominantProfiles)) {
+      results.dominantProfiles.forEach((profile: any) => {
+        checkNewPage(20);
+        // Extraire le code RIASEC de profile.type
+        const match = profile.type?.match(/\(([RIASEC])\)/);
+        const profileCode = match ? match[1] : profile.code || profile.category;
+        const category = riasecCategories[profileCode as keyof typeof riasecCategories];
+        
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text(`• ${category?.name || 'Non défini'}`, margin + 5, yPosition);
+        yPosition += 6;
+        
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(10);
+        const descLines = pdf.splitTextToSize(profile.description, maxWidth - 10);
+        descLines.forEach((line: string) => {
+          checkNewPage(6);
+          pdf.text(line, margin + 10, yPosition);
+          yPosition += 6;
+        });
+        yPosition += 4;
+      });
+    }
     
+    // Section Recommandations de métiers
+    yPosition += 5;
+    checkNewPage(30);
+    pdf.setFontSize(16);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Métiers recommandés', margin, yPosition);
     yPosition += 10;
-    doc.text('Recommandations de métiers:', 20, yPosition);
+    
+    if (Array.isArray(results.recommendations)) {
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      results.recommendations.forEach((rec: string) => {
+        checkNewPage(8);
+        const recLines = pdf.splitTextToSize(`• ${rec}`, maxWidth - 5);
+        recLines.forEach((line: string) => {
+          pdf.text(line, margin + 5, yPosition);
+          yPosition += 6;
+        });
+        yPosition += 2;
+      });
+    }
+    
+    // Section Plan d'exploration
+    yPosition += 5;
+    checkNewPage(30);
+    pdf.setFontSize(16);
+    pdf.setFont('helvetica', 'bold');
+    pdf.text('Plan d\'exploration', margin, yPosition);
     yPosition += 10;
     
-    results.recommendations?.forEach((rec: string) => {
-      doc.text(`• ${rec}`, 30, yPosition);
-      yPosition += 8;
-    });
+    if (Array.isArray(results.actionPlan)) {
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      results.actionPlan.forEach((action: string) => {
+        checkNewPage(8);
+        const actionLines = pdf.splitTextToSize(action, maxWidth - 5);
+        actionLines.forEach((line: string) => {
+          pdf.text(line, margin + 5, yPosition);
+          yPosition += 6;
+        });
+        yPosition += 2;
+      });
+    }
     
-    doc.save('profil-riasec.pdf');
+    // Section Opportunités marché (si disponible)
+    if (Array.isArray(results.marketOpportunities) && results.marketOpportunities.length > 0) {
+      yPosition += 5;
+      checkNewPage(30);
+      pdf.setFontSize(16);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Opportunités de marché', margin, yPosition);
+      yPosition += 10;
+      
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'normal');
+      results.marketOpportunities.forEach((opp: string) => {
+        checkNewPage(8);
+        pdf.text(`• ${opp}`, margin + 5, yPosition);
+        yPosition += 6;
+      });
+    }
+    
+    pdf.save('profil-riasec-pictotest.pdf');
+    toast.success('PDF exporté avec succès');
   };
 
   const progressPercentage = (evaluated.length / activities.length) * 100;
@@ -355,8 +443,9 @@ export const PictotestMetiersPage = () => {
                   <h3 className="text-lg font-semibold mb-4">Vos pôles dominants :</h3>
                   <div className="grid gap-3">
                     {Array.isArray(results.dominantProfiles) && results.dominantProfiles.map((profile: any, index: number) => {
-                      // L'API retourne 'code' et non 'category'
-                      const profileCode = profile.code || profile.category;
+                      // L'API retourne 'type' comme "Social (S)" - extraire le code entre parenthèses
+                      const match = profile.type?.match(/\(([RIASEC])\)/);
+                      const profileCode = match ? match[1] : profile.code || profile.category;
                       const category = riasecCategories[profileCode as keyof typeof riasecCategories];
                       if (!category) return null;
                       
