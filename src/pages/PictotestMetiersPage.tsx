@@ -67,14 +67,14 @@ export const PictotestMetiersPage = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLike = () => {
-    if (liked.length < 10) {
+    if (liked.length < 15) {
       setLiked([...liked, activities[currentActivityIndex].id]);
       nextActivity();
     }
   };
 
   const handleDislike = () => {
-    if (disliked.length < 5) {
+    if (disliked.length < 10) {
       setDisliked([...disliked, activities[currentActivityIndex].id]);
       nextActivity();
     }
@@ -87,8 +87,6 @@ export const PictotestMetiersPage = () => {
   const nextActivity = () => {
     if (currentActivityIndex < activities.length - 1) {
       setCurrentActivityIndex(currentActivityIndex + 1);
-    } else if (liked.length >= 10 && disliked.length >= 5) {
-      generateResults();
     } else {
       // Reloop through activities if needed
       setCurrentActivityIndex(0);
@@ -151,7 +149,7 @@ export const PictotestMetiersPage = () => {
   };
 
   const progressPercentage = ((currentActivityIndex + 1) / activities.length) * 100;
-  const canContinue = liked.length >= 10 && disliked.length >= 5;
+  const canContinue = liked.length >= 5;
 
   if (currentStep === 'intro') {
     return (
@@ -190,7 +188,7 @@ export const PictotestMetiersPage = () => {
                   <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">2</div>
                   <div>
                     <h4 className="font-semibold">Sélectionnez vos préférences</h4>
-                    <p className="text-muted-foreground">Choisissez 10 activités qui vous attirent et 5 qui vous attirent le moins</p>
+                    <p className="text-muted-foreground">Sélectionnez au minimum 5 activités qui vous attirent pour obtenir vos résultats</p>
                   </div>
                 </div>
                 
@@ -257,13 +255,13 @@ export const PictotestMetiersPage = () => {
                 <div className="flex gap-4 justify-center">
                   <Button
                     onClick={handleLike}
-                    disabled={liked.length >= 10}
+                    disabled={liked.length >= 15}
                     variant="default"
                     size="lg"
                     className="bg-green-600 hover:bg-green-700"
                   >
                     <Heart className="h-5 w-5 mr-2" />
-                    J'aime ({liked.length}/10)
+                    J'aime ({liked.length})
                   </Button>
                   
                   <Button
@@ -276,27 +274,35 @@ export const PictotestMetiersPage = () => {
                   
                   <Button
                     onClick={handleDislike}
-                    disabled={disliked.length >= 5}
+                    disabled={disliked.length >= 10}
                     variant="destructive"
                     size="lg"
                   >
                     <X className="h-5 w-5 mr-2" />
-                    Je n'aime pas ({disliked.length}/5)
+                    Je n'aime pas ({disliked.length})
                   </Button>
                 </div>
 
-                {canContinue && (
-                  <div className="mt-6">
+                <div className="mt-6 space-y-3">
+                  {!canContinue && (
+                    <div className="bg-blue-50 p-3 rounded-lg">
+                      <p className="text-sm text-blue-800 text-center">
+                        Sélectionnez au moins 5 activités que vous aimez pour générer vos résultats
+                      </p>
+                    </div>
+                  )}
+                  
+                  {canContinue && (
                     <Button 
                       onClick={generateResults}
                       disabled={isLoading}
-                      className="bg-primary"
+                      className="w-full bg-primary"
                       size="lg"
                     >
                       {isLoading ? 'Analyse en cours...' : 'Voir mes résultats'}
                     </Button>
-                  </div>
-                )}
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>
