@@ -63,34 +63,38 @@ export const PictotestMetiersPage = () => {
   const [currentActivityIndex, setCurrentActivityIndex] = useState(0);
   const [liked, setLiked] = useState<number[]>([]);
   const [disliked, setDisliked] = useState<number[]>([]);
+  const [evaluated, setEvaluated] = useState<number[]>([]);
   const [results, setResults] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLike = () => {
-    if (liked.length < 15) {
+    if (liked.length < 15 && !evaluated.includes(activities[currentActivityIndex].id)) {
       setLiked([...liked, activities[currentActivityIndex].id]);
+      setEvaluated([...evaluated, activities[currentActivityIndex].id]);
       nextActivity();
     }
   };
 
   const handleDislike = () => {
-    if (disliked.length < 10) {
+    if (disliked.length < 10 && !evaluated.includes(activities[currentActivityIndex].id)) {
       setDisliked([...disliked, activities[currentActivityIndex].id]);
+      setEvaluated([...evaluated, activities[currentActivityIndex].id]);
       nextActivity();
     }
   };
 
   const handleSkip = () => {
+    if (!evaluated.includes(activities[currentActivityIndex].id)) {
+      setEvaluated([...evaluated, activities[currentActivityIndex].id]);
+    }
     nextActivity();
   };
 
   const nextActivity = () => {
     if (currentActivityIndex < activities.length - 1) {
       setCurrentActivityIndex(currentActivityIndex + 1);
-    } else {
-      // Reloop through activities if needed
-      setCurrentActivityIndex(0);
     }
+    // Ne plus boucler - on s'arrête à la dernière activité
   };
 
   const generateResults = async () => {
@@ -148,8 +152,9 @@ export const PictotestMetiersPage = () => {
     doc.save('profil-riasec.pdf');
   };
 
-  const progressPercentage = ((currentActivityIndex + 1) / activities.length) * 100;
-  const canContinue = liked.length >= 5;
+  const progressPercentage = (evaluated.length / activities.length) * 100;
+  const hasEvaluatedAll = evaluated.length === activities.length;
+  const canContinue = hasEvaluatedAll && liked.length >= 5;
 
   if (currentStep === 'intro') {
     return (
@@ -187,8 +192,8 @@ export const PictotestMetiersPage = () => {
                 <div className="flex items-start gap-3">
                   <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">2</div>
                   <div>
-                    <h4 className="font-semibold">Sélectionnez vos préférences</h4>
-                    <p className="text-muted-foreground">Sélectionnez au minimum 5 activités qui vous attirent pour obtenir vos résultats</p>
+                    <h4 className="font-semibold">Évaluez toutes les activités</h4>
+                    <p className="text-muted-foreground">Parcourez les 30 activités et sélectionnez au minimum 5 activités que vous aimez pour obtenir vos résultats</p>
                   </div>
                 </div>
                 
@@ -240,8 +245,9 @@ export const PictotestMetiersPage = () => {
                   Activité {currentActivityIndex + 1} sur {activities.length}
                 </span>
                 <div className="flex gap-4 text-sm">
-                  <span className="text-green-600">❤️ {liked.length}/10</span>
-                  <span className="text-red-600">❌ {disliked.length}/5</span>
+                  <span className="text-muted-foreground">Évaluées : {evaluated.length}/{activities.length}</span>
+                  <span className="text-green-600">❤️ {liked.length}/15</span>
+                  <span className="text-red-600">❌ {disliked.length}/10</span>
                 </div>
               </div>
               <Progress value={progressPercentage} className="w-full" />
@@ -284,10 +290,18 @@ export const PictotestMetiersPage = () => {
                 </div>
 
                 <div className="mt-6 space-y-3">
-                  {!canContinue && (
+                  {!hasEvaluatedAll && (
                     <div className="bg-blue-50 p-3 rounded-lg">
                       <p className="text-sm text-blue-800 text-center">
-                        Sélectionnez au moins 5 activités que vous aimez pour générer vos résultats
+                        Évaluez toutes les activités ({evaluated.length}/{activities.length}) pour voir vos résultats
+                      </p>
+                    </div>
+                  )}
+                  
+                  {hasEvaluatedAll && liked.length < 5 && (
+                    <div className="bg-orange-50 p-3 rounded-lg">
+                      <p className="text-sm text-orange-800 text-center">
+                        Vous devez avoir sélectionné au moins 5 activités que vous aimez ({liked.length}/5)
                       </p>
                     </div>
                   )}
