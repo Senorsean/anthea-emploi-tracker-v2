@@ -340,14 +340,19 @@ export const PictotestMetiersPage = () => {
                 <div>
                   <h3 className="text-lg font-semibold mb-4">Vos pôles dominants :</h3>
                   <div className="grid gap-3">
-                    {results.dominantProfiles?.map((profile: any, index: number) => (
-                      <div key={index} className="flex items-center gap-3 p-3 rounded-lg border">
-                        <Badge className={riasecCategories[profile.category as keyof typeof riasecCategories].color}>
-                          {riasecCategories[profile.category as keyof typeof riasecCategories].name}
-                        </Badge>
-                        <span>{profile.description}</span>
-                      </div>
-                    ))}
+                    {results.dominantProfiles?.map((profile: any, index: number) => {
+                      const category = riasecCategories[profile.category as keyof typeof riasecCategories];
+                      if (!category) return null;
+                      
+                      return (
+                        <div key={index} className="flex items-center gap-3 p-3 rounded-lg border">
+                          <Badge className={category.color}>
+                            {category.name}
+                          </Badge>
+                          <span>{profile.description}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
 
