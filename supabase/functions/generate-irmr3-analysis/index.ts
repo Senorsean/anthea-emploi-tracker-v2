@@ -36,22 +36,23 @@ Objectifs : ${responses.objectifs}
 
 Fournis une analyse complète structurée ainsi :
 
-## 🎯 VOS DOMAINES D'INTÉRÊT DOMINANTS
+## VOS DOMAINES D'INTÉRÊT DOMINANTS
 [Identifie les 2-3 domaines avec les scores les plus élevés et explique ce que cela révèle]
 
-## 📊 PROFIL DÉTAILLÉ IRMR3
+## PROFIL DÉTAILLÉ IRMR3
 [Pour chaque domaine, commente le score et ce qu'il indique sur les préférences professionnelles]
 
-## 🚀 MÉTIERS ET SECTEURS RECOMMANDÉS
+## MÉTIERS ET SECTEURS RECOMMANDÉS
 [Propose des familles de métiers alignées avec les domaines dominants, en tenant compte de l'expérience]
 
-## 💡 PLAN D'ACTION PERSONNALISÉ
+## PLAN D'ACTION PERSONNALISÉ
 [Suggestions concrètes : formations à explorer, secteurs à investiguer, compétences à développer]
 
-## 🔄 COHÉRENCE AVEC VOS ASPIRATIONS
+## COHÉRENCE AVEC VOS ASPIRATIONS
 [Analyse la cohérence entre les scores IRMR3, les motivations exprimées et les objectifs professionnels]
 
-Utilise un ton professionnel mais accessible, sois précis et actionnable dans tes recommandations.`;
+Utilise un ton professionnel mais accessible, sois précis et actionnable dans tes recommandations.
+N'utilise AUCUN émoji dans ta réponse, uniquement du texte.
 
     console.log('Envoi de la requête à OpenAI...');
     

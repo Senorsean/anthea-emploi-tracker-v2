@@ -198,8 +198,24 @@ const IRMR3Page = () => {
       return currentY + 10;
     };
 
-    // Nettoyer l'analyse des marqueurs Markdown de façon plus complète
-    const cleanedAnalysis = analysis
+    // Fonction pour décoder les entités HTML
+    const decodeHTMLEntities = (text: string) => {
+      const entities: { [key: string]: string } = {
+        '&amp;': '&',
+        '&lt;': '<',
+        '&gt;': '>',
+        '&quot;': '"',
+        '&#x26;': '&',
+        '&#38;': '&',
+        '&#x27;': "'",
+        '&#39;': "'",
+        '&apos;': "'",
+      };
+      return text.replace(/&[#\w]+;/g, (entity) => entities[entity] || entity);
+    };
+
+    // Nettoyer l'analyse des marqueurs Markdown et entités HTML
+    const cleanedAnalysis = decodeHTMLEntities(analysis)
       .replace(/#{1,6}\s*[🎯📊🚀💡🔄Ø=ß¯]\s*/g, '') // Retirer les headers avec emojis et caractères parasites
       .replace(/#{1,6}\s*/g, '') // Retirer les autres headers markdown
       .replace(/\*\*(.*?)\*\*/g, '$1') // Retirer le gras markdown
@@ -434,11 +450,15 @@ const IRMR3Page = () => {
         </CardHeader>
         <CardContent>
           <div className="prose max-w-none">
-            {analysis.split('\n').map((paragraph, index) => (
-              <p key={index} className="mb-4 leading-relaxed">
-                {paragraph}
-              </p>
-            ))}
+            {analysis
+              .replace(/[🎯📊🚀💡🔄]/g, '') // Retirer les émojis
+              .split('\n')
+              .map((paragraph, index) => (
+                <p key={index} className="mb-4 leading-relaxed">
+                  {paragraph}
+                </p>
+              ))
+            }
           </div>
         </CardContent>
       </Card>
