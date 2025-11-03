@@ -250,6 +250,9 @@ const IRMR3Page = () => {
 
         for (let i = 0; i < lines.length; i++) {
           currentY = checkSpace(lineHeight, currentY);
+          // Ré-appliquer la police après un éventuel saut de page provoqué par le header
+          pdf.setFontSize(fontSize);
+          pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
           if (i === 0) {
             pdf.text(bullet, x, currentY);
             pdf.text(lines[i], textX, currentY);
@@ -264,6 +267,9 @@ const IRMR3Page = () => {
         
         for (let i = 0; i < lines.length; i++) {
           currentY = checkSpace(lineHeight, currentY);
+          // Ré-appliquer la police après un éventuel saut de page provoqué par le header
+          pdf.setFontSize(fontSize);
+          pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
           pdf.text(lines[i], x, currentY);
           currentY += lineHeight;
         }
