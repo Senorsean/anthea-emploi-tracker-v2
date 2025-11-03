@@ -316,8 +316,8 @@ const IRMR3Page = () => {
       .replace(/\n{3,}/g, '\n\n') // Limiter les sauts de ligne multiples
       .trim();
 
-    // Diviser le contenu en sections
-    const sections = cleanedAnalysis.split(/(?=VOS DOMAINES D'INTÉRÊT DOMINANTS|PROFIL DÉTAILLÉ IRMR3|MÉTIERS ET SECTEURS RECOMMANDÉS|PLAN D'ACTION PERSONNALISÉ|COHÉRENCE AVEC VOS ASPIRATIONS)/);
+    // Diviser le contenu en sections principales uniquement
+    const sections = cleanedAnalysis.split(/(?=^(?:VOS DOMAINES D'INTÉRÊT DOMINANTS|PROFIL DÉTAILLÉ IRMR3|MÉTIERS ET SECTEURS RECOMMANDÉS|PLAN D'ACTION PERSONNALISÉ|COHÉRENCE AVEC VOS ASPIRATIONS)$)/m);
 
     sections.forEach((section, index) => {
       if (section.trim()) {
@@ -358,25 +358,28 @@ const IRMR3Page = () => {
 
         if (processedLines.length === 0) return;
 
-        const title = processedLines[0];
-        const content = processedLines.slice(1);
+        const firstLine = processedLines[0];
+        
+        // Vérifier si la première ligne est un titre de section majeur (ligne exacte)
+        const isMajorTitle = /^(VOS DOMAINES D'INTÉRÊT DOMINANTS|PROFIL DÉTAILLÉ IRMR3|MÉTIERS ET SECTEURS RECOMMANDÉS|PLAN D'ACTION PERSONNALISÉ|COHÉRENCE AVEC VOS ASPIRATIONS)$/.test(firstLine.trim());
 
-        // Ajouter le titre de section
-        if (title && (title.includes('VOS DOMAINES') || title.includes('PROFIL DÉTAILLÉ') || 
-                      title.includes('MÉTIERS ET SECTEURS') || title.includes('PLAN D\'ACTION') || 
-                      title.includes('COHÉRENCE'))) {
-          yPosition = addSectionTitle(title, yPosition);
+        if (isMajorTitle) {
+          // C'est un titre de section principal
+          yPosition = addSectionTitle(firstLine, yPosition);
+          // Ajouter le reste du contenu
+          processedLines.slice(1).forEach(line => {
+            if (line.trim()) {
+              yPosition = addParagraph(line, yPosition);
+            }
+          });
         } else {
-          // Si ce n'est pas un titre de section, l'ajouter comme contenu
-          yPosition = addParagraph(title, yPosition);
+          // Tout est du contenu normal
+          processedLines.forEach(line => {
+            if (line.trim()) {
+              yPosition = addParagraph(line, yPosition);
+            }
+          });
         }
-
-        // Ajouter le contenu ligne par ligne
-        content.forEach(line => {
-          if (line.trim()) {
-            yPosition = addParagraph(line, yPosition);
-          }
-        });
       }
     });
 
