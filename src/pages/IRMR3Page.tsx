@@ -229,7 +229,7 @@ const IRMR3Page = () => {
     const addText = (text: string, x: number, y: number, fontSize: number, isBold = false) => {
       let currentY = y;
       pdf.setFontSize(fontSize);
-      pdf.setFont(undefined, isBold ? 'bold' : 'normal');
+      pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
       
       // Détecter si c'est un élément de liste
       const isBulletPoint = /^[•\-]\s/.test(text);
