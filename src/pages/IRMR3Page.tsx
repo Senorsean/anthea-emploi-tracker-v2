@@ -226,7 +226,7 @@ const IRMR3Page = () => {
     };
 
     // Fonction pour ajouter du texte avec gestion des pages et des listes
-    const addText = (text: string, x: number, y: number, fontSize = 11, isBold = false) => {
+    const addText = (text: string, x: number, y: number, fontSize: number, isBold = false) => {
       let currentY = y;
       pdf.setFontSize(fontSize);
       pdf.setFont(undefined, isBold ? 'bold' : 'normal');
@@ -272,21 +272,19 @@ const IRMR3Page = () => {
       return currentY;
     };
 
-    // Fonction pour ajouter un paragraphe avec espacement
+    // Fonction pour ajouter un paragraphe avec espacement (toujours taille 11)
     const addParagraph = (text: string, y: number) => {
       if (!text.trim()) return y;
-      const newY = addText(text, margin, y);
+      const newY = addText(text, margin, y, 11, false);
       return newY + 2;
     };
 
-    // Fonction pour ajouter un titre de section
+    // Fonction pour ajouter un titre de section (taille 13, gras)
     const addSectionTitle = (title: string, y: number) => {
       let currentY = checkSpace(20, y + 5);
       
-      pdf.setFontSize(13);
-      pdf.setFont(undefined, 'bold');
-      pdf.text(title, margin, currentY);
-      return currentY + 8;
+      const newY = addText(title, margin, currentY, 13, true);
+      return newY + 3;
     };
 
     // Fonction pour décoder les entités HTML
