@@ -209,9 +209,9 @@ const IRMR3Page = () => {
     const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'p' });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 15; // marge A4 standard
-    const maxWidth = pageWidth - 2 * margin; // largeur de colonne sécurisée
-    const lineHeight = 6;
+    const margin = 15;
+    const maxWidth = pageWidth - 2 * margin; // 180mm de largeur utile
+    const lineHeight = 7;
 
     // Ajouter l'en-tête Anthea
     let yPosition = addAntheaHeader(pdf, 'IRMR3 - Inventaire des Intérêts Professionnels');
@@ -225,52 +225,42 @@ const IRMR3Page = () => {
       return currentY;
     };
 
-    // Fonction pour ajouter du texte avec gestion avancée des pages et des listes
+    // Fonction pour ajouter du texte avec gestion des pages et des listes
     const addText = (text: string, x: number, y: number, fontSize = 11, isBold = false) => {
       let currentY = y;
       pdf.setFontSize(fontSize);
       pdf.setFont(undefined, isBold ? 'bold' : 'normal');
-
-      // Ajoute des points de coupure invisibles pour forcer le retour à la ligne sur les mots très longs
-      const insertBreakOpportunities = (s: string) => {
-        const withPunctBreaks = s.replace(/([\\/_\-:\.;,()\[\]])/g, '$1\u200b');
-        return withPunctBreaks
-          .split(' ')
-          .map((tok) => (tok.length > 24 ? tok.replace(/(.{12})/g, '$1\u200b') : tok))
-          .join(' ');
-      };
       
       // Détecter si c'est un élément de liste
       const isBulletPoint = /^[•\-]\s/.test(text);
       const isNumberedItem = /^\d+\.\s/.test(text);
       
       if (isBulletPoint || isNumberedItem) {
-        // Rendu des listes : dessiner la puce séparément et le texte dans une colonne
+        // Rendu des listes
         const match = text.match(/^([•\-]\s|\d+\.\s)/);
         const prefix = match ? match[0] : '• ';
         const bullet = prefix.trim();
-        const textToWrap = insertBreakOpportunities(text.substring(prefix.length));
+        const textContent = text.substring(prefix.length);
 
-        const bulletIndent = 6; // indentation de la colonne de texte des listes
-        const textX = x + bulletIndent; // colonne texte
-        const textWidth = maxWidth - bulletIndent; // largeur sécurisée
+        const bulletIndent = 8;
+        const textX = x + bulletIndent;
+        const availableWidth = maxWidth - bulletIndent;
 
-        const lines = pdf.splitTextToSize(textToWrap, textWidth);
+        const lines = pdf.splitTextToSize(textContent, availableWidth);
 
         for (let i = 0; i < lines.length; i++) {
           currentY = checkSpace(lineHeight, currentY);
           if (i === 0) {
-            pdf.text(bullet, x, currentY); // puce / numéro
-            pdf.text(lines[i], textX, currentY); // première ligne de texte
+            pdf.text(bullet, x, currentY);
+            pdf.text(lines[i], textX, currentY);
           } else {
-            pdf.text(lines[i], textX, currentY); // lignes suivantes avec indentation
+            pdf.text(lines[i], textX, currentY);
           }
           currentY += lineHeight;
         }
       } else {
         // Texte normal
-        const textToWrap = insertBreakOpportunities(text);
-        const lines = pdf.splitTextToSize(textToWrap, maxWidth - 2); // petite marge de sécurité
+        const lines = pdf.splitTextToSize(text, maxWidth);
         
         for (let i = 0; i < lines.length; i++) {
           currentY = checkSpace(lineHeight, currentY);
@@ -286,17 +276,17 @@ const IRMR3Page = () => {
     const addParagraph = (text: string, y: number) => {
       if (!text.trim()) return y;
       const newY = addText(text, margin, y);
-      return newY + 3; // Espacement après paragraphe
+      return newY + 2;
     };
 
     // Fonction pour ajouter un titre de section
     const addSectionTitle = (title: string, y: number) => {
-      let currentY = checkSpace(20, y + 8);
+      let currentY = checkSpace(20, y + 5);
       
-      pdf.setFontSize(14);
+      pdf.setFontSize(13);
       pdf.setFont(undefined, 'bold');
       pdf.text(title, margin, currentY);
-      return currentY + 10;
+      return currentY + 8;
     };
 
     // Fonction pour décoder les entités HTML
