@@ -60,13 +60,14 @@ Fournis une analyse complète structurée ainsi :
 
 Utilise un ton professionnel mais accessible, sois précis et actionnable dans tes recommandations.
 N'utilise AUCUN émoji dans ta réponse, uniquement du texte.
-
+`;
+    
     console.log('Envoi de la requête à OpenAI...');
     
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        'Authorization': 'Bearer ' + openAIApiKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -85,7 +86,7 @@ N'utilise AUCUN émoji dans ta réponse, uniquement du texte.
 
     if (!response.ok) {
       console.error('Erreur OpenAI:', response.status, response.statusText);
-      throw new Error(`Erreur OpenAI: ${response.status}`);
+      throw new Error('Erreur OpenAI: ' + response.status);
     }
 
     const data = await response.json();
