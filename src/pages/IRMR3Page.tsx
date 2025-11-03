@@ -209,7 +209,7 @@ const IRMR3Page = () => {
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     const margin = 20;
-    const maxWidth = pageWidth - 2 * margin;
+    const maxWidth = pageWidth - 2 * margin - 5; // Réduire un peu plus pour éviter le débordement
     const lineHeight = 6;
 
     // Ajouter l'en-tête Anthea
@@ -224,18 +224,48 @@ const IRMR3Page = () => {
       return currentY;
     };
 
-    // Fonction pour ajouter du texte avec gestion avancée des pages
+    // Fonction pour ajouter du texte avec gestion avancée des pages et des listes
     const addText = (text: string, x: number, y: number, fontSize = 11, isBold = false) => {
       let currentY = y;
       pdf.setFontSize(fontSize);
       pdf.setFont(undefined, isBold ? 'bold' : 'normal');
       
-      const lines = pdf.splitTextToSize(text, maxWidth);
+      // Détecter si c'est un élément de liste
+      const isBulletPoint = /^[•\-]\s/.test(text);
+      const isNumberedItem = /^\d+\.\s/.test(text);
       
-      for (let i = 0; i < lines.length; i++) {
-        currentY = checkSpace(lineHeight, currentY);
-        pdf.text(lines[i], x, currentY);
-        currentY += lineHeight;
+      let textToWrap = text;
+      let indent = 0;
+      
+      if (isBulletPoint || isNumberedItem) {
+        // Pour les listes, réduire encore la largeur pour l'indentation
+        const listMaxWidth = maxWidth - 10;
+        const match = text.match(/^([•\-]\s|\d+\.\s)/);
+        const prefix = match ? match[0] : '';
+        textToWrap = text.substring(prefix.length);
+        
+        const lines = pdf.splitTextToSize(textToWrap, listMaxWidth);
+        
+        for (let i = 0; i < lines.length; i++) {
+          currentY = checkSpace(lineHeight, currentY);
+          if (i === 0) {
+            // Première ligne avec la puce ou le numéro
+            pdf.text(prefix + lines[i], x, currentY);
+          } else {
+            // Lignes suivantes avec indentation
+            pdf.text(lines[i], x + 10, currentY);
+          }
+          currentY += lineHeight;
+        }
+      } else {
+        // Texte normal
+        const lines = pdf.splitTextToSize(textToWrap, maxWidth);
+        
+        for (let i = 0; i < lines.length; i++) {
+          currentY = checkSpace(lineHeight, currentY);
+          pdf.text(lines[i], x, currentY);
+          currentY += lineHeight;
+        }
       }
       
       return currentY;
@@ -245,7 +275,7 @@ const IRMR3Page = () => {
     const addParagraph = (text: string, y: number) => {
       if (!text.trim()) return y;
       const newY = addText(text, margin, y);
-      return newY + 4; // Espacement après paragraphe
+      return newY + 3; // Espacement après paragraphe
     };
 
     // Fonction pour ajouter un titre de section
