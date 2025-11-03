@@ -310,8 +310,8 @@ const IRMR3Page = () => {
       .replace(/#{1,6}\s*/g, '') // Retirer les autres headers markdown
       .replace(/\*\*(.*?)\*\*/g, '$1') // Retirer le gras markdown
       .replace(/\*(.*?)\*/g, '$1') // Retirer l'italique markdown
-      .replace(/[Øß¯=•\-\*\+]+/g, '') // Retirer tous les caractères parasites
-      .replace(/^\s*[-•]\s*/gm, '• ') // Normaliser les puces
+      .replace(/[Øß¯=]+/g, '') // Retirer certains caractères parasites
+      .replace(/^\s*[-•\-\*\+]\s*/gm, '• ') // Normaliser les puces
       .replace(/\n{3,}/g, '\n\n') // Limiter les sauts de ligne multiples
       .trim();
 
@@ -320,15 +320,54 @@ const IRMR3Page = () => {
 
     sections.forEach((section, index) => {
       if (section.trim()) {
-        const lines = section.split('\n').map(line => line.trim()).filter(line => line);
-        if (lines.length === 0) return;
+        // Séparer les lignes et regrouper les paragraphes
+        const rawLines = section.split('\n');
+        const processedLines: string[] = [];
+        let currentParagraph = '';
 
-        const title = lines[0];
-        const content = lines.slice(1);
+        rawLines.forEach(line => {
+          const trimmedLine = line.trim();
+          if (!trimmedLine) {
+            // Ligne vide, terminer le paragraphe en cours
+            if (currentParagraph) {
+              processedLines.push(currentParagraph);
+              currentParagraph = '';
+            }
+          } else if (/^•\s/.test(trimmedLine) || /^\d+\.\s/.test(trimmedLine)) {
+            // Élément de liste, terminer le paragraphe en cours et ajouter la liste
+            if (currentParagraph) {
+              processedLines.push(currentParagraph);
+              currentParagraph = '';
+            }
+            processedLines.push(trimmedLine);
+          } else {
+            // Continuer le paragraphe actuel
+            if (currentParagraph) {
+              currentParagraph += ' ' + trimmedLine;
+            } else {
+              currentParagraph = trimmedLine;
+            }
+          }
+        });
+
+        // Ajouter le dernier paragraphe s'il existe
+        if (currentParagraph) {
+          processedLines.push(currentParagraph);
+        }
+
+        if (processedLines.length === 0) return;
+
+        const title = processedLines[0];
+        const content = processedLines.slice(1);
 
         // Ajouter le titre de section
-        if (title) {
+        if (title && (title.includes('VOS DOMAINES') || title.includes('PROFIL DÉTAILLÉ') || 
+                      title.includes('MÉTIERS ET SECTEURS') || title.includes('PLAN D\'ACTION') || 
+                      title.includes('COHÉRENCE'))) {
           yPosition = addSectionTitle(title, yPosition);
+        } else {
+          // Si ce n'est pas un titre de section, l'ajouter comme contenu
+          yPosition = addParagraph(title, yPosition);
         }
 
         // Ajouter le contenu ligne par ligne
