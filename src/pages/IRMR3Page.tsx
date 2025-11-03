@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { ArrowLeft, Download, Loader2, Palette, Users, Briefcase, Calculator, Wrench, FlaskConical, Heart } from 'lucide-react';
+import { ArrowLeft, Download, Loader2, Palette, Users, Briefcase, Calculator, Wrench, FlaskConical, Heart, TreePine, Hammer, Cpu, Microscope, Stethoscope, Music, Paintbrush, BookOpen, HandHeart, MessageCircle, ClipboardList, FileText } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -14,13 +14,18 @@ import { addAntheaHeader } from '@/lib/pdf-utils';
 const IRMR3Page = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [responses, setResponses] = useState({
-    artistique: '',
-    contact: '',
-    entreprise: '',
+    pleinAir: '',
+    pratiques: '',
+    techniques: '',
+    scientifiques: '',
+    medicaux: '',
+    musicaux: '',
+    esthetiques: '',
+    litteraires: '',
+    serviceSocial: '',
+    contactsPersonnels: '',
     gestion: '',
-    manuel: '',
-    sciences: '',
-    social: '',
+    bureau: '',
     experience: '',
     motivations: '',
     objectifs: ''
@@ -31,80 +36,135 @@ const IRMR3Page = () => {
 
   const domains = [
     {
-      key: 'artistique',
-      title: 'Artistique',
-      icon: Palette,
-      description: 'Créativité, expression artistique, innovation, esthétique',
+      key: 'pleinAir',
+      title: 'Plein air',
+      icon: TreePine,
+      description: 'Activités en extérieur, nature, environnement',
       questions: [
-        'Êtes-vous attiré(e) par les activités créatives et artistiques ?',
-        'Aimez-vous créer, concevoir, imaginer de nouvelles choses ?',
-        'Vous sentez-vous à l\'aise dans des environnements créatifs ?'
+        'Aimez-vous travailler en plein air ?',
+        'Êtes-vous attiré(e) par les métiers liés à la nature ?',
+        'Préférez-vous les environnements extérieurs aux bureaux fermés ?'
       ]
     },
     {
-      key: 'contact',
-      title: 'Contact',
-      icon: Users,
-      description: 'Relations interpersonnelles, communication, interaction sociale',
+      key: 'pratiques',
+      title: 'Pratiques',
+      icon: Hammer,
+      description: 'Travail manuel, construction, réparation',
       questions: [
-        'Appréciez-vous d\'être en contact direct avec les gens ?',
-        'Êtes-vous à l\'aise pour communiquer et échanger ?',
-        'Aimez-vous les métiers orientés vers la relation client ?'
+        'Aimez-vous travailler de vos mains ?',
+        'Êtes-vous attiré(e) par les activités pratiques et concrètes ?',
+        'Appréciez-vous construire ou réparer des choses ?'
       ]
     },
     {
-      key: 'entreprise',
-      title: 'Entreprise',
-      icon: Briefcase,
-      description: 'Leadership, prise de décision, développement d\'affaires',
+      key: 'techniques',
+      title: 'Techniques',
+      icon: Cpu,
+      description: 'Technologie, mécanique, systèmes techniques',
       questions: [
-        'Êtes-vous intéressé(e) par la création et le développement d\'entreprises ?',
-        'Aimez-vous prendre des initiatives et des risques calculés ?',
-        'Vous sentez-vous capable de diriger et motiver une équipe ?'
+        'Êtes-vous intéressé(e) par les technologies et systèmes techniques ?',
+        'Aimez-vous comprendre le fonctionnement des machines ?',
+        'Vous sentez-vous à l\'aise avec les outils techniques ?'
+      ]
+    },
+    {
+      key: 'scientifiques',
+      title: 'Scientifiques',
+      icon: Microscope,
+      description: 'Recherche, expérimentation, analyse scientifique',
+      questions: [
+        'Êtes-vous attiré(e) par la recherche scientifique ?',
+        'Aimez-vous expérimenter et analyser ?',
+        'Appréciez-vous les démarches scientifiques rigoureuses ?'
+      ]
+    },
+    {
+      key: 'medicaux',
+      title: 'Médicaux',
+      icon: Stethoscope,
+      description: 'Santé, soins, bien-être',
+      questions: [
+        'Êtes-vous intéressé(e) par le domaine médical et la santé ?',
+        'Aimez-vous prendre soin des autres ?',
+        'Vous sentez-vous concerné(e) par le bien-être des personnes ?'
+      ]
+    },
+    {
+      key: 'musicaux',
+      title: 'Musicaux',
+      icon: Music,
+      description: 'Musique, rythme, expression sonore',
+      questions: [
+        'Êtes-vous attiré(e) par la musique ?',
+        'Aimez-vous jouer d\'un instrument ou composer ?',
+        'La musique joue-t-elle un rôle important dans votre vie ?'
+      ]
+    },
+    {
+      key: 'esthetiques',
+      title: 'Esthétiques',
+      icon: Paintbrush,
+      description: 'Arts visuels, design, créativité esthétique',
+      questions: [
+        'Êtes-vous attiré(e) par les arts visuels et le design ?',
+        'Aimez-vous créer des œuvres esthétiques ?',
+        'Avez-vous un sens développé de l\'esthétique ?'
+      ]
+    },
+    {
+      key: 'litteraires',
+      title: 'Littéraires',
+      icon: BookOpen,
+      description: 'Écriture, lecture, expression écrite',
+      questions: [
+        'Aimez-vous lire et écrire ?',
+        'Êtes-vous attiré(e) par la littérature ?',
+        'Appréciez-vous vous exprimer par l\'écrit ?'
+      ]
+    },
+    {
+      key: 'serviceSocial',
+      title: 'Service social',
+      icon: HandHeart,
+      description: 'Aide sociale, accompagnement, service à la communauté',
+      questions: [
+        'Êtes-vous motivé(e) par l\'aide aux personnes en difficulté ?',
+        'Aimez-vous accompagner et soutenir les autres ?',
+        'Le service social vous semble-t-il une vocation ?'
+      ]
+    },
+    {
+      key: 'contactsPersonnels',
+      title: 'Contacts personnels',
+      icon: MessageCircle,
+      description: 'Relations interpersonnelles, communication, échanges',
+      questions: [
+        'Aimez-vous échanger avec les autres ?',
+        'Êtes-vous à l\'aise dans les relations interpersonnelles ?',
+        'Appréciez-vous créer des liens avec les gens ?'
       ]
     },
     {
       key: 'gestion',
       title: 'Gestion',
-      icon: Calculator,
-      description: 'Organisation, planification, administration, coordination',
+      icon: ClipboardList,
+      description: 'Organisation, planification, administration',
       questions: [
-        'Appréciez-vous organiser, planifier et structurer les activités ?',
-        'Êtes-vous à l\'aise avec la gestion administrative ?',
-        'Aimez-vous coordonner des projets et des équipes ?'
+        'Aimez-vous organiser et planifier ?',
+        'Êtes-vous attiré(e) par la gestion de projets ou d\'équipes ?',
+        'Appréciez-vous coordonner des activités ?'
       ]
     },
     {
-      key: 'manuel',
-      title: 'Manuel',
-      icon: Wrench,
-      description: 'Travail concret, manipulation d\'outils, réalisation pratique',
+      key: 'bureau',
+      title: 'Bureau',
+      icon: FileText,
+      description: 'Travail administratif, tâches de bureau, organisation',
       questions: [
-        'Préférez-vous les activités concrètes et pratiques ?',
-        'Êtes-vous habile de vos mains et aimez-vous manipuler des outils ?',
-        'Vous sentez-vous satisfait(e) par un travail avec des résultats tangibles ?'
-      ]
-    },
-    {
-      key: 'sciences',
-      title: 'Sciences',
-      icon: FlaskConical,
-      description: 'Recherche, analyse, investigation, méthode scientifique',
-      questions: [
-        'Êtes-vous attiré(e) par la recherche et l\'investigation ?',
-        'Aimez-vous analyser, comprendre et résoudre des problèmes complexes ?',
-        'Appréciez-vous les démarches méthodiques et scientifiques ?'
-      ]
-    },
-    {
-      key: 'social',
-      title: 'Social',
-      icon: Heart,
-      description: 'Aide aux autres, éducation, service à la communauté',
-      questions: [
-        'Êtes-vous motivé(e) par l\'aide et le service aux autres ?',
-        'Aimez-vous éduquer, former ou accompagner les personnes ?',
-        'Vous sentez-vous concerné(e) par les enjeux sociaux et humains ?'
+        'Êtes-vous à l\'aise avec les tâches administratives ?',
+        'Aimez-vous travailler dans un environnement de bureau ?',
+        'Appréciez-vous les activités de classement et d\'organisation ?'
       ]
     }
   ];
@@ -263,8 +323,9 @@ const IRMR3Page = () => {
       <div className="text-center space-y-4">
         <h2 className="text-3xl font-bold">IRMR3 - Inventaire des Intérêts Professionnels</h2>
         <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-          Découvrez vos centres d'intérêt professionnels selon 7 grands domaines validés scientifiquement.
-          Cet inventaire vous aidera à identifier les secteurs d'activité qui correspondent le mieux à vos aspirations naturelles.
+          Découvrez vos centres d'intérêt professionnels selon les 12 catégories spécifiques de l'IRMR3.
+          Ce questionnaire comprend 98 questions réparties en 12 domaines pour identifier avec précision 
+          les secteurs d'activité qui correspondent le mieux à vos aspirations naturelles.
         </p>
       </div>
 

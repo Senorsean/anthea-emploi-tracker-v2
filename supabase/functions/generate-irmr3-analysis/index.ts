@@ -18,16 +18,23 @@ serve(async (req) => {
 
     const prompt = `Tu es un expert en orientation professionnelle spécialisé dans l'IRMR3 (Inventaire des Intérêts Professionnels). 
 
-Analyse les réponses suivantes d'un candidat qui a évalué ses intérêts sur 7 domaines (échelle 1-5) :
+Le questionnaire IRMR3 comprend 98 questions réparties en 12 catégories d'intérêts spécifiques qui affinent l'analyse des intérêts professionnels pour permettre un accompagnement plus personnalisé.
+
+Analyse les réponses suivantes d'un candidat qui a évalué ses intérêts sur 12 domaines (échelle 1-5) :
 
 ÉVALUATIONS DES DOMAINES :
-- Artistique (créativité, expression, innovation) : ${responses.artistique}/5
-- Contact (relations interpersonnelles, communication) : ${responses.contact}/5  
-- Entreprise (leadership, développement d'affaires) : ${responses.entreprise}/5
+- Plein air (activités extérieures, nature, environnement) : ${responses.pleinAir}/5
+- Pratiques (travail manuel, construction, réparation) : ${responses.pratiques}/5
+- Techniques (technologie, mécanique, systèmes techniques) : ${responses.techniques}/5
+- Scientifiques (recherche, expérimentation, analyse scientifique) : ${responses.scientifiques}/5
+- Médicaux (santé, soins, bien-être) : ${responses.medicaux}/5
+- Musicaux (musique, rythme, expression sonore) : ${responses.musicaux}/5
+- Esthétiques (arts visuels, design, créativité esthétique) : ${responses.esthetiques}/5
+- Littéraires (écriture, lecture, expression écrite) : ${responses.litteraires}/5
+- Service social (aide sociale, accompagnement, service communauté) : ${responses.serviceSocial}/5
+- Contacts personnels (relations interpersonnelles, communication) : ${responses.contactsPersonnels}/5
 - Gestion (organisation, planification, administration) : ${responses.gestion}/5
-- Manuel (travail concret, manipulation d'outils) : ${responses.manuel}/5
-- Sciences (recherche, analyse, investigation) : ${responses.sciences}/5
-- Social (aide aux autres, éducation, service communauté) : ${responses.social}/5
+- Bureau (travail administratif, tâches de bureau) : ${responses.bureau}/5
 
 INFORMATIONS COMPLÉMENTAIRES :
 Expérience : ${responses.experience}
