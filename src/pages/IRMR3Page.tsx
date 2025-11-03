@@ -205,11 +205,12 @@ const IRMR3Page = () => {
   };
 
   const exportToPDF = () => {
-    const pdf = new jsPDF();
+    // Forcer A4 portrait en mm pour un rendu fiable
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'p' });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 20;
-    const maxWidth = pageWidth - 2 * margin - 12; // Réduire davantage pour éviter tout débordement
+    const margin = 15; // marge A4 standard
+    const maxWidth = pageWidth - 2 * margin; // largeur de colonne sécurisée
     const lineHeight = 6;
 
     // Ajouter l'en-tête Anthea
@@ -250,8 +251,9 @@ const IRMR3Page = () => {
         const bullet = prefix.trim();
         const textToWrap = insertBreakOpportunities(text.substring(prefix.length));
 
-        const textX = x + 10; // colonne texte
-        const textWidth = maxWidth - 14; // largeur légèrement réduite pour sécurité
+        const bulletIndent = 6; // indentation de la colonne de texte des listes
+        const textX = x + bulletIndent; // colonne texte
+        const textWidth = maxWidth - bulletIndent; // largeur sécurisée
 
         const lines = pdf.splitTextToSize(textToWrap, textWidth);
 
