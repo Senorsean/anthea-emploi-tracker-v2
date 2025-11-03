@@ -232,7 +232,7 @@ const IRMR3Page = () => {
 
       // Ajoute des points de coupure invisibles pour forcer le retour à la ligne sur les mots très longs
       const insertBreakOpportunities = (s: string) => {
-        const withPunctBreaks = s.replace(/([\/_[\-:\.;,()\[\]])/g, '$1\u200b');
+        const withPunctBreaks = s.replace(/([\\/_\-:\.;,()\[\]])/g, '$1\u200b');
         return withPunctBreaks
           .split(' ')
           .map((tok) => (tok.length > 24 ? tok.replace(/(.{12})/g, '$1\u200b') : tok))
@@ -244,22 +244,24 @@ const IRMR3Page = () => {
       const isNumberedItem = /^\d+\.\s/.test(text);
       
       if (isBulletPoint || isNumberedItem) {
-        // Pour les listes, réduire encore la largeur pour l'indentation
-        const listMaxWidth = maxWidth - 14;
+        // Rendu des listes : dessiner la puce séparément et le texte dans une colonne
         const match = text.match(/^([•\-]\s|\d+\.\s)/);
-        const prefix = match ? match[0] : '';
+        const prefix = match ? match[0] : '• ';
+        const bullet = prefix.trim();
         const textToWrap = insertBreakOpportunities(text.substring(prefix.length));
-        
-        const lines = pdf.splitTextToSize(textToWrap, listMaxWidth);
-        
+
+        const textX = x + 10; // colonne texte
+        const textWidth = maxWidth - 14; // largeur légèrement réduite pour sécurité
+
+        const lines = pdf.splitTextToSize(textToWrap, textWidth);
+
         for (let i = 0; i < lines.length; i++) {
           currentY = checkSpace(lineHeight, currentY);
           if (i === 0) {
-            // Première ligne avec la puce ou le numéro
-            pdf.text(prefix + lines[i], x, currentY, { maxWidth });
+            pdf.text(bullet, x, currentY); // puce / numéro
+            pdf.text(lines[i], textX, currentY); // première ligne de texte
           } else {
-            // Lignes suivantes avec indentation
-            pdf.text(lines[i], x + 10, currentY, { maxWidth });
+            pdf.text(lines[i], textX, currentY); // lignes suivantes avec indentation
           }
           currentY += lineHeight;
         }
@@ -270,7 +272,7 @@ const IRMR3Page = () => {
         
         for (let i = 0; i < lines.length; i++) {
           currentY = checkSpace(lineHeight, currentY);
-          pdf.text(lines[i], x, currentY, { maxWidth });
+          pdf.text(lines[i], x, currentY);
           currentY += lineHeight;
         }
       }
