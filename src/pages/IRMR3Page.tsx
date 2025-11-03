@@ -209,7 +209,7 @@ const IRMR3Page = () => {
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
     const margin = 20;
-    const maxWidth = pageWidth - 2 * margin - 5; // Réduire un peu plus pour éviter le débordement
+    const maxWidth = pageWidth - 2 * margin - 12; // Réduire davantage pour éviter tout débordement
     const lineHeight = 6;
 
     // Ajouter l'en-tête Anthea
@@ -229,20 +229,26 @@ const IRMR3Page = () => {
       let currentY = y;
       pdf.setFontSize(fontSize);
       pdf.setFont(undefined, isBold ? 'bold' : 'normal');
+
+      // Ajoute des points de coupure invisibles pour forcer le retour à la ligne sur les mots très longs
+      const insertBreakOpportunities = (s: string) => {
+        const withPunctBreaks = s.replace(/([\/_[\-:\.;,()\[\]])/g, '$1\u200b');
+        return withPunctBreaks
+          .split(' ')
+          .map((tok) => (tok.length > 24 ? tok.replace(/(.{12})/g, '$1\u200b') : tok))
+          .join(' ');
+      };
       
       // Détecter si c'est un élément de liste
       const isBulletPoint = /^[•\-]\s/.test(text);
       const isNumberedItem = /^\d+\.\s/.test(text);
       
-      let textToWrap = text;
-      let indent = 0;
-      
       if (isBulletPoint || isNumberedItem) {
         // Pour les listes, réduire encore la largeur pour l'indentation
-        const listMaxWidth = maxWidth - 10;
+        const listMaxWidth = maxWidth - 14;
         const match = text.match(/^([•\-]\s|\d+\.\s)/);
         const prefix = match ? match[0] : '';
-        textToWrap = text.substring(prefix.length);
+        const textToWrap = insertBreakOpportunities(text.substring(prefix.length));
         
         const lines = pdf.splitTextToSize(textToWrap, listMaxWidth);
         
@@ -250,20 +256,21 @@ const IRMR3Page = () => {
           currentY = checkSpace(lineHeight, currentY);
           if (i === 0) {
             // Première ligne avec la puce ou le numéro
-            pdf.text(prefix + lines[i], x, currentY);
+            pdf.text(prefix + lines[i], x, currentY, { maxWidth });
           } else {
             // Lignes suivantes avec indentation
-            pdf.text(lines[i], x + 10, currentY);
+            pdf.text(lines[i], x + 10, currentY, { maxWidth });
           }
           currentY += lineHeight;
         }
       } else {
         // Texte normal
-        const lines = pdf.splitTextToSize(textToWrap, maxWidth);
+        const textToWrap = insertBreakOpportunities(text);
+        const lines = pdf.splitTextToSize(textToWrap, maxWidth - 2); // petite marge de sécurité
         
         for (let i = 0; i < lines.length; i++) {
           currentY = checkSpace(lineHeight, currentY);
-          pdf.text(lines[i], x, currentY);
+          pdf.text(lines[i], x, currentY, { maxWidth });
           currentY += lineHeight;
         }
       }
