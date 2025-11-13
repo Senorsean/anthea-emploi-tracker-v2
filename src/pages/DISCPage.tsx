@@ -269,35 +269,45 @@ const DISCPage = () => {
     };
 
     // Ajoute un bloc de texte avec coupe stricte par mots pour éviter tout dépassement horizontal
-    const addTextBlock = (text: string, fontSize = 10, isBold = false) => {
-      if (!text || !text.trim()) return;
-      pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
-      pdf.setFontSize(fontSize);
+const addTextBlock = (text: string, fontSize = 11, isBold = false) => {
+  if (!text || !text.trim()) return;
 
-      const words = text.split(' ');
-      let line = '';
+  const applyBodyFont = () => {
+    pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
+    pdf.setFontSize(fontSize);
+  };
 
-      for (const word of words) {
-        const testLine = line ? `${line} ${word}` : word;
-        const width = pdf.getTextWidth(testLine);
-        if (width > maxWidth && line) {
-          currentY = checkSpace(lineHeight, currentY);
-          pdf.text(line, margin, currentY);
-          currentY += lineHeight;
-          line = word;
-        } else {
-          line = testLine;
-        }
-      }
+  applyBodyFont();
 
-      if (line) {
-        currentY = checkSpace(lineHeight, currentY);
-        pdf.text(line, margin, currentY);
-        currentY += lineHeight;
-      }
+  const words = text.split(' ');
+  let line = '';
 
-      currentY += 2; // petit espace après le bloc
-    };
+  for (const word of words) {
+    const testLine = line ? `${line} ${word}` : word;
+    const width = pdf.getTextWidth(testLine);
+
+    if (width > maxWidth && line) {
+      // Peut déclencher un saut de page + header qui change la police → on réapplique
+      currentY = checkSpace(lineHeight, currentY);
+      applyBodyFont();
+      pdf.text(line, margin, currentY);
+      currentY += lineHeight;
+      line = word;
+    } else {
+      line = testLine;
+    }
+  }
+
+  if (line) {
+    // Dernière ligne: recheck + reapply la police après un éventuel saut de page
+    currentY = checkSpace(lineHeight, currentY);
+    applyBodyFont();
+    pdf.text(line, margin, currentY);
+    currentY += lineHeight;
+  }
+
+  currentY += 2; // petit espace après le bloc
+};
 
     // Titre principal
     pdf.setFont('helvetica', 'bold');
