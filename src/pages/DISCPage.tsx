@@ -251,97 +251,122 @@ const DISCPage = () => {
   const downloadPDF = () => {
     const pdf = new jsPDF();
     const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
     const margin = 20;
     const maxWidth = pageWidth - (2 * margin);
-    let currentY = 20;
-    const lineHeight = 7;
+    const lineHeight = 5.5;
 
-    const addHeader = () => {
-      currentY = addAntheaHeader(pdf, 'Analyse DISC');
-    };
+    // Position courante
+    let currentY = addAntheaHeader(pdf, 'Analyse DISC');
 
-    const checkSpace = (spaceNeeded: number, currentY: number) => {
-      if (currentY + spaceNeeded > 280) {
+    // Vérifie l'espace restant sur la page (avec marge de sécurité) et ajoute un header si besoin
+    const checkSpace = (requiredHeight: number, y: number) => {
+      if (y + requiredHeight + 15 > pageHeight - margin) {
         pdf.addPage();
-        currentY = addAntheaHeader(pdf, 'Analyse DISC');
-        return currentY;
+        return addAntheaHeader(pdf, 'Analyse DISC');
       }
-      return currentY;
+      return y;
     };
 
-    const addSectionTitle = (title: string) => {
-      currentY = checkSpace(15, currentY);
-      pdf.setFont('helvetica', 'bold');
-      pdf.setFontSize(13);
-      pdf.text(title, margin, currentY);
-      currentY += 10;
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(11);
-    };
+    // Ajoute un bloc de texte avec coupe stricte par mots pour éviter tout dépassement horizontal
+    const addTextBlock = (text: string, fontSize = 10, isBold = false) => {
+      if (!text || !text.trim()) return;
+      pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
+      pdf.setFontSize(fontSize);
 
-    const addParagraph = (text: string) => {
-      const lines = pdf.splitTextToSize(text, maxWidth);
-      for (let line of lines) {
+      const words = text.split(' ');
+      let line = '';
+
+      for (const word of words) {
+        const testLine = line ? `${line} ${word}` : word;
+        const width = pdf.getTextWidth(testLine);
+        if (width > maxWidth && line) {
+          currentY = checkSpace(lineHeight, currentY);
+          pdf.text(line, margin, currentY);
+          currentY += lineHeight;
+          line = word;
+        } else {
+          line = testLine;
+        }
+      }
+
+      if (line) {
         currentY = checkSpace(lineHeight, currentY);
         pdf.text(line, margin, currentY);
         currentY += lineHeight;
       }
-      currentY += 3;
+
+      currentY += 2; // petit espace après le bloc
     };
 
-    addHeader();
-
+    // Titre principal
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(16);
+    currentY = checkSpace(12, currentY);
     pdf.text('Analyse DISC - Profil Comportemental', margin, currentY);
     currentY += 15;
 
     // Scores
-    addSectionTitle('Vos Scores DISC');
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(12);
+    currentY = checkSpace(20, currentY);
+    pdf.text('Vos Scores DISC', margin, currentY);
+    currentY += 12;
+
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(11);
-    
+    pdf.setFontSize(10);
+
     const dimensions = [
-      { key: 'D', name: 'Dominance', color: [220, 38, 38] },
-      { key: 'I', name: 'Influence', color: [234, 179, 8] },
-      { key: 'S', name: 'Stabilité', color: [34, 197, 94] },
-      { key: 'C', name: 'Conformité', color: [59, 130, 246] }
+      { key: 'D', name: 'Dominance', color: [220, 38, 38] as [number, number, number] },
+      { key: 'I', name: 'Influence', color: [234, 179, 8] as [number, number, number] },
+      { key: 'S', name: 'Stabilité', color: [34, 197, 94] as [number, number, number] },
+      { key: 'C', name: 'Conformité', color: [59, 130, 246] as [number, number, number] }
     ];
 
     dimensions.forEach(dim => {
       currentY = checkSpace(15, currentY);
       pdf.text(`${dim.name} (${dim.key}): ${scores[dim.key]}%`, margin, currentY);
-      
-      const barMaxWidth = maxWidth - 100; // Largeur max pour les barres
-      const barWidth = (scores[dim.key] / 100) * barMaxWidth;
+
+      const barMaxWidth = maxWidth - 100; // Longueur max des barres (laisse de l'espace à droite)
+      const barWidth = Math.max(0, Math.min(barMaxWidth, (scores[dim.key] / 100) * barMaxWidth));
+
       pdf.setFillColor(dim.color[0], dim.color[1], dim.color[2]);
       pdf.rect(margin, currentY + 2, barWidth, 5, 'F');
       pdf.setDrawColor(200, 200, 200);
       pdf.rect(margin, currentY + 2, barMaxWidth, 5, 'S');
-      
+
       currentY += 12;
     });
 
     currentY += 5;
 
-    // Analyse
-    addSectionTitle('Analyse Détaillée');
-    
+    // Analyse détaillée
+    currentY = checkSpace(15, currentY);
+    pdf.setFont('helvetica', 'bold');
+    pdf.setFontSize(12);
+    pdf.text('Analyse Détaillée', margin, currentY);
+    currentY += 10;
+
+    // Nettoyage et impression du texte avec coupe stricte
     const cleanedText = analysisResult
       .replace(/#{1,6}\s*/g, '')
-      .replace(/\*\*/g, '')
-      .replace(/\*/g, '')
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/\*(.*?)\*/g, '$1')
+      .replace(/[•\-\*\+]+/g, '•')
+      .replace(/\n{3,}/g, '\n\n')
       .trim();
 
-    const sections = cleanedText.split('\n\n');
-    
+    const sections = cleanedText.split(/\n\n+/);
+
     sections.forEach((section) => {
-      if (section.trim()) {
-        if (section.length < 100 && !section.includes('.') && !section.includes(',')) {
-          addSectionTitle(section.trim());
-        } else {
-          addParagraph(section.trim());
-        }
+      const s = section.trim();
+      if (!s) return;
+      // Si c'est un titre court sans ponctuation, on le rend en gras
+      if (s.length < 80 && !/[\.,:;]/.test(s)) {
+        currentY = checkSpace(18, currentY);
+        addTextBlock(s, 11, true);
+      } else {
+        addTextBlock(s, 10, false);
       }
     });
 
