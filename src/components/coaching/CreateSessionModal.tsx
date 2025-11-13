@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCoachingSessions } from '@/hooks/useCoachingSessions';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface CreateSessionModalProps {
   open: boolean;
@@ -15,7 +16,9 @@ interface CreateSessionModalProps {
 
 const CreateSessionModal = ({ open, onClose }: CreateSessionModalProps) => {
   const { createSession } = useCoachingSessions();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [candidates, setCandidates] = useState<Array<{ id: string; full_name: string; email: string }>>([]);
   const [formData, setFormData] = useState({
     candidate_id: '',
     session_date: '',
@@ -23,6 +26,33 @@ const CreateSessionModal = ({ open, onClose }: CreateSessionModalProps) => {
     duration: 60,
     objectives: '',
   });
+
+  useEffect(() => {
+    const fetchCandidates = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .eq('consultant_id', user.id);
+
+      if (error) {
+        toast({
+          title: 'Erreur',
+          description: 'Impossible de charger les candidats',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      setCandidates(profiles || []);
+    };
+
+    if (open) {
+      fetchCandidates();
+    }
+  }, [open, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,13 +80,23 @@ const CreateSessionModal = ({ open, onClose }: CreateSessionModalProps) => {
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="candidate_id">ID Candidat *</Label>
-            <Input
-              id="candidate_id"
+            <Label htmlFor="candidate_id">Candidat *</Label>
+            <Select
               value={formData.candidate_id}
-              onChange={(e) => setFormData({ ...formData, candidate_id: e.target.value })}
+              onValueChange={(value) => setFormData({ ...formData, candidate_id: value })}
               required
-            />
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Sélectionner un candidat" />
+              </SelectTrigger>
+              <SelectContent>
+                {candidates.map((candidate) => (
+                  <SelectItem key={candidate.id} value={candidate.id}>
+                    {candidate.full_name || candidate.email}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
