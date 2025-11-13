@@ -19,6 +19,12 @@ const ProgressionCarrierePage = () => {
       link: '/parcours-carriere',
     },
     {
+      title: 'Coaching Cadre',
+      description: 'Accompagnement personnalisé pour le développement professionnel',
+      icon: Users,
+      link: '/coaching-cadre',
+    },
+    {
       title: 'Apprentissage & Montée en compétences',
       description: 'Opportunités de croissance personnelle',
       icon: Users,

@@ -50,6 +50,7 @@ import PresentationPage from './pages/PresentationPage';
 import Settings from "./pages/Settings";
 import RoleManagement from "./pages/RoleManagement";
 import RequireAuth from "./components/RequireAuth";
+import CoachingCadrePage from "./pages/CoachingCadrePage";
 import { JobsProvider } from "@/hooks/useJobs";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 const queryClient = new QueryClient();
@@ -205,6 +206,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <IntelligenceMarcheePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/coaching-cadre"
+            element={
+              <RequireAuth>
+                <CoachingCadrePage />
               </RequireAuth>
             }
           />
