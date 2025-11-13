@@ -16,6 +16,8 @@ const CoachingCadrePage = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const { userRole, loading } = useUserRole();
 
+  console.log('[CoachingCadrePage] userRole:', userRole, 'loading:', loading);
+
   if (loading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">Chargement...</div>;
   }
