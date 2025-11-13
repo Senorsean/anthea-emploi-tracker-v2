@@ -1,18 +1,38 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Target, TrendingUp, Users } from 'lucide-react';
 import { useCoachingSessions } from '@/hooks/useCoachingSessions';
 import { useCoachingObjectives } from '@/hooks/useCoachingObjectives';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import CandidateSelector from './CandidateSelector';
+import CandidateProgressOverview from './CandidateProgressOverview';
 
 interface CoachingDashboardProps {
   userRole: string | null;
 }
 
 const CoachingDashboard = ({ userRole }: CoachingDashboardProps) => {
-  const { sessions, loading: loadingSessions } = useCoachingSessions();
-  const { objectives, loading: loadingObjectives } = useCoachingObjectives();
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
+  const { sessions, loading: loadingSessions } = useCoachingSessions(selectedCandidateId || undefined);
+  const { objectives, loading: loadingObjectives } = useCoachingObjectives(selectedCandidateId || undefined);
+
+  // Si c'est un consultant, afficher le sélecteur de candidat et la vue détaillée
+  if (userRole === 'consultant' || userRole === 'admin') {
+    return (
+      <div className="space-y-6">
+        <CandidateSelector 
+          selectedCandidateId={selectedCandidateId}
+          onSelectCandidate={setSelectedCandidateId}
+        />
+        {selectedCandidateId && (
+          <CandidateProgressOverview candidateId={selectedCandidateId} />
+        )}
+      </div>
+    );
+  }
+
+  // Vue candidat (code existant)
 
   const upcomingSessions = sessions.filter(s => 
     new Date(s.session_date) > new Date() && s.status === 'planifiée'
