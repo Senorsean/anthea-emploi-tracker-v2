@@ -250,9 +250,11 @@ const DISCPage = () => {
 
   const downloadPDF = () => {
     const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const margin = 20;
+    const maxWidth = pageWidth - (2 * margin);
     let currentY = 20;
     const lineHeight = 7;
-    const maxWidth = 170;
 
     const addHeader = () => {
       currentY = addAntheaHeader(pdf, 'Analyse DISC');
@@ -271,7 +273,7 @@ const DISCPage = () => {
       currentY = checkSpace(15, currentY);
       pdf.setFont('helvetica', 'bold');
       pdf.setFontSize(13);
-      pdf.text(title, 20, currentY);
+      pdf.text(title, margin, currentY);
       currentY += 10;
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(11);
@@ -281,7 +283,7 @@ const DISCPage = () => {
       const lines = pdf.splitTextToSize(text, maxWidth);
       for (let line of lines) {
         currentY = checkSpace(lineHeight, currentY);
-        pdf.text(line, 20, currentY);
+        pdf.text(line, margin, currentY);
         currentY += lineHeight;
       }
       currentY += 3;
@@ -291,7 +293,7 @@ const DISCPage = () => {
 
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(16);
-    pdf.text('Analyse DISC - Profil Comportemental', 20, currentY);
+    pdf.text('Analyse DISC - Profil Comportemental', margin, currentY);
     currentY += 15;
 
     // Scores
@@ -308,13 +310,14 @@ const DISCPage = () => {
 
     dimensions.forEach(dim => {
       currentY = checkSpace(15, currentY);
-      pdf.text(`${dim.name} (${dim.key}): ${scores[dim.key]}%`, 25, currentY);
+      pdf.text(`${dim.name} (${dim.key}): ${scores[dim.key]}%`, margin, currentY);
       
-      const barWidth = (scores[dim.key] / 100) * 120;
+      const barMaxWidth = maxWidth - 100; // Largeur max pour les barres
+      const barWidth = (scores[dim.key] / 100) * barMaxWidth;
       pdf.setFillColor(dim.color[0], dim.color[1], dim.color[2]);
-      pdf.rect(25, currentY + 2, barWidth, 5, 'F');
+      pdf.rect(margin, currentY + 2, barWidth, 5, 'F');
       pdf.setDrawColor(200, 200, 200);
-      pdf.rect(25, currentY + 2, 120, 5, 'S');
+      pdf.rect(margin, currentY + 2, barMaxWidth, 5, 'S');
       
       currentY += 12;
     });
