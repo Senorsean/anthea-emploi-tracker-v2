@@ -366,19 +366,25 @@ const addTextBlock = (text: string, fontSize = 11, isBold = false) => {
       .replace(/\n{3,}/g, '\n\n')
       .trim();
 
-    const sections = cleanedText.split(/\n\n+/);
+    const lines = cleanedText.split(/\n/);
 
-    sections.forEach((section) => {
-      const s = section.trim();
-      if (!s) return;
-      // Si c'est un titre court sans ponctuation, on le rend en gras
-      if (s.length < 80 && !/[\.,:;]/.test(s)) {
-        currentY = checkSpace(18, currentY);
-        addTextBlock(s, 11, true);
-      } else {
-        addTextBlock(s, 10, false);
+    for (const line of lines) {
+      const trimmedLine = line.trim();
+      if (!trimmedLine) {
+        currentY += 3; // Espace vide entre paragraphes
+        continue;
       }
-    });
+      
+      // Détection simple: titre si très court ET commence par un chiffre suivi d'un point
+      const isTitle = /^\d+\./.test(trimmedLine) || (trimmedLine.length < 50 && trimmedLine === trimmedLine.toUpperCase());
+      
+      if (isTitle) {
+        currentY += 3; // Petit espace avant titre
+        addTextBlock(trimmedLine, 11, true);
+      } else {
+        addTextBlock(trimmedLine, 11, false);
+      }
+    }
 
     pdf.save('analyse-disc.pdf');
     
