@@ -200,6 +200,13 @@ export const OverviewFocusAreas = () => {
       iconColor: "text-green-500",
       areas: [
         {
+          title: 'Test DISC',
+          description:
+            'Évaluez votre profil comportemental professionnel et découvrez votre style de communication et de travail.',
+          link: '/disc',
+          external: false,
+        },
+        {
           title: 'Découvrez votre IKIGAÏ',
           description:
             'Trouvez l\'intersection entre passion, mission, profession et vocation pour votre épanouissement professionnel.',
