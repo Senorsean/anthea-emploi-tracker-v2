@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { downloadJson } from '@/integrations/supabase/storage';
 import { useToast } from '@/hooks/use-toast';
@@ -11,9 +12,11 @@ import {
   Calendar,
   TrendingDown,
   Target,
-  Briefcase
+  Briefcase,
+  Settings
 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import AlertSettingsModal from './AlertSettingsModal';
 
 interface CandidateAlert {
   candidateId: string;
@@ -28,20 +31,67 @@ interface CandidateAlert {
   }[];
 }
 
-const ALERT_THRESHOLDS = {
-  NO_APPLICATION_DAYS: 14, // Pas de candidature depuis 14 jours
-  OBJECTIVE_OVERDUE_DAYS: 7, // Objectif en retard de 7 jours
-  NO_SESSION_DAYS: 30, // Pas de session depuis 30 jours
-  SESSION_TO_PLAN_DAYS: 21, // Planifier une session dans les 21 jours
+interface AlertThresholds {
+  NO_APPLICATION_DAYS: number;
+  OBJECTIVE_OVERDUE_DAYS: number;
+  NO_SESSION_DAYS: number;
+  SESSION_TO_PLAN_DAYS: number;
+  LOW_PROGRESS_THRESHOLD: number;
+}
+
+const DEFAULT_THRESHOLDS: AlertThresholds = {
+  NO_APPLICATION_DAYS: 14,
+  OBJECTIVE_OVERDUE_DAYS: 7,
+  NO_SESSION_DAYS: 30,
+  SESSION_TO_PLAN_DAYS: 21,
+  LOW_PROGRESS_THRESHOLD: 25,
 };
 
 const ConsultantAlerts = () => {
   const [candidateAlerts, setCandidateAlerts] = useState<CandidateAlert[]>([]);
   const [loading, setLoading] = useState(true);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [thresholds, setThresholds] = useState<AlertThresholds>(DEFAULT_THRESHOLDS);
   const { toast } = useToast();
 
+  const loadThresholds = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('consultant_alert_settings' as any)
+        .select('*')
+        .eq('consultant_id', user.id)
+        .single() as any;
+
+      if (error && error.code !== 'PGRST116') throw error;
+
+      if (data) {
+        setThresholds({
+          NO_APPLICATION_DAYS: (data as any).no_application_days,
+          OBJECTIVE_OVERDUE_DAYS: (data as any).objective_overdue_days,
+          NO_SESSION_DAYS: (data as any).no_session_days,
+          SESSION_TO_PLAN_DAYS: (data as any).session_to_plan_days,
+          LOW_PROGRESS_THRESHOLD: (data as any).low_progress_threshold,
+        });
+      }
+    } catch (error: any) {
+      console.error('Erreur chargement seuils:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchAlerts = async () => {
+    loadThresholds();
+  }, []);
+
+  useEffect(() => {
+    if (thresholds) {
+      fetchAlerts();
+    }
+  }, [thresholds]);
+
+  const fetchAlerts = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
@@ -91,7 +141,7 @@ const ConsultantAlerts = () => {
                   (now.getTime() - latestJobDate.getTime()) / (1000 * 60 * 60 * 24)
                 );
 
-                if (daysSinceLastApplication > ALERT_THRESHOLDS.NO_APPLICATION_DAYS) {
+                if (daysSinceLastApplication > thresholds.NO_APPLICATION_DAYS) {
                   alerts.push({
                     type: 'warning',
                     icon: TrendingDown,
@@ -132,7 +182,7 @@ const ConsultantAlerts = () => {
                 const daysOverdue = Math.floor(
                   (now.getTime() - targetDate.getTime()) / (1000 * 60 * 60 * 24)
                 );
-                return daysOverdue > ALERT_THRESHOLDS.OBJECTIVE_OVERDUE_DAYS;
+                return daysOverdue > thresholds.OBJECTIVE_OVERDUE_DAYS;
               }
               return false;
             });
@@ -148,7 +198,7 @@ const ConsultantAlerts = () => {
 
             // Objectifs avec faible progression
             const lowProgressObjectives = (objectives as any[]).filter((obj: any) => 
-              obj.status === 'en_cours' && obj.progress_percentage < 25
+              obj.status === 'en_cours' && obj.progress_percentage < thresholds.LOW_PROGRESS_THRESHOLD
             );
 
             if (lowProgressObjectives.length > 0) {
@@ -181,7 +231,7 @@ const ConsultantAlerts = () => {
                 (now.getTime() - lastSessionDate.getTime()) / (1000 * 60 * 60 * 24)
               );
 
-              if (daysSinceLastSession > ALERT_THRESHOLDS.NO_SESSION_DAYS) {
+              if (daysSinceLastSession > thresholds.NO_SESSION_DAYS) {
                 alerts.push({
                   type: 'warning',
                   icon: Calendar,
@@ -189,7 +239,7 @@ const ConsultantAlerts = () => {
                   description: `Dernière session il y a ${daysSinceLastSession} jours`,
                   daysCount: daysSinceLastSession,
                 });
-              } else if (daysSinceLastSession > ALERT_THRESHOLDS.SESSION_TO_PLAN_DAYS) {
+              } else if (daysSinceLastSession > thresholds.SESSION_TO_PLAN_DAYS) {
                 alerts.push({
                   type: 'info',
                   icon: Clock,
@@ -232,9 +282,6 @@ const ConsultantAlerts = () => {
       }
     };
 
-    fetchAlerts();
-  }, [toast]);
-
   if (loading) {
     return <div className="text-muted-foreground">Chargement des alertes...</div>;
   }
@@ -276,8 +323,26 @@ const ConsultantAlerts = () => {
     }
   };
 
+  const handleSettingsSaved = () => {
+    loadThresholds();
+  };
+
   return (
     <div className="space-y-6">
+      {/* Header avec bouton de configuration */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-semibold">Alertes</h2>
+          <p className="text-sm text-muted-foreground">
+            Candidats nécessitant votre attention
+          </p>
+        </div>
+        <Button variant="outline" onClick={() => setSettingsOpen(true)}>
+          <Settings className="h-4 w-4 mr-2" />
+          Configurer les seuils
+        </Button>
+      </div>
+
       {/* Résumé des alertes */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
@@ -401,6 +466,13 @@ const ConsultantAlerts = () => {
           ))
         )}
       </div>
+
+      {/* Modal de configuration */}
+      <AlertSettingsModal
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        onSettingsSaved={handleSettingsSaved}
+      />
     </div>
   );
 };
