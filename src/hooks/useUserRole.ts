@@ -32,6 +32,7 @@ export const useUserRole = () => {
           _user_id: user.id
         });
 
+        console.log('[useUserRole] Role fetched:', roleData);
         setUserRole(roleData);
 
         // If user is a candidate, get their assigned modules
