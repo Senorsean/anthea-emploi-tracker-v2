@@ -2,3 +2,6 @@ project_id = "gefunbsxfofqvwvvqgnb"
 
 [functions.fetch-indeed-listings]
 verify_jwt = true
+
+[functions.generate-disc-analysis]
+verify_jwt = true

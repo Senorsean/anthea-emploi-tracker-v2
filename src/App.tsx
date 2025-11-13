@@ -44,6 +44,7 @@ import { PictotestMetiersPage } from './pages/PictotestMetiersPage';
 import IRMR3Page from './pages/IRMR3Page';
 import MBTIPage from './pages/MBTIPage';
 import BigFivePage from './pages/BigFivePage';
+import DISCPage from './pages/DISCPage';
 import { MotivationQuestionnairePage } from './pages/MotivationQuestionnairePage';
 import PresentationPage from './pages/PresentationPage';
 import Settings from "./pages/Settings";
@@ -356,6 +357,14 @@ const App = () => (
             element={
               <RequireAuth>
                 <BigFivePage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/disc"
+            element={
+              <RequireAuth>
+                <DISCPage />
               </RequireAuth>
             }
           />
