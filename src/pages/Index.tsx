@@ -8,6 +8,7 @@ import { AIInsights } from "@/components/AIInsights";
 import { OverviewFocusAreas } from "@/components/OverviewFocusAreas";
 import { GoalsModule } from "@/components/GoalsModule";
 import WebzinesAnthea from "@/components/WebzinesAnthea";
+import QuickAccessModules from "@/components/QuickAccessModules";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const Index = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -19,6 +20,7 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8">
         <StatsOverview />
         <ApplicationStats />
+        <QuickAccessModules />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-8">
           <TabsList className="grid grid-cols-4 lg:w-1/2 mx-auto mb-8">
