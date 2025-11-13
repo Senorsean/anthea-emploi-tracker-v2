@@ -33,13 +33,13 @@ export const useCoachingObjectives = (candidateId?: string) => {
       const targetId = candidateId || user.id;
 
       const { data, error } = await supabase
-        .from('coaching_objectives')
+        .from('coaching_objectives' as any)
         .select('*')
         .eq('candidate_id', targetId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setObjectives(data as CoachingObjective[] || []);
+      setObjectives((data as unknown as CoachingObjective[]) || []);
     } catch (error: any) {
       toast({
         title: 'Erreur',
@@ -54,7 +54,7 @@ export const useCoachingObjectives = (candidateId?: string) => {
   const createObjective = async (objectiveData: any) => {
     try {
       const { data, error } = await supabase
-        .from('coaching_objectives')
+        .from('coaching_objectives' as any)
         .insert([objectiveData])
         .select()
         .single();
@@ -81,7 +81,7 @@ export const useCoachingObjectives = (candidateId?: string) => {
   const updateObjective = async (objectiveId: string, updates: any) => {
     try {
       const { error } = await supabase
-        .from('coaching_objectives')
+        .from('coaching_objectives' as any)
         .update(updates)
         .eq('id', objectiveId);
 

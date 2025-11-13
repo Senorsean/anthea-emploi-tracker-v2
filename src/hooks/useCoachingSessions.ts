@@ -34,13 +34,13 @@ export const useCoachingSessions = (userId?: string) => {
       const targetUserId = userId || user.id;
 
       const { data, error } = await supabase
-        .from('coaching_sessions')
+        .from('coaching_sessions' as any)
         .select('*')
         .or(`candidate_id.eq.${targetUserId},consultant_id.eq.${targetUserId}`)
         .order('session_date', { ascending: false });
 
       if (error) throw error;
-      setSessions(data as CoachingSession[] || []);
+      setSessions((data as unknown as CoachingSession[]) || []);
     } catch (error: any) {
       toast({
         title: 'Erreur',
@@ -55,7 +55,7 @@ export const useCoachingSessions = (userId?: string) => {
   const createSession = async (sessionData: any) => {
     try {
       const { data, error } = await supabase
-        .from('coaching_sessions')
+        .from('coaching_sessions' as any)
         .insert([sessionData])
         .select()
         .single();
@@ -82,7 +82,7 @@ export const useCoachingSessions = (userId?: string) => {
   const updateSession = async (sessionId: string, updates: any) => {
     try {
       const { error } = await supabase
-        .from('coaching_sessions')
+        .from('coaching_sessions' as any)
         .update(updates)
         .eq('id', sessionId);
 
@@ -108,7 +108,7 @@ export const useCoachingSessions = (userId?: string) => {
   const deleteSession = async (sessionId: string) => {
     try {
       const { error } = await supabase
-        .from('coaching_sessions')
+        .from('coaching_sessions' as any)
         .delete()
         .eq('id', sessionId);
 
