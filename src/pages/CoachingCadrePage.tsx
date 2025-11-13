@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ArrowLeft, Calendar, Target, FileText, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Calendar, Target, FileText, BarChart3, Activity } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import CoachingDashboard from '@/components/coaching/CoachingDashboard';
 import SessionsList from '@/components/coaching/SessionsList';
 import ObjectivesList from '@/components/coaching/ObjectivesList';
 import NotesSection from '@/components/coaching/NotesSection';
+import ConsultantMonitoring from '@/components/coaching/ConsultantMonitoring';
 
 const CoachingCadrePage = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -49,7 +50,13 @@ const CoachingCadrePage = () => {
 
         {/* Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-grid">
+          <TabsList className={`grid w-full ${userRole === 'consultant' || userRole === 'admin' ? 'grid-cols-5' : 'grid-cols-4'} lg:w-auto lg:inline-grid`}>
+            {(userRole === 'consultant' || userRole === 'admin') && (
+              <TabsTrigger value="monitoring" className="flex items-center gap-2">
+                <Activity className="h-4 w-4" />
+                <span className="hidden sm:inline">Monitoring</span>
+              </TabsTrigger>
+            )}
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden sm:inline">Vue d'ensemble</span>
@@ -67,6 +74,12 @@ const CoachingCadrePage = () => {
               <span className="hidden sm:inline">Notes</span>
             </TabsTrigger>
           </TabsList>
+
+          {(userRole === 'consultant' || userRole === 'admin') && (
+            <TabsContent value="monitoring" className="space-y-6">
+              <ConsultantMonitoring />
+            </TabsContent>
+          )}
 
           <TabsContent value="overview" className="space-y-6">
             <CoachingDashboard userRole={userRole} />
