@@ -23,7 +23,7 @@ export const useCoachingNotes = (sessionId?: string, candidateId?: string) => {
     try {
       setLoading(true);
       
-      let query = supabase.from('coaching_notes').select('*');
+      let query = supabase.from('coaching_notes' as any).select('*');
 
       if (sessionId) {
         query = query.eq('session_id', sessionId);
@@ -34,7 +34,7 @@ export const useCoachingNotes = (sessionId?: string, candidateId?: string) => {
       const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
-      setNotes(data as CoachingNote[] || []);
+      setNotes((data as unknown as CoachingNote[]) || []);
     } catch (error: any) {
       toast({
         title: 'Erreur',
@@ -49,7 +49,7 @@ export const useCoachingNotes = (sessionId?: string, candidateId?: string) => {
   const createNote = async (noteData: any) => {
     try {
       const { data, error } = await supabase
-        .from('coaching_notes')
+        .from('coaching_notes' as any)
         .insert([noteData])
         .select()
         .single();
@@ -76,7 +76,7 @@ export const useCoachingNotes = (sessionId?: string, candidateId?: string) => {
   const updateNote = async (noteId: string, content: string) => {
     try {
       const { error } = await supabase
-        .from('coaching_notes')
+        .from('coaching_notes' as any)
         .update({ content })
         .eq('id', noteId);
 
