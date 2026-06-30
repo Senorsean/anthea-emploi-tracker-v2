@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Header } from '@/components/Header';
+import { MFAManage } from '@/components/auth/MFAManage';
 
 const Settings = () => {
   const [firstName, setFirstName] = useState('');
@@ -128,6 +129,11 @@ const Settings = () => {
           {message && <p className="text-sm text-green-600">{message}</p>}
           <Button type="submit">Enregistrer</Button>
         </form>
+
+        <div className="pt-2">
+          <h2 className="text-lg font-semibold mb-3">Sécurité</h2>
+          <MFAManage />
+        </div>
       </main>
     </div>
   );
