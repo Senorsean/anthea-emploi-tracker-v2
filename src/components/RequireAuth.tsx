@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Session } from '@supabase/supabase-js';
 import { Navigate } from 'react-router-dom';
+import { MFAGate } from './auth/MFAGate';
 
 interface RequireAuthProps {
   children: React.ReactElement;
@@ -36,7 +37,7 @@ const RequireAuth = ({ children }: RequireAuthProps) => {
     return <Navigate to="/login" replace />;
   }
 
-  return children;
+  return <MFAGate>{children}</MFAGate>;
 };
 
 export default RequireAuth;
